@@ -1,0 +1,27 @@
+<library path="lib/libbaxter_controllers">
+
+  <class name="baxter_controllers/BaxterPositionController" 
+	 type="baxter_controllers::BaxterPositionController" 
+	 base_class_type="controller_interface::ControllerBase">
+    <description>
+      The BaxterPositionController tracks position commands for the entire Baxter arm. It expects a EffortJointInterface type of hardware interface.
+    </description>
+  </class>
+
+  <class name="baxter_controllers/BaxterVelocityController" 
+	 type="baxter_controllers::BaxterVelocityController" 
+	 base_class_type="controller_interface::ControllerBase">
+    <description>
+      The BaxterVelocityController tracks velocity commands for the entire Baxter arm. It expects a EffortJointInterface type of hardware interface.
+    </description>
+  </class>
+
+  <class name="baxter_controllers/BaxterGripperController" 
+	 type="baxter_controllers::BaxterGripperController" 
+	 base_class_type="controller_interface::ControllerBase">
+    <description>
+      The BaxterGripperController tracks position commands for the Baxter gripper. It expects a EffortJointInterface type of hardware interface.
+    </description>
+  </class>
+
+</library>
