@@ -52,12 +52,14 @@ joint_trajectory_controller: Cannot locate rosdep definition for [xacro]
 You should build xacro from source using the hydro branch:
 
 ```
+    cd ~/catkin_ws/
     git clone https://github.com/ros/xacro.git -b hydro-devel
 ```
 
-You may also get missing dependency errors on certain ros-groovy packages and thus you should intall them by hand:
+You may also get missing dependency errors on certain ros-groovy packages and thus you should install them by hand:
 
 ```
+    cd ~/catkin_ws/
     sudo apt-get install ros-groovy-pcl-conversions
     sudo apt-get install ros-groovy-control-msgs 
     sudo apt-get install ros-groovy-cmake-modules 
