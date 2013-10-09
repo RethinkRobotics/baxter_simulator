@@ -10,6 +10,8 @@ Necessary files for the Gazebo™ simulation of the Baxter Research Robot from R
 
  * [ROS Groovy](http://wiki.ros.org/groovy/Installation)
  * Setup Github - the git@github.com urls, below, only work if you have [Setup Github](https://help.github.com/articles/set-up-git) and generated [SSH Keys for Github](https://help.github.com/articles/generating-ssh-keys).
+ * [Gazebo V 1.9 debian/binary or source install](http://gazebosim.org/wiki/1.9/install)
+
 
 
 ## Baxter Installation
