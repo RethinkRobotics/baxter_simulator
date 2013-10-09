@@ -43,6 +43,27 @@ Necessary files for the Gazebo™ simulation of the Baxter Research Robot from R
     rosdep install --from-paths . --ignore-src --rosdistro groovy -y
 ```
 
+If you get the following error:
+
+ERROR: the following packages/stacks could not have their rosdep keys resolved
+to system dependencies:
+joint_trajectory_controller: Cannot locate rosdep definition for [xacro]
+
+You should build xacro from source using the hydro branch:
+
+```
+    git clone https://github.com/ros/xacro.git -b hydro-devel
+```
+
+You may also get missing dependency errors on certain ros-groovy packages and thus you should intall them by hand:
+
+```
+    sudo apt-get install ros-groovy-pcl-conversions
+    sudo apt-get install ros-groovy-control-msgs 
+    sudo apt-get install ros-groovy-cmake-modules 
+    sudo apt-get install ros-groovy-moveit-full
+```
+
 * Build
 
 ```
