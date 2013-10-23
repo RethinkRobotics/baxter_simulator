@@ -41,10 +41,6 @@
 	      -J baxter::left_w2 -0.0124707
 	      " />
 
-  <!-- publish to Baxter's face -->
-  <node name="face_image" pkg="head_control" type="xdisplay_image.py" respawn="false" output="screen"
-	args="--file=$(find baxter_description)/media/researchsdk.png --delay=5" />
-
   <!-- ros_control baxter launch file -->
   <include file="$(find baxter_control)/launch/baxter_sdk_control.launch" />
 

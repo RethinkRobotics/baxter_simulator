@@ -51,7 +51,7 @@
 #include <controller_interface/controller.h>
 #include <realtime_tools/realtime_buffer.h>
 
-#include <baxter_msgs/JointPositions.h> // the input command
+#include <baxter_core_msgs/JointCommand.h> // the input command
 
 #include <effort_controllers/joint_position_controller.h> // used for controlling individual joints
 
@@ -76,7 +76,7 @@ namespace baxter_controllers
     ros::NodeHandle nh_;
 
     /**< Last commanded position. */
-    realtime_tools::RealtimeBuffer<baxter_msgs::JointPositions> position_command_buffer_; 
+    realtime_tools::RealtimeBuffer<baxter_core_msgs::JointCommand> position_command_buffer_; 
 
     size_t n_joints_;
     std::string topic_name;
@@ -94,7 +94,7 @@ namespace baxter_controllers
      * @brief Callback from a recieved goal from the published topic message
      * @param msg trajectory goal
      */
-    void commandCB(const baxter_msgs::JointPositionsConstPtr& msg);
+    void commandCB(const baxter_core_msgs::JointCommandConstPtr& msg);
 
     // Create an effort-based joint position controller for every joint
     std::vector< 

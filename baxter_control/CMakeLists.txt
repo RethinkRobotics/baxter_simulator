@@ -32,7 +32,7 @@ catkin_package(
     moveit_ros_planning_interface 
     std_msgs
     roscpp
-    baxter_msgs
+    baxter_core_msgs
 #  DEPENDS system_lib
 )
 

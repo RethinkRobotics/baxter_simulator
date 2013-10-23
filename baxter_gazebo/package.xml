@@ -15,12 +15,12 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <build_depend>roscpp</build_depend>  
-  <build_depend>baxter_msgs</build_depend>
+  <build_depend>baxter_core_msgs</build_depend>
   <build_depend>gazebo_ros_control</build_depend>
   <build_depend>controller_manager_msgs</build_depend>
 
   <run_depend>roscpp</run_depend>  
-  <run_depend>baxter_msgs</run_depend>
+  <run_depend>baxter_core_msgs</run_depend>
   <run_depend>gazebo_ros_control</run_depend>
   <run_depend>controller_manager_msgs</run_depend>
   <run_depend>baxter_description</run_depend>

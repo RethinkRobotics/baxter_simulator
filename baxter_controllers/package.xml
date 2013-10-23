@@ -17,12 +17,12 @@
   <build_depend>controller_interface</build_depend> 
   <build_depend>control_toolbox</build_depend> 
   <build_depend>effort_controllers</build_depend> 
-  <build_depend>baxter_msgs</build_depend>
+  <build_depend>baxter_core_msgs</build_depend>
 
   <run_depend>controller_interface</run_depend> 
   <run_depend>control_toolbox</run_depend> 
   <run_depend>effort_controllers</run_depend> 
-  <run_depend>baxter_msgs</run_depend>
+  <run_depend>baxter_core_msgs</run_depend>
 
   <export>
     <controller_interface plugin="${prefix}/baxter_controllers_plugins.xml"/>

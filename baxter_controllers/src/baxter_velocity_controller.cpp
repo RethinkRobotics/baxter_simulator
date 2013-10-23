@@ -123,13 +123,13 @@ bool BaxterVelocityController::init(
     ros::NodeHandle nh_base("~");
 
     // Create command subscriber custom to baxter  
-    velocity_command_sub_ = nh_base.subscribe<baxter_msgs::JointVelocities>
+    velocity_command_sub_ = nh_base.subscribe<baxter_core_msgs::JointCommand>
       (topic_name, 1, &BaxterVelocityController::commandCB, this);
   }
   else // default "command" topic
   {
     // Create command subscriber custom to baxter  
-    velocity_command_sub_ = nh_.subscribe<baxter_msgs::JointVelocities>
+    velocity_command_sub_ = nh_.subscribe<baxter_core_msgs::JointCommand>
       ("command", 1, &BaxterVelocityController::commandCB, this);
   }
 
@@ -140,13 +140,13 @@ bool BaxterVelocityController::init(
 
 void BaxterVelocityController::starting(const ros::Time& time)
 {
-  baxter_msgs::JointVelocities initial_command;
+  baxter_core_msgs::JointCommand initial_command;
 
   // Fill in the initial command
   for(int i=0; i<n_joints_; i++)
   {
     initial_command.names.push_back( velocity_controllers_[i]->getJointName());
-    initial_command.velocities.push_back(0);
+    initial_command.command.push_back(0);
   }
   velocity_command_buffer_.initRT(initial_command);
   new_command_ = true;
@@ -185,13 +185,13 @@ void BaxterVelocityController::updateCommands()
   new_command_ = false;
 
   // Get latest command
-  const baxter_msgs::JointVelocities &command = *(velocity_command_buffer_.readFromRT());
+  const baxter_core_msgs::JointCommand &command = *(velocity_command_buffer_.readFromRT());
 
   // Error check message data
-  if( command.velocities.size() != command.names.size() )
+  if( command.command.size() != command.names.size() )
   {
     ROS_ERROR_STREAM_NAMED("update","List of names does not match list of velocities size, "
-      << command.velocities.size() << " != " << command.names.size() );
+      << command.command.size() << " != " << command.names.size() );
     return;
   }
 
@@ -206,12 +206,12 @@ void BaxterVelocityController::updateCommands()
     if( name_it != joint_to_index_map_.end() )
     {
       // Joint is in the map, so we'll update the joint velocity
-      velocity_controllers_[name_it->second]->setCommand( command.velocities[i] );
+      velocity_controllers_[name_it->second]->setCommand( command.command[i] );
     }
   }
 }
 
-void BaxterVelocityController::commandCB(const baxter_msgs::JointVelocitiesConstPtr& msg)
+void BaxterVelocityController::commandCB(const baxter_core_msgs::JointCommandConstPtr& msg)
 {
   // the writeFromNonRT can be used in RT, if you have the guarantee that
   //  * no non-rt thread is calling the same function (we're not subscribing to ros callbacks)

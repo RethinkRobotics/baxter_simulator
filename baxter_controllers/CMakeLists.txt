@@ -7,7 +7,7 @@ find_package(catkin REQUIRED COMPONENTS
   controller_interface
   control_toolbox
   effort_controllers
-  baxter_msgs
+  baxter_core_msgs
   )
 
 ## System dependencies are found with CMake's conventions
@@ -19,7 +19,7 @@ catkin_package(
   controller_interface
   control_toolbox
   effort_controllers
-  baxter_msgs
+  baxter_core_msgs
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
   )
