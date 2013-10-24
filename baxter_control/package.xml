@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<package>
+  <name>baxter_control</name>
+  <version>0.0.2</version>
+  <description>ros_control controllers for use with Gazebo</description>     
+
+
+  <maintainer email="davetcoleman@gmail.com">Dave Coleman</maintainer>
+
+  <author>Dave Coleman</author>
+  <license>BSD</license>
+
+  <url type="website">https://github.com/davetcoleman/baxter</url>
+  <url type="bugtracker">https://github.com/davetcoleman/baxter/issues</url>
+  <url type="repository">https://github.com/davetcoleman/baxter</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <run_depend>moveit_ros_planning_interface</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>roscpp</run_depend>
+
+  <run_depend>controller_manager</run_depend>
+  <run_depend>gazebo_ros_control</run_depend>
+  <run_depend>baxter_msgs</run_depend>
+
+</package>
+
+

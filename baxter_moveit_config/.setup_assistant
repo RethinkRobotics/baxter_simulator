@@ -1,0 +1,8 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: baxter_description
+    relative_path: urdf/baxter.urdf
+  SRDF:
+    relative_path: config/baxter.srdf
+  CONFIG:
+    generated_timestamp: 1372874307

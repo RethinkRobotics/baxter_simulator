@@ -1,0 +1,25 @@
+<launch>
+
+  <!-- Load joint controller configurations from YAML file to parameter server -->
+  <rosparam file="$(find baxter_control)/config/baxter_controllers.yaml" command="load"/>
+
+  <!-- load the default controllers -->
+  <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
+	output="screen" ns="/robot" args=" joint_state_controller					   
+					   left_joint_position_controller
+					   right_joint_position_controller
+					   " />
+  <!-- load the stopped controllers -->
+  <node name="controller_spawner_stopped" pkg="controller_manager" type="spawner" respawn="false"
+	output="screen" ns="/robot" args=" --stopped
+					   left_joint_velocity_controller
+					   right_joint_velocity_controller
+					   " />
+  
+  <!-- convert joint states to TF transforms -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
+	respawn="false" output="screen">
+    <remap from="/joint_states" to="/robot/joint_states" />
+  </node>
+
+</launch>
