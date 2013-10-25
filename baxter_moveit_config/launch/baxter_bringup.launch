@@ -5,17 +5,9 @@
     <arg name="load_robot_description" value="true"/>
   </include>
 
-  <!-- Display image on Baxter face -->
-  <node name="face" pkg="head_control" type="xdisplay_image.py" 
-	args="--file=$(find baxter_moveit_config)/media/hal.jpg" />
-
   <!-- mute Baxter's sonars -->
   <node name="baxter_mute_sonar" pkg="baxter_control" type="sonar_enable.py"
 	respawn="false" output="screen" args="--enable=0"/>
-
-  <!-- load Baxter's trajectory controller -->
-  <node name="baxter_trajectory_controller" pkg="baxter_interface" type="trajectory_controller.py"
-	respawn="false" output="screen"/>
   
   <!-- start move_group -->
   <include file="$(find baxter_moveit_config)/launch/move_group.launch">

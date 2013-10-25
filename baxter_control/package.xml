@@ -22,7 +22,7 @@
 
   <run_depend>controller_manager</run_depend>
   <run_depend>gazebo_ros_control</run_depend>
-  <run_depend>baxter_msgs</run_depend>
+  <run_depend>baxter_core_msgs</run_depend>
 
 </package>
 

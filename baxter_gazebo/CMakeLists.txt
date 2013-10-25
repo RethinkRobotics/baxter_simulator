@@ -7,7 +7,7 @@ find_package(catkin
     gazebo_ros
     gazebo_ros_control
     controller_manager    
-    baxter_msgs 
+    baxter_core_msgs 
 )
 
 ## System dependencies are found with CMake's conventions
@@ -20,7 +20,7 @@ catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES baxter_gazebo
   CATKIN_DEPENDS 
-    baxter_msgs 
+    baxter_core_msgs 
     gazebo_ros_control
     roscpp
     controller_manager_msgs
@@ -44,7 +44,7 @@ include_directories(include
 add_library(baxter_gazebo_ros_control src/baxter_gazebo_ros_control_plugin.cpp)
 #message(status "${catkin_LIBRARIES} \n\n\n\n\n\n\n\n ")
 target_link_libraries(baxter_gazebo_ros_control ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} gazebo_ros_control) # \todo remove gazebo_ros_control here
-add_dependencies(baxter_gazebo_ros_control ${catkin_EXPORTED_TARGETS}) # don't build until baxter_msgs is done
+add_dependencies(baxter_gazebo_ros_control ${catkin_EXPORTED_TARGETS}) # don't build until baxter_core_msgs is done
 
 
 

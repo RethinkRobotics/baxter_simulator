@@ -9,7 +9,9 @@ Necessary files for the Gazebo™ simulation of the Baxter Research Robot from R
 ## Prequisites
 
  * [ROS Groovy](http://wiki.ros.org/groovy/Installation)
- * Setup Github - the git@github.com urls, below, only work if you have [Setup Github](https://help.github.com/articles/set-up-git) and generated [SSH Keys for Github](https://help.github.com/articles/generating-ssh-keys).
+ * Setup Github - the git@github.com urls, below, only work if you 
+   have [Setup Github](https://help.github.com/articles/set-up-git) and 
+   generated [SSH Keys for Github](https://help.github.com/articles/generating-ssh-keys).
  * [Gazebo V 1.9 debian/binary or source install](http://gazebosim.org/wiki/1.9/install)
 
 
@@ -22,6 +24,12 @@ Necessary files for the Gazebo™ simulation of the Baxter Research Robot from R
     mkdir -p ~/catkin_ws/src
     cd ~/catkin_ws/src
     catkin_init_workspace
+    cd ..
+    catkin_make
+
+Feel free to put something in your .bashrc to source the ~/catkin_ws/devel/setup.sh script 
+or do manually before running.
+
 ```
 
 * install from source a few customized repositories:
@@ -45,20 +53,20 @@ Necessary files for the Gazebo™ simulation of the Baxter Research Robot from R
     rosdep install --from-paths . --ignore-src --rosdistro groovy -y
 ```
 
-If you get the following error:
+   If you get the following error:
 
-ERROR: the following packages/stacks could not have their rosdep keys resolved
-to system dependencies:
-joint_trajectory_controller: Cannot locate rosdep definition for [xacro]
+   ERROR: the following packages/stacks could not have their rosdep keys resolved to system dependencies:
+   joint_trajectory_controller: Cannot locate rosdep definition for [xacro]
 
 You should build xacro from source using the hydro branch:
 
 ```
-    cd ~/catkin_ws/
+    cd ~/catkin_ws/src
     git clone https://github.com/ros/xacro.git -b hydro-devel
 ```
 
-You may also get missing dependency errors on certain ros-groovy packages and thus you should install them by hand:
+   You may also get missing dependency errors on certain ros-groovy packages and thus 
+   you should install them by hand:
 
 ```
     cd ~/catkin_ws/
@@ -81,9 +89,11 @@ You may need to run this command multiple times if there is a message dependency
    ```
    roslaunch baxter_gazebo baxter_world.launch
    ```
-   By default the position controllers are started. To switch, use the JointCommandMode topic as documented in the Baxter SDK.
+   By default the position controllers are started. To switch, use the JointCommand topic 
+   as documented in the Baxter SDK.
 
- * Optional: Test/tune the velocity controllers or position controllers using a RQT dashboard GUI. Make sure you are in the right joint command mode when using these:
+ * Optional: Test/tune the velocity controllers or position controllers using a RQT dashboard GUI. 
+   Make sure you are in the right joint command mode when using these:
 
    ```
    roslaunch baxter_control baxter_sdk_position_rqt.launch
@@ -97,12 +107,36 @@ You may need to run this command multiple times if there is a message dependency
 
 Works with simulation or hardware:
 
+
+ * Start Trajectory Controller:
+
+   ```
+   rosrun baxter_interface joint_trajectory_action_server.py
+   ```
+
  * Start MoveIt:
 
    ```
    roslaunch baxter_moveit_config baxter_bringup.launch
    ```
 
-## Develop and Contribute
+## Run SDK Examples
 
-See [Contribute](https://github.com/osrf/baxter/blob/master/CONTRIBUTING.md) page.
+ * Start Wobbler example:
+
+   ```
+   source ~/catkin_ws/devel/setup.sh
+   ~/catkin_ws/src/baxter_simulator/baxter_spoof.sh
+   rosrun joint_velocity wobbler.py
+   ```
+
+ * Start keyboard joint position example:
+
+   ```
+   source ~/catkin_ws/devel/setup.sh
+   ~/catkin_ws/src/baxter_simulator/baxter_spoof.sh
+   rosrun joint_position keyboard.py
+
+   ```
+
+
