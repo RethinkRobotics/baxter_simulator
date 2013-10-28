@@ -354,6 +354,11 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
+          left_gripper_base:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
           left_hand:
             Alpha: 1
             Show Axes: false
@@ -436,6 +441,11 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
           right_gripper:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          right_gripper_base:
             Alpha: 1
             Show Axes: false
             Show Trail: false
