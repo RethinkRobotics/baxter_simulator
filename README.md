@@ -36,9 +36,9 @@ or do manually before running.
 
 ```
     git clone https://github.com/RethinkRobotics/gazebo_ros_pkgs.git -b hydro-devel
-    git clone https://github.com/RethinkRobotics/baxter_simulation.git -b development
-    git clone https://github.com/RethinkRobotics/sdk-examples.git -b gazebo_dev
-    git clone https://github.com/RethinkRobotics/baxter_common.git -b gazebo_development
+    git clone https://github.com/RethinkRobotics/baxter_simulation.git
+    git clone https://github.com/RethinkRobotics/sdk-examples.git
+    git clone https://github.com/RethinkRobotics/baxter_common.git
     git clone https://github.com/RethinkRobotics/ros_controllers -b velocity_position_controller
     git clone https://github.com/RethinkRobotics/ros_control.git
     git clone https://github.com/RethinkRobotics/control_toolbox.git
