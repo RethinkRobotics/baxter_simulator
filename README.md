@@ -37,7 +37,7 @@ Necessary files for the Gazebo™ simulation of the Baxter Research Robot from R
     git clone https://github.com/RethinkRobotics/sdk-examples.git
 
     git clone https://github.com/RethinkRobotics/gazebo_ros_pkgs.git -b hydro-devel
-    git clone https://github.com/RethinkRobotics/ros_controllers -b hydro-devel
+    git clone https://github.com/RethinkRobotics/ros_controllers.git -b hydro-devel
     git clone https://github.com/RethinkRobotics/ros_control.git -b hydro-devel
     git clone https://github.com/RethinkRobotics/control_toolbox.git -b hydro-devel
     git clone https://github.com/RethinkRobotics/realtime_tools.git -b hydro-devel
