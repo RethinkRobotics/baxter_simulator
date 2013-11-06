@@ -27,22 +27,20 @@ Necessary files for the Gazebo™ simulation of the Baxter Research Robot from R
     cd ..
     catkin_make
 
-Feel free to put something in your .bashrc to source the ~/catkin_ws/devel/setup.sh script 
-or do manually before running.
-
 ```
 
 * install from source a few customized repositories:
 
 ```
-    git clone https://github.com/RethinkRobotics/gazebo_ros_pkgs.git -b hydro-devel
-    git clone https://github.com/RethinkRobotics/baxter_simulation.git
-    git clone https://github.com/RethinkRobotics/sdk-examples.git
     git clone https://github.com/RethinkRobotics/baxter_common.git
-    git clone https://github.com/RethinkRobotics/ros_controllers -b velocity_position_controller
-    git clone https://github.com/RethinkRobotics/ros_control.git
-    git clone https://github.com/RethinkRobotics/control_toolbox.git
-    git clone https://github.com/RethinkRobotics/realtime_tools.git
+    git clone https://github.com/RethinkRobotics/baxter_simulator.git
+    git clone https://github.com/RethinkRobotics/sdk-examples.git
+
+    git clone https://github.com/RethinkRobotics/gazebo_ros_pkgs.git -b hydro-devel
+    git clone https://github.com/RethinkRobotics/ros_controllers.git -b hydro-devel
+    git clone https://github.com/RethinkRobotics/ros_control.git -b hydro-devel
+    git clone https://github.com/RethinkRobotics/control_toolbox.git -b hydro-devel
+    git clone https://github.com/RethinkRobotics/realtime_tools.git -b hydro-devel
 
 ```
 
