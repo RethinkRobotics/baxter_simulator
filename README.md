@@ -8,13 +8,19 @@ Necessary files for the Gazebo™ simulation of the Baxter Research Robot from R
 
 ## Prequisites
 
- * [ROS Groovy](http://wiki.ros.org/groovy/Installation)
  * Setup Github - the git@github.com urls, below, only work if you 
    have [Setup Github](https://help.github.com/articles/set-up-git) and 
    generated [SSH Keys for Github](https://help.github.com/articles/generating-ssh-keys).
- * [Gazebo V 1.9 debian/binary or source install](http://gazebosim.org/wiki/1.9/install)
 
+## Prequisites
 
+```
+$ sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu precise main" > /etc/apt/sources.list.d/gazebo-latest.list'
+$ wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
+$ sudo apt-get update
+$ sudo apt-get install python-wstool python-rosdep ros-groovy-pcl-conversions ros-groovy-control-msgs ros-groovy-cmake-modules ros-groovy-moveit-full ros-groovy-driver-common ros-groovy-image-common ros-groovy-rostest gazebo
+
+```
 
 ## Baxter Installation
 
@@ -29,27 +35,46 @@ Necessary files for the Gazebo™ simulation of the Baxter Research Robot from R
 
 ```
 
-* install from source a few customized repositories:
+* Copy rosinstall file:
 
 ```
-    git clone https://github.com/RethinkRobotics/baxter_common.git
-    git clone https://github.com/RethinkRobotics/baxter_simulator.git
-    git clone https://github.com/RethinkRobotics/sdk-examples.git
-
-    git clone https://github.com/RethinkRobotics/gazebo_ros_pkgs.git -b hydro-devel
-    git clone https://github.com/RethinkRobotics/ros_controllers.git -b hydro-devel
-    git clone https://github.com/RethinkRobotics/ros_control.git -b hydro-devel
-    git clone https://github.com/RethinkRobotics/control_toolbox.git -b hydro-devel
-    git clone https://github.com/RethinkRobotics/realtime_tools.git -b hydro-devel
+    $ wget (ftp address of rosinstall file) - will add later
+(for now copy in the attached file)
 
 ```
 
-* Install dependencies
+* Run wstool:
 
 ```
-    cd ~/catkin_ws/
-    rosdep install --from-paths . --ignore-src --rosdistro groovy -y
+    $ wstool init -j8 src baxter_simulation.rosinstall
+
 ```
+
+* Build:
+
+```
+    $ source /opt/ros/groovy/setup.bash
+    $ catkin_make
+    $ catkin_make install 
+
+```
+
+* Use baxter.sh - it has a special hook for sim:
+
+'''
+    $ cp src/baxter/baxter.sh .
+'''
+
+#Edit the your_ip value in baxter.sh
+
+* Run the script with sim specified:
+
+'''
+    $ baxter.sh sim
+'''
+
+
+* Known Issues
 
    If you get the following error:
 
@@ -62,24 +87,6 @@ You should build xacro from source using the hydro branch:
     cd ~/catkin_ws/src
     git clone https://github.com/ros/xacro.git -b hydro-devel
 ```
-
-   You may also get missing dependency errors on certain ros-groovy packages and thus 
-   you should install them by hand:
-
-```
-    cd ~/catkin_ws/
-    sudo apt-get install ros-groovy-pcl-conversions
-    sudo apt-get install ros-groovy-control-msgs 
-    sudo apt-get install ros-groovy-cmake-modules 
-    sudo apt-get install ros-groovy-moveit-full
-```
-
-* Build
-
-```
-    catkin_make
-```
-You may need to run this command multiple times if there is a message dependency issue.
 
 ### Simulation 
 
