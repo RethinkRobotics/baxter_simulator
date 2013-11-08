@@ -71,10 +71,10 @@ $ sudo apt-get install python-wstool python-rosdep ros-groovy-pcl-conversions ro
 
 * Run the script with sim specified:
 
-'''
+```
     $ baxter.sh sim
-'''
 
+```
 
 * Known Issues
 
