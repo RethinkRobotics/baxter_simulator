@@ -61,11 +61,13 @@ $ sudo apt-get install python-wstool python-rosdep ros-groovy-pcl-conversions ro
 
 * Use baxter.sh - it has a special hook for sim:
 
-'''
-    $ cp src/baxter/baxter.sh .
-'''
 
-#Edit the your_ip value in baxter.sh
+```
+    $ cp src/baxter/baxter.sh .
+
+```
+
+###Edit the your_ip value in baxter.sh
 
 * Run the script with sim specified:
 
