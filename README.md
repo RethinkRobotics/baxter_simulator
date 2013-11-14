@@ -20,39 +20,26 @@ $ wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
 $ sudo apt-get update
 $ sudo apt-get install python-wstool python-rosdep ros-groovy-pcl-conversions ros-groovy-control-msgs ros-groovy-cmake-modules ros-groovy-moveit-full ros-groovy-driver-common ros-groovy-image-common ros-groovy-rostest gazebo
 
+You have already downloaded and installed the Rethink Robotics SDK into a catkin workspace
 ```
 
 ## Baxter Installation
 
-* Create a catkin workspace and cd into it:
+* cd to your catkin workspace where the SDK resides and use wstool to install:
 
 ```
-    mkdir -p ~/catkin_ws/src
-    cd ~/catkin_ws/src
-    catkin_init_workspace
-    cd ..
-    catkin_make
-
-```
-
-* Copy rosinstall file:
-
-```
-    $ wget (ftp address of rosinstall file) - will add later
-(for now copy in the attached file)
-
-```
-
-* Run wstool:
-
-```
-    $ wstool init -j8 src baxter_simulation.rosinstall
+    cd ~/<catkin_ws>/src
+    wstool init .
+    wstool merge https://raw.github.com/RethinkRobotics/baxter_simulator/master/baxter_simulator.rosinstall
+    wstool update
 
 ```
 
 * Build:
 
 ```
+    $ cd ..
+    $ rosdep install --from-paths . --ignore-src --rosdistro hydro -y
     $ source /opt/ros/groovy/setup.bash
     $ catkin_make
     $ catkin_make install 
