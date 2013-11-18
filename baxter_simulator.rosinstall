@@ -1,6 +1,6 @@
 - git:
-    local-name: baxter_simulation
-    uri: git@github.com:RethinkRobotics/baxter_simulation.git
+    local-name: baxter_simulator
+    uri: git@github.com:RethinkRobotics/baxter_simulator.git
     version: development
 - git:
     local-name: gazebo_ros_pkgs
@@ -9,7 +9,7 @@
 - git:
     local-name: ros_controllers
     uri: git@github.com:RethinkRobotics/ros_controllers.git
-    version: velocity_position_controller
+    version: hydro-devel
 - git:
     local-name: ros_control
     uri: git@github.com:RethinkRobotics/ros_control.git
@@ -19,26 +19,26 @@
     uri: git@github.com:RethinkRobotics/control_toolbox.git
     version: hydro-devel
 - git:
-    local-name: control_toolbox
+    local-name: realtime_tools
     uri: git@github.com:RethinkRobotics/realtime_tools.git
     version: hydro-devel
 - git:
     local-name: baxter_interface
     uri: git@github.com:RethinkRobotics/baxter_interface.git
-    version: development
+    version: release-0.7.0
 - git:
     local-name: baxter_examples
     uri: git@github.com:RethinkRobotics/baxter_examples.git
-    version: development
+    version: release-0.7.0
 - git:
     local-name: baxter_tools
     uri: git@github.com:RethinkRobotics/baxter_tools.git
-    version: development
+    version: release-0.7.0
 - git:
     local-name: baxter_common
     uri: git@github.com:RethinkRobotics/baxter_common.git
-    version: development
+    version: release-0.7.0
 - git:
     local-name: baxter
     uri: git@github.com:RethinkRobotics/sdk-examples.git
-    version: development
+    version: release-0.7.0

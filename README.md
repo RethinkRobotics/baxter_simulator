@@ -25,12 +25,12 @@ You have already downloaded and installed the Rethink Robotics SDK into a catkin
 
 ## Baxter Installation
 
-* cd to your catkin workspace where the SDK resides and use wstool to install:
+* cd to your catkin workspace where the SDK resides and use wstool to install and update:
 
 ```
-    cd ~/<catkin_ws>/src
-    wstool init .
-    wstool merge https://raw.github.com/RethinkRobotics/baxter_simulator/master/baxter_simulator.rosinstall
+    cd ~/ros_ws/src
+    git clone https://github.com/RethinkRobotics/baxter_simulator.git
+    wstool merge baxter_simulator/baxter_simulator.rosinstall
     wstool update
 
 ```
