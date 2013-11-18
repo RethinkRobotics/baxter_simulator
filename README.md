@@ -39,11 +39,25 @@ You have already downloaded and installed the Rethink Robotics SDK into a catkin
 
 ```
     $ cd ..
-    $ rosdep install --from-paths . --ignore-src --rosdistro hydro -y
+    $ rosdep install --from-paths . --ignore-src --rosdistro groovy -y
     $ source /opt/ros/groovy/setup.bash
     $ catkin_make
     $ catkin_make install 
 
+```
+
+* Known Issues
+
+   If you get the following error:
+
+   ERROR: the following packages/stacks could not have their rosdep keys resolved to system dependencies:
+   joint_trajectory_controller: Cannot locate rosdep definition for [xacro]
+
+You should build xacro from source using the hydro branch:
+
+```
+    cd ~/ros_ws/src
+    git clone https://github.com/ros/xacro.git -b hydro-devel
 ```
 
 * Use baxter.sh - it has a special hook for sim:
@@ -63,19 +77,7 @@ You have already downloaded and installed the Rethink Robotics SDK into a catkin
 
 ```
 
-* Known Issues
 
-   If you get the following error:
-
-   ERROR: the following packages/stacks could not have their rosdep keys resolved to system dependencies:
-   joint_trajectory_controller: Cannot locate rosdep definition for [xacro]
-
-You should build xacro from source using the hydro branch:
-
-```
-    cd ~/catkin_ws/src
-    git clone https://github.com/ros/xacro.git -b hydro-devel
-```
 
 ### Simulation 
 
@@ -119,16 +121,16 @@ Works with simulation or hardware:
  * Start Wobbler example:
 
    ```
-   source ~/catkin_ws/devel/setup.sh
-   ~/catkin_ws/src/baxter_simulator/baxter_spoof.sh
+   source ~/ros_ws/devel/setup.sh
+   ~/ros_ws/src/baxter_simulator/baxter_spoof.sh
    rosrun joint_velocity wobbler.py
    ```
 
  * Start keyboard joint position example:
 
    ```
-   source ~/catkin_ws/devel/setup.sh
-   ~/catkin_ws/src/baxter_simulator/baxter_spoof.sh
+   source ~/ros_ws/devel/setup.sh
+   ~/ros_ws/src/baxter_simulator/baxter_spoof.sh
    rosrun joint_position keyboard.py
 
    ```
