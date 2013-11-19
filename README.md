@@ -32,7 +32,6 @@ You have already downloaded and installed the Rethink Robotics SDK into a catkin
     git clone git@github.com:RethinkRobotics/baxter_simulator.git
     wstool merge baxter_simulator/baxter_simulator.rosinstall
     wstool update
-
 ```
 
 * Check dependencies:
@@ -41,7 +40,6 @@ You have already downloaded and installed the Rethink Robotics SDK into a catkin
     $ cd ..
     $ rosdep install --from-paths . --ignore-src --rosdistro groovy -y
     $ source /opt/ros/groovy/setup.bash
-
 ```
 
 * Known Issues
@@ -61,9 +59,9 @@ You should build xacro from source using the hydro branch:
 * Build:
 
 ```
+    $ cd ..
     $ catkin_make
     $ catkin_make install 
-
 ```
 
 * Use baxter.sh - it has a special hook for sim:
