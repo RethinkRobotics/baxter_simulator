@@ -39,7 +39,6 @@ You have already downloaded and installed the Rethink Robotics SDK into a catkin
 ```
     $ cd ..
     $ rosdep install --from-paths . --ignore-src --rosdistro groovy -y
-    $ source /opt/ros/groovy/setup.bash
 ```
 
 * Known Issues
@@ -59,6 +58,7 @@ You should build xacro from source using the hydro branch:
 * Build:
 
 ```
+    $ source /opt/ros/groovy/setup.bash
     $ cd ..
     $ catkin_make
     $ catkin_make install 
