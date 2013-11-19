@@ -127,7 +127,7 @@ Works with simulation or hardware:
    ```
    source ~/ros_ws/devel/setup.sh
    ~/ros_ws/src/baxter_simulator/baxter_spoof.sh
-   rosrun joint_velocity wobbler.py
+   rosrun baxter_examples joint_velocity_wobbler.py
    ```
 
  * Start keyboard joint position example:
@@ -135,7 +135,7 @@ Works with simulation or hardware:
    ```
    source ~/ros_ws/devel/setup.sh
    ~/ros_ws/src/baxter_simulator/baxter_spoof.sh
-   rosrun joint_position keyboard.py
+   rosrun baxter_examples joint_position_keyboard.py
 
    ```
 
