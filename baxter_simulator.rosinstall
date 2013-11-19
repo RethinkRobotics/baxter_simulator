@@ -1,7 +1,7 @@
 - git:
     local-name: baxter_simulator
     uri: git@github.com:RethinkRobotics/baxter_simulator.git
-    version: development
+    version: release-0.7.0
 - git:
     local-name: gazebo_ros_pkgs
     uri: git@github.com:RethinkRobotics/gazebo_ros_pkgs.git
