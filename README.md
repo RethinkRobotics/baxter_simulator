@@ -59,7 +59,7 @@ You should build xacro from source using the hydro branch:
 
 ```
     $ source /opt/ros/groovy/setup.bash
-    $ cd ..
+    $ cd ~/ros_ws
     $ catkin_make
     $ catkin_make install 
 ```
