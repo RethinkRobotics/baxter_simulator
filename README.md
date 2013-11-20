@@ -88,7 +88,7 @@ You should build xacro from source using the hydro branch:
 
  * Start simulation with controllers:
    ```
-   roslaunch baxter_gazebo baxter_world.launch
+   $ roslaunch baxter_gazebo baxter_world.launch
    ```
    By default the position controllers are started. To switch, use the JointCommand topic 
    as documented in the Baxter SDK.
@@ -97,11 +97,11 @@ You should build xacro from source using the hydro branch:
    Make sure you are in the right joint command mode when using these:
 
    ```
-   roslaunch baxter_control baxter_sdk_position_rqt.launch
+   $ roslaunch baxter_control baxter_sdk_position_rqt.launch
    ```
    or
    ```
-   roslaunch baxter_control baxter_sdk_velocity_rqt.launch 
+   $ roslaunch baxter_control baxter_sdk_velocity_rqt.launch 
    ```
 
 ## Start MoveIt
@@ -111,24 +111,24 @@ Works with simulation or hardware:
  * Check out the Baxter MoveIt configuration package into your ROS workspace and rebuild:
 
    ```
-   cd ~/ros_ws/src
-   git clone https://github.com/ros-planning/moveit_robots.git
-   source /opt/ros/groovy/setup.bash
-   cd ..
-   catkin_make
-   catkin_make install 
+   $ cd ~/ros_ws/src
+   $ git clone https://github.com/ros-planning/moveit_robots.git
+   $ source /opt/ros/groovy/setup.bash
+   $ cd ..
+   $ catkin_make
+   $ catkin_make install 
    ```
 
  * Start Trajectory Controller:
 
    ```
-   rosrun baxter_interface joint_trajectory_action_server.py
+   $ rosrun baxter_interface joint_trajectory_action_server.py
    ```
 
  * Start MoveIt:
 
    ```
-   roslaunch baxter_moveit_config demo_baxter.launch
+   $ roslaunch baxter_moveit_config demo_baxter.launch
    ```
 
 ## Run SDK Examples
@@ -136,17 +136,17 @@ Works with simulation or hardware:
  * Start Wobbler example:
 
    ```
-   source ~/ros_ws/devel/setup.sh
-   ~/ros_ws/src/baxter_simulator/baxter_spoof.sh
-   rosrun baxter_examples joint_velocity_wobbler.py
+   $ ./baxter.sh sim
+   $ ~/ros_ws/src/baxter_simulator/baxter_spoof.sh
+   $ rosrun baxter_examples joint_velocity_wobbler.py
    ```
 
  * Start keyboard joint position example:
 
    ```
-   source ~/ros_ws/devel/setup.sh
-   ~/ros_ws/src/baxter_simulator/baxter_spoof.sh
-   rosrun baxter_examples joint_position_keyboard.py
+   $ ./baxter.sh sim
+   $ ~/ros_ws/src/baxter_simulator/baxter_spoof.sh
+   $ rosrun baxter_examples joint_position_keyboard.py
 
    ```
 
