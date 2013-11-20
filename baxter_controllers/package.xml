@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>baxter_controllers</name>
-  <version>0.0.2</version>
+  <version>0.2.0</version>
   <description>
     Baxter specific controllers for Gazebo use
   </description>
@@ -10,12 +10,12 @@
     Rethink Robotics Inc.
   </maintainer>
   <license>BSD</license>
-  <url type="website">http://www.rethinkrobotics.com</url>
+  <url type="website">http://www.rethinkrobotics.com/sdk</url>
   <url type="repository">
-    https://github.com/RethinkRobotics/baxter_simulation
+    https://github.com/RethinkRobotics/baxter_simulator
   </url>
   <url type="bugtracker">
-    https://github.com/RethinkRobotics/baxter_simulation/issues
+    https://github.com/RethinkRobotics/baxter_simulator/issues
   </url>
   <author>Rethink Robotics Inc.</author>
   <author>Dave Coleman</author>
