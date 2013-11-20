@@ -104,6 +104,32 @@ You should build xacro from source using the hydro branch:
    $ roslaunch baxter_control baxter_sdk_velocity_rqt.launch 
    ```
 
+## Run SDK Examples
+
+NOTE: Before running any examples you need to change the JOINT_ANGLE_TOLERANCE setting in the ‘ros_ws/src/baxter_interface/src/baxter_interface/settings.py’ file:
+
+change ‘JOINT_ANGLE_TOLERANCE = 0.008726646’ to ‘JOINT_ANGLE_TOLERANCE = 0.08726646’
+
+Which changes the value from 0.5 degrees to 5 degrees across each joint.
+
+ * Start Wobbler example:
+
+   ```
+   $ ./baxter.sh sim
+   $ ~/ros_ws/src/baxter_simulator/baxter_spoof.sh
+   $ rosrun baxter_examples joint_velocity_wobbler.py
+   ```
+
+ * Start keyboard joint position example:
+
+   ```
+   $ ./baxter.sh sim
+   $ ~/ros_ws/src/baxter_simulator/baxter_spoof.sh
+   $ rosrun baxter_examples joint_position_keyboard.py
+
+   ```
+
+
 ## Start MoveIt
 
 Works with simulation or hardware:
@@ -131,23 +157,5 @@ Works with simulation or hardware:
    $ roslaunch baxter_moveit_config demo_baxter.launch
    ```
 
-## Run SDK Examples
-
- * Start Wobbler example:
-
-   ```
-   $ ./baxter.sh sim
-   $ ~/ros_ws/src/baxter_simulator/baxter_spoof.sh
-   $ rosrun baxter_examples joint_velocity_wobbler.py
-   ```
-
- * Start keyboard joint position example:
-
-   ```
-   $ ./baxter.sh sim
-   $ ~/ros_ws/src/baxter_simulator/baxter_spoof.sh
-   $ rosrun baxter_examples joint_position_keyboard.py
-
-   ```
 
 
