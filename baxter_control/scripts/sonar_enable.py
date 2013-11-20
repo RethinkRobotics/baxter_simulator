@@ -40,11 +40,13 @@
 import getopt
 import sys
 import os
+
 import roslib
 roslib.load_manifest('head_control')
 import rospy
 
 import std_msgs.msg
+
 
 def send_command(enable):
     """
@@ -52,15 +54,16 @@ def send_command(enable):
 
     @param enable - true or false - are sonars enabled?
     """
-    
-    if int(enable)==int(0):
-        msg = 0 # turn off enable flags for all sonar channels
+
+    if int(enable) == int(0):
+        msg = 0  # turn off enable flags for all sonar channels
     else:
-        msg = 4095 # turn back on enable flags for all sonar channels
+        msg = 4095  # turn back on enable flags for all sonar channels
 
-    print(' Enabling sonars= '+enable+' message= '+str(msg));
+    print(' Enabling sonars= ' + enable + ' message= ' + str(msg))
 
-    pub = rospy.Publisher('/robot/sonar/set_sonars_enabled', std_msgs.msg.UInt16, latch=False)
+    pub = rospy.Publisher('/robot/sonar/set_sonars_enabled',
+                          std_msgs.msg.UInt16, latch=False)
     rospy.Rate(1).sleep()
 
     pub.publish(data=int(msg))
@@ -74,6 +77,7 @@ def usage():
     -h, --help          This screen
     -e, --enable        0 - disable sonars, 1 - enable sonars
     """ % (os.path.basename(sys.argv[0]),)
+
 
 def main():
     try:
