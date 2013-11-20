@@ -28,16 +28,16 @@ You have already downloaded and installed the Rethink Robotics SDK into a catkin
 * From your catkin workspace where the SDK resides, use wstool to install and update:
 
 ```
-    cd ~/ros_ws/src
-    git clone git@github.com:RethinkRobotics/baxter_simulator.git
-    wstool merge baxter_simulator/baxter_simulator.rosinstall
-    wstool update
+    $ cd ~/ros_ws/src
+    $ git clone git@github.com:RethinkRobotics/baxter_simulator.git
+    $ wstool merge baxter_simulator/baxter_simulator.rosinstall
+    $ wstool update
 ```
 
 
 * Known Issues
 
-   If you get the following error when doing the catkin_make step below:
+If you get the following error when doing the catkin_make step below:
 ```
    CMake Error at /opt/ros/groovy/share/catkin/cmake/catkinConfig.cmake:72 (find_package):
    Could not find a configuration file for package xacro.
@@ -52,8 +52,8 @@ You have already downloaded and installed the Rethink Robotics SDK into a catkin
 You should build xacro from source using the hydro branch:
 
 ```
-    cd ~/ros_ws/src
-    git clone https://github.com/ros/xacro.git -b hydro-devel
+    $ cd ~/ros_ws/src
+    $ git clone https://github.com/ros/xacro.git -b hydro-devel
 ```
 
 * Build:
@@ -78,7 +78,7 @@ You should build xacro from source using the hydro branch:
 * Run the script with sim specified:
 
 ```
-    $ baxter.sh sim
+    $ ./baxter.sh sim
 
 ```
 
