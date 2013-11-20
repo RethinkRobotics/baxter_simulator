@@ -12,7 +12,7 @@ Necessary files for the Gazebo™ simulation of the Baxter Research Robot from R
    have [Setup Github](https://help.github.com/articles/set-up-git) and 
    generated [SSH Keys for Github](https://help.github.com/articles/generating-ssh-keys).
 
-## Prequisites
+ * make sure the following software packages are installed:
 
 ```
 $ sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu precise main" > /etc/apt/sources.list.d/gazebo-latest.list'
