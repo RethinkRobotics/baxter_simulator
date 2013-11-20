@@ -107,6 +107,16 @@ You should build xacro from source using the hydro branch:
 
 Works with simulation or hardware:
 
+ * Check out the Baxter MoveIt configuration package into your ROS workspace and rebuild:
+
+   ```
+   cd ~/ros_ws/src
+   git clone https://github.com/ros-planning/moveit_robots.git
+   source /opt/ros/groovy/setup.bash
+   cd ..
+   catkin_make
+   catkin_make install 
+   ```
 
  * Start Trajectory Controller:
 
