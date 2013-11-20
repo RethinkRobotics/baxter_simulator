@@ -128,7 +128,7 @@ Works with simulation or hardware:
  * Start MoveIt:
 
    ```
-   roslaunch baxter_moveit_config baxter_bringup.launch
+   roslaunch baxter_moveit_config demo_baxter.launch
    ```
 
 ## Run SDK Examples
