@@ -34,19 +34,20 @@ You have already downloaded and installed the Rethink Robotics SDK into a catkin
     wstool update
 ```
 
-* Check dependencies:
-
-```
-    $ cd ..
-    $ rosdep install --from-paths . --ignore-src --rosdistro groovy -y
-```
 
 * Known Issues
 
-   If you get the following error:
+   If you get the following error when doing the catkin_make step below:
 
-   ERROR: the following packages/stacks could not have their rosdep keys resolved to system dependencies:
-   joint_trajectory_controller: Cannot locate rosdep definition for [xacro]
+   CMake Error at /opt/ros/groovy/share/catkin/cmake/catkinConfig.cmake:72 (find_package):
+   Could not find a configuration file for package xacro.
+
+   Set xacro_DIR to the directory containing a CMake configuration file for
+   xacro.  The file will have one of the following names:
+
+    xacroConfig.cmake
+    xacro-config.cmake
+
 
 You should build xacro from source using the hydro branch:
 
