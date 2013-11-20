@@ -12,7 +12,7 @@ Necessary files for the Gazebo™ simulation of the Baxter Research Robot from R
    have [Setup Github](https://help.github.com/articles/set-up-git) and 
    generated [SSH Keys for Github](https://help.github.com/articles/generating-ssh-keys).
 
- * make sure the following software packages are installed:
+ * Ensure the following software packages are installed:
 
 ```
 $ sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu precise main" > /etc/apt/sources.list.d/gazebo-latest.list'
@@ -25,7 +25,7 @@ You have already downloaded and installed the Rethink Robotics SDK into a catkin
 
 ## Baxter Installation
 
-* cd to your catkin workspace where the SDK resides and use wstool to install and update:
+* From your catkin workspace where the SDK resides, use wstool to install and update:
 
 ```
     cd ~/ros_ws/src
