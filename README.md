@@ -38,7 +38,7 @@ You have already downloaded and installed the Rethink Robotics SDK into a catkin
 * Known Issues
 
    If you get the following error when doing the catkin_make step below:
-
+```
    CMake Error at /opt/ros/groovy/share/catkin/cmake/catkinConfig.cmake:72 (find_package):
    Could not find a configuration file for package xacro.
 
@@ -47,7 +47,7 @@ You have already downloaded and installed the Rethink Robotics SDK into a catkin
 
     xacroConfig.cmake
     xacro-config.cmake
-
+```
 
 You should build xacro from source using the hydro branch:
 
