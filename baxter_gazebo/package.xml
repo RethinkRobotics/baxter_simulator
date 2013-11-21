@@ -1,33 +1,40 @@
+<?xml version="1.0"?>
 <package>
   <name>baxter_gazebo</name>
-  <version>0.1.1</version>
-  <description>baxter_gazebo</description>
-  <maintainer email="davetcoleman@gmail.com">Dave Coleman</maintainer>
+  <version>0.2.0</version>
+  <description>
+    Baxter Gazebo plugins and launch files
+  </description>
 
+  <maintainer email="rsdk.support@rethinkrobotics.com">
+    Rethink Robotics Inc.
+  </maintainer>
   <license>BSD</license>
-
-  <url type="website">https://github.com/davetcoleman/baxter</url>
-  <url type="bugtracker">https://github.com/davetcoleman/baxter/issues</url>
-  <url type="repository">https://github.com/davetcoleman/baxter</url>
-
-  <author email="davetcoleman@gmail.com">Dave Coleman</author>
+  <url type="website">http://www.rethinkrobotics.com/sdk</url>
+  <url type="repository">
+    https://github.com/RethinkRobotics/baxter_simulator
+  </url>
+  <url type="bugtracker">
+    https://github.com/RethinkRobotics/baxter_simulator/issues
+  </url>
+  <author>Rethink Robotics Inc.</author>
+  <author>Dave Coleman</author>
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>roscpp</build_depend>  
+  <build_depend>roscpp</build_depend>
   <build_depend>baxter_core_msgs</build_depend>
   <build_depend>gazebo_ros_control</build_depend>
   <build_depend>controller_manager_msgs</build_depend>
 
-  <run_depend>roscpp</run_depend>  
+  <run_depend>roscpp</run_depend>
   <run_depend>baxter_core_msgs</run_depend>
   <run_depend>gazebo_ros_control</run_depend>
   <run_depend>controller_manager_msgs</run_depend>
+  <run_depend>baxter_control</run_depend>
+  <run_depend>gazebo_ros</run_depend>
   <run_depend>baxter_description</run_depend>
-  <run_depend>baxter_control</run_depend> 
-  <run_depend>gazebo_ros</run_depend> 
-  <run_depend>baxter_description</run_depend> 
-  
+
   <export>
     <gazebo plugin_path="${prefix}/lib" gazebo_media_path="${prefix}" />
   </export>
