@@ -1,7 +1,7 @@
 - git:
     local-name: baxter_simulator
     uri: git@github.com:RethinkRobotics/baxter_simulator.git
-    version: release-0.7.0
+    version: master
 - git:
     local-name: gazebo_ros_pkgs
     uri: git@github.com:RethinkRobotics/gazebo_ros_pkgs.git
@@ -25,20 +25,20 @@
 - git:
     local-name: baxter_interface
     uri: git@github.com:RethinkRobotics/baxter_interface.git
-    version: release-0.7.0
+    version: master
 - git:
     local-name: baxter_examples
     uri: git@github.com:RethinkRobotics/baxter_examples.git
-    version: release-0.7.0
+    version: master
 - git:
     local-name: baxter_tools
     uri: git@github.com:RethinkRobotics/baxter_tools.git
-    version: release-0.7.0
+    version: master
 - git:
     local-name: baxter_common
     uri: git@github.com:RethinkRobotics/baxter_common.git
-    version: release-0.7.0
+    version: master
 - git:
     local-name: baxter
     uri: git@github.com:RethinkRobotics/baxter.git
-    version: release-0.7.0
+    version: master
