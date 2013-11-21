@@ -40,5 +40,5 @@
     version: release-0.7.0
 - git:
     local-name: baxter
-    uri: git@github.com:RethinkRobotics/sdk-examples.git
+    uri: git@github.com:RethinkRobotics/baxter.git
     version: release-0.7.0
