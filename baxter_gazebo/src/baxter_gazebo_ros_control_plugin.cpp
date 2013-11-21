@@ -44,14 +44,14 @@
 #include <controller_manager_msgs/SwitchController.h>
 
 // Baxter
-#include <baxter_msgs/JointCommandMode.h>
-#include <baxter_msgs/AssemblyState.h>
+#include <baxter_core_msgs/JointCommand.h>
+#include <baxter_core_msgs/AssemblyState.h>
 
 
 namespace baxter_gazebo_plugin
 {
 
-static const std::string BAXTER_STATE_TOPIC = "/sdk/robot/state";
+static const std::string BAXTER_STATE_TOPIC = "/robot/state";
 
 class BaxterGazeboRosControlPlugin : public gazebo_ros_control::GazeboRosControlPlugin
 {
@@ -64,11 +64,11 @@ private:
   ros::Timer timer_;
   
   // Cache the message
-  baxter_msgs::AssemblyState assembly_state_;
+  baxter_core_msgs::AssemblyState assembly_state_;
 
   // use this as flag to indicate current mode
-  baxter_msgs::JointCommandMode right_command_mode_;
-  baxter_msgs::JointCommandMode left_command_mode_;
+  baxter_core_msgs::JointCommand right_command_mode_;
+  baxter_core_msgs::JointCommand left_command_mode_;
 
   boost::mutex mtx_; // mutex for re-entrent calls to modeCommandCallback
 
@@ -83,20 +83,20 @@ public:
     ROS_INFO_STREAM_NAMED("baxter_gazebo_ros_control_plugin","Loading Baxter specific simulation components");
 
     // Subscribe to a topic that switches' Baxter's msgs
-    left_command_mode_sub_ = nh_.subscribe<baxter_msgs::JointCommandMode>("/robot/limb/left/joint_command_mode",
+    left_command_mode_sub_ = nh_.subscribe<baxter_core_msgs::JointCommand>("/robot/limb/left/joint_command",
                              1, &BaxterGazeboRosControlPlugin::leftModeCommandCallback, this);
-    right_command_mode_sub_ = nh_.subscribe<baxter_msgs::JointCommandMode>("/robot/limb/right/joint_command_mode",
+    right_command_mode_sub_ = nh_.subscribe<baxter_core_msgs::JointCommand>("/robot/limb/right/joint_command",
                              1, &BaxterGazeboRosControlPlugin::rightModeCommandCallback, this);
 
     // Start a publisher that publishes fake AssemblyState.msg data about Baxter
-    assembly_state_pub_ = nh_.advertise<baxter_msgs::AssemblyState>(BAXTER_STATE_TOPIC,10);
+    assembly_state_pub_ = nh_.advertise<baxter_core_msgs::AssemblyState>(BAXTER_STATE_TOPIC,10);
 
     // Create assembly state message 
     assembly_state_.enabled = 1;             // true if enabled
     assembly_state_.stopped = 0;            // true if stopped -- e-stop asserted
     assembly_state_.error = 0;              // true if a component of the assembly has an error
-    assembly_state_.estop_button = baxter_msgs::AssemblyState::ESTOP_BUTTON_UNPRESSED;      // button status
-    assembly_state_.estop_source = baxter_msgs::AssemblyState::ESTOP_SOURCE_NONE;     // If stopped is true, the source of the e-stop.  
+    assembly_state_.estop_button = baxter_core_msgs::AssemblyState::ESTOP_BUTTON_UNPRESSED;      // button status
+    assembly_state_.estop_source = baxter_core_msgs::AssemblyState::ESTOP_SOURCE_NONE;     // If stopped is true, the source of the e-stop.  
 
     // Set publish frequency
     ros::NodeHandle nh_tilde("~");
@@ -117,7 +117,7 @@ public:
     assembly_state_pub_.publish(assembly_state_);
   }
 
-  void leftModeCommandCallback(const baxter_msgs::JointCommandModeConstPtr& msg)
+  void leftModeCommandCallback(const baxter_core_msgs::JointCommandConstPtr& msg)
   {
     //Check if we already received this command for this arm and bug out if so
     if(left_command_mode_.mode == msg->mode)
@@ -132,7 +132,7 @@ public:
     modeCommandCallback(msg, "left");
   }
 
-  void rightModeCommandCallback(const baxter_msgs::JointCommandModeConstPtr& msg)
+  void rightModeCommandCallback(const baxter_core_msgs::JointCommandConstPtr& msg)
   {
     //Check if we already received this command for this arm and bug out if so
     if(right_command_mode_.mode == msg->mode)
@@ -147,7 +147,7 @@ public:
     modeCommandCallback(msg, "right");
   }
 
-  void modeCommandCallback(const baxter_msgs::JointCommandModeConstPtr& msg, const std::string& side)
+  void modeCommandCallback(const baxter_core_msgs::JointCommandConstPtr& msg, const std::string& side)
   {
     ROS_DEBUG_STREAM_NAMED("baxter_gazebo_ros_control_plugin","Switching command mode for side " 
       << side );
@@ -159,17 +159,17 @@ public:
     std::vector<std::string> stop_controllers;
     switch(msg->mode)
     {
-    case baxter_msgs::JointCommandMode::POSITION:
+    case baxter_core_msgs::JointCommand::POSITION_MODE:
       start_controllers.push_back(side+"_joint_position_controller");
       stop_controllers.push_back(side+"_joint_velocity_controller");
       //stop_controllers.push_back(side+"_joint_effort_controller");
       break;
-    case baxter_msgs::JointCommandMode::VELOCITY:
+    case baxter_core_msgs::JointCommand::VELOCITY_MODE:
       start_controllers.push_back(side+"_joint_velocity_controller");
       stop_controllers.push_back(side+"_joint_position_controller");
       //stop_controllers.push_back(side+"_joint_effort_controller");
       break;
-    case baxter_msgs::JointCommandMode::TORQUE:
+    case baxter_core_msgs::JointCommand::TORQUE_MODE:
       ROS_WARN_STREAM_NAMED("baxter_gazebo_ros_control_plugin","Torque not implemented yet!");
       return;
       start_controllers.push_back(side+"_joint_effort_controller");

@@ -1,18 +1,25 @@
 <?xml version="1.0"?>
 <package>
   <name>baxter_control</name>
-  <version>0.0.2</version>
-  <description>ros_control controllers for use with Gazebo</description>     
+  <version>0.2.0</version>
+  <description>
+    ros_control controllers for use with Baxter
+    in Gazebo
+  </description>
 
-
-  <maintainer email="davetcoleman@gmail.com">Dave Coleman</maintainer>
-
-  <author>Dave Coleman</author>
+  <maintainer email="rsdk.support@rethinkrobotics.com">
+    Rethink Robotics Inc.
+  </maintainer>
   <license>BSD</license>
-
-  <url type="website">https://github.com/davetcoleman/baxter</url>
-  <url type="bugtracker">https://github.com/davetcoleman/baxter/issues</url>
-  <url type="repository">https://github.com/davetcoleman/baxter</url>
+  <url type="website">http://www.rethinkrobotics.com/sdk</url>
+  <url type="repository">
+    https://github.com/RethinkRobotics/baxter_simulator
+  </url>
+  <url type="bugtracker">
+    https://github.com/RethinkRobotics/baxter_simulator/issues
+  </url>
+  <author>Rethink Robotics Inc.</author>
+  <author>Dave Coleman</author>
 
   <buildtool_depend>catkin</buildtool_depend>
 
@@ -22,7 +29,7 @@
 
   <run_depend>controller_manager</run_depend>
   <run_depend>gazebo_ros_control</run_depend>
-  <run_depend>baxter_msgs</run_depend>
+  <run_depend>baxter_core_msgs</run_depend>
 
 </package>
 

@@ -123,13 +123,13 @@ bool BaxterPositionController::init(
     ros::NodeHandle nh_base("~");
 
     // Create command subscriber custom to baxter  
-    position_command_sub_ = nh_base.subscribe<baxter_msgs::JointPositions>
+    position_command_sub_ = nh_base.subscribe<baxter_core_msgs::JointCommand>
       (topic_name, 1, &BaxterPositionController::commandCB, this);
   }
   else // default "command" topic
   {
     // Create command subscriber custom to baxter
-    position_command_sub_ = nh_.subscribe<baxter_msgs::JointPositions>
+    position_command_sub_ = nh_.subscribe<baxter_core_msgs::JointCommand>
       ("command", 1, &BaxterPositionController::commandCB, this);
   }
 
@@ -140,13 +140,13 @@ bool BaxterPositionController::init(
 
 void BaxterPositionController::starting(const ros::Time& time)
 {
-  baxter_msgs::JointPositions initial_command;
+  baxter_core_msgs::JointCommand initial_command;
 
   // Fill in the initial command
   for(int i=0; i<n_joints_; i++)
   {
     initial_command.names.push_back( position_controllers_[i]->getJointName());
-    initial_command.angles.push_back(position_controllers_[i]->getPosition());
+    initial_command.command.push_back(position_controllers_[i]->getPosition());
   }
   position_command_buffer_.initRT(initial_command);
   new_command_ = true;
@@ -185,13 +185,13 @@ void BaxterPositionController::updateCommands()
   new_command_ = false;
 
   // Get latest command
-  const baxter_msgs::JointPositions &command = *(position_command_buffer_.readFromRT());
+  const baxter_core_msgs::JointCommand &command = *(position_command_buffer_.readFromRT());
 
   // Error check message data
-  if( command.angles.size() != command.names.size() )
+  if( command.command.size() != command.names.size() )
   {
     ROS_ERROR_STREAM_NAMED("update","List of names does not match list of angles size, "
-      << command.angles.size() << " != " << command.names.size() );
+      << command.command.size() << " != " << command.names.size() );
     return;
   }
 
@@ -206,12 +206,12 @@ void BaxterPositionController::updateCommands()
     if( name_it != joint_to_index_map_.end() )
     {
       // Joint is in the map, so we'll update the joint position
-      position_controllers_[name_it->second]->setCommand( command.angles[i] );
+      position_controllers_[name_it->second]->setCommand( command.command[i] );
     }
   }
 }
 
-void BaxterPositionController::commandCB(const baxter_msgs::JointPositionsConstPtr& msg)
+void BaxterPositionController::commandCB(const baxter_core_msgs::JointCommandConstPtr& msg)
 {
   // the writeFromNonRT can be used in RT, if you have the guarantee that
   //  * no non-rt thread is calling the same function (we're not subscribing to ros callbacks)
