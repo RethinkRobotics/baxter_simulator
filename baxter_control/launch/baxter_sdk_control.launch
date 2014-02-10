@@ -14,6 +14,8 @@
 	output="screen" ns="/robot" args=" --stopped
 					   left_joint_velocity_controller
 					   right_joint_velocity_controller
+					   left_joint_effort_controller
+					   right_joint_effort_controller
 					   " />
   
   <!-- convert joint states to TF transforms -->

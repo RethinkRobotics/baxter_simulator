@@ -162,16 +162,16 @@ public:
     case baxter_core_msgs::JointCommand::POSITION_MODE:
       start_controllers.push_back(side+"_joint_position_controller");
       stop_controllers.push_back(side+"_joint_velocity_controller");
-      //stop_controllers.push_back(side+"_joint_effort_controller");
+      stop_controllers.push_back(side+"_joint_effort_controller");
       break;
     case baxter_core_msgs::JointCommand::VELOCITY_MODE:
       start_controllers.push_back(side+"_joint_velocity_controller");
       stop_controllers.push_back(side+"_joint_position_controller");
-      //stop_controllers.push_back(side+"_joint_effort_controller");
+      stop_controllers.push_back(side+"_joint_effort_controller");
       break;
     case baxter_core_msgs::JointCommand::TORQUE_MODE:
-      ROS_WARN_STREAM_NAMED("baxter_gazebo_ros_control_plugin","Torque not implemented yet!");
-      return;
+      //ROS_WARN_STREAM_NAMED("baxter_gazebo_ros_control_plugin","Torque not implemented yet!");
+      //return;
       start_controllers.push_back(side+"_joint_effort_controller");
       stop_controllers.push_back(side+"_joint_position_controller");
       stop_controllers.push_back(side+"_joint_velocity_controller");
