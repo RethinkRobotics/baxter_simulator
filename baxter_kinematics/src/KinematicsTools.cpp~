@@ -1,0 +1,975 @@
+/****************************************************************************
+* KinematicsTools.cpp
+* Copyright (c) 2008-2012, Rethink Robotics, Inc.
+****************************************************************************/
+
+
+/** \file
+ *
+ *   A set of helper functions for performing operations related to Kinematics of the robot
+ *
+ */
+#include "KinematicsTools.h"
+
+#include <string>
+#include <math.h>
+#include <cstdio>
+
+#include <ros/console.h>
+
+#include <KDLTypeConversions/KDLTypeConversions.h>
+#include <RosMsgTools/RosMsgTools.h>
+
+namespace Heartland {
+namespace MotorControl {
+
+/**
+ * @addtogroup MotorControl
+ * @{
+ * @addtogroup KinematicsTools
+ * @{
+ */
+
+
+KinematicsTools::~KinematicsTools()
+{
+}
+
+
+
+/**
+ * Class initialization, parses urdf and loads data from parameter server.
+ *
+ * Pass in root and tip name to define the chain that KinematicsTools will work on
+ *
+ * @return True if initialization succeeds.
+ */
+bool KinematicsTools::init(RobotKinematicModel::Ptr robotModel, const std::string & rootName, const std::string & tipName)
+{
+  // get a chain between the root and the tip
+  m_pKDLInfo = robotModel->getKDLInfo(rootName, tipName);
+
+  if (m_pKDLInfo == NULL)
+  {
+    return false;
+  }
+
+  boost::shared_lock<boost::shared_mutex> lock(m_pKDLInfo->getMutex());
+
+  // get the joint limits (with no offset)
+  if(!m_pKDLInfo->getJointLimits(m_jointLimitMin, m_jointLimitMax, 0.0))
+  {
+    ROS_FATAL("KT: Could not read information about the joints");
+    return false;
+  }
+
+  // store the joint order list if we are using an arm
+  if (std::string::npos != tipName.find("left"))
+      m_limbName = "left";
+  if (std::string::npos != tipName.find("right"))
+      m_limbName = "right";
+  m_orderedJointNames = getOrderedListOfJointNames();
+  // turn this list of ordered names into a std map for more efficient indexing
+  for (size_t i = 0; i < m_orderedJointNames.size(); i++)
+    m_jointNameIndexMap[m_orderedJointNames[i]] = i;
+
+  return true;
+}
+
+std::vector<std::string>
+KinematicsTools::getOrderedListOfJointNames()
+/*
+{
+  std::vector<std::string> result;
+  if (m_limbName.empty())
+  {
+    result.clear();
+    return result;
+  }
+
+  // get the physical parameters from the parameter server, in robot_config
+  ros::NodeHandle root_handle;
+  XmlRpc::XmlRpcValue param_list;
+  std::vector<std::string> joint_names;
+
+  // get/check we can find the joint names
+  // get joint names per limb from the config
+  if (!root_handle.getParam("robot_config/" + m_limbName + "_config/joint_names",
+                            param_list))
+  {
+    ROS_ERROR("Could not find joint names for limb %s, have you loaded the robot config? ns=%s",
+              m_limbName.c_str(), root_handle.getNamespace().c_str());
+    result.clear();
+    return result;
+  }
+
+  // make sure they are an array
+  if (param_list.getType() != XmlRpc::XmlRpcValue::TypeArray)
+  {
+    ROS_ERROR("Joint names list is not an array, please check robot config ns=%s",
+              root_handle.getNamespace().c_str());
+    result.clear();
+    return result;
+  }
+
+  // get and verify each
+  for (int32_t i = 0; i < param_list.size(); ++i)
+  {
+    if (param_list[i].getType() != XmlRpc::XmlRpcValue::TypeString)
+    {
+      ROS_ERROR("Joint names should be a list of strings, found something else ns=%s",
+                root_handle.getNamespace().c_str());
+      result.clear();
+      return result;
+    }
+
+    std::string jointName = static_cast<std::string>(param_list[i]);
+    result.push_back(jointName);
+  }
+  return result;
+}*/
+
+
+/**
+* Put a JointPosition data structure in proximal to distal order
+*/
+MotorControlMsgs::JointPosition
+KinematicsTools::orderJointConfiguration(
+  const MotorControlMsgs::JointPosition &unorderedConfig)
+/*
+{
+  MotorControlMsgs::JointPosition orderedConfig;
+  orderedConfig.angles.resize( getChainLength() );
+  orderedConfig.names.resize(  getChainLength() );
+
+  //loop through all joints in the input message
+  for (size_t i = 0; i < unorderedConfig.angles.size(); i++)
+  {
+    if (m_jointNameIndexMap.find(unorderedConfig.names[i]) !=
+        m_jointNameIndexMap.end())
+    {
+      size_t index = m_jointNameIndexMap[unorderedConfig.names[i]];
+      orderedConfig.angles[index] = unorderedConfig.angles[i];
+      orderedConfig.names[index] =  unorderedConfig.names[i];
+    }
+  }
+  return orderedConfig;
+}*/
+
+std::string
+KinematicsTools::getJointName(size_t index)
+/*
+{
+  if (index < m_orderedJointNames.size())
+    return m_orderedJointNames[index];
+  else
+    return "";
+}*/
+
+bool
+KinematicsTools::getJointNames(std::vector<std::string> &names)
+/*
+{
+  names.clear();
+  for (std::string & name : m_orderedJointNames)
+  {
+    names.push_back(name);
+  }
+  return true;
+}*/
+
+
+/**
+ * Method to generate kinematic subchains
+ *
+ * @param rootName: the name of the root joint
+ * @param shoulderName: the name of the target joint
+ * @return true if model is the chains were successfully created. false on failure or if chain exists
+ */
+bool KinematicsTools::attachIntermediateChain(RobotKinematicModel::Ptr robotModel, std::string rootName, std::string chainName)
+/*
+{
+  // get an interator to our chain library and see if this chain already exists
+  KDLInfoMap :: iterator chainInfoIter;
+  chainInfoIter = m_KDLSubchainInfoMap.find(chainName);
+
+  // exit with failure if it exists already
+  if (chainInfoIter != m_KDLSubchainInfoMap.end() )
+  {
+    ROS_ERROR("KT: Tried to create chain %s, but chain already exists.",chainName.c_str());
+    return false;
+  }
+
+  // insert a chain between the root and the target
+  m_KDLSubchainInfoMap.insert(std::pair<std::string,KDLInfo::Ptr>
+                            (chainName,robotModel->getKDLInfo(rootName, chainName)));
+  chainInfoIter = m_KDLSubchainInfoMap.find(chainName);
+
+  KDLInfo::ChainPtr pKDLSubchain = (chainInfoIter->second)->getChain();
+
+  if(pKDLSubchain->getNrOfSegments() == 0)
+  {
+    ROS_ERROR("KT: Could not initialize chain object. Did you load the model tree yet?");
+    return false;
+  }
+
+  //setup our sub jacobians used for force computation on various other sub-joint assemblies
+  m_jacSubchainMap.insert(std::pair<std::string,KDL::Jacobian>
+                       (chainName,KDL::Jacobian(pKDLSubchain->getNrOfJoints())));
+
+  return true;
+}*/
+
+unsigned int KinematicsTools::getChainLength()
+/*
+{
+  boost::shared_lock<boost::shared_mutex> lock(m_pKDLInfo->getMutex());
+  return m_pKDLInfo->getChain()->getNrOfJoints();
+}*/
+
+
+/**create
+ * compute the gravity compensation torques
+ *
+ * @param jointIn vector of joint positions
+ * @param torquesOut vector of torques
+ * @return
+ */
+
+bool KinematicsTools::getGravityTorques(std::vector<Joint*> jointsIn, std::vector<double> &torquesOut)
+/*
+{
+  boost::shared_lock<boost::shared_mutex> lock(m_pKDLInfo->getMutex());
+
+  KDLInfo::ChainPtr pKDLChain = m_pKDLInfo->getChain();
+
+  KDL::JntArray torques;
+  KDL::JntArray jntPosIn;
+
+  torques.resize(jointsIn.size());
+  jntPosIn.resize(jointsIn.size());
+
+  // copy joint positions into kdl JntArray
+  for (uint32_t i = 0; i < jointsIn.size(); i++)
+  {
+    jntPosIn(i) = jointsIn[i]->state.position;
+  }
+
+  // create zero arrays for velocity, acceleration and force
+  KDL::JntArray jntArrayNull(jointsIn.size());
+  KDL::Wrenches wrenchNull(pKDLChain->getNrOfSegments(), KDL::Wrench::Zero());
+
+  int code = m_pKDLInfo->getIdSolver()->CartToJnt(jntPosIn, jntArrayNull, jntArrayNull, wrenchNull, torques);
+  if (code >= 0)
+  {
+    torquesOut.clear();
+    // copy torques into result
+    for (unsigned int i = 0; i < jointsIn.size(); i++)
+    {
+      torquesOut.push_back(torques(i));
+    }
+    return true;
+  }
+  else
+  {
+    ROS_ERROR_THROTTLE(1.0, "KT: Failed to compute gravity torques from KDL return code %d", code);
+    torquesOut.clear();
+    return false;
+  }
+}*/
+
+/**
+ * project a set of joint values (torques or velocities) into the nullspace of the arm
+ *
+ * @param jointsIn vector of joint positions
+ * @param valIn vector of non-nullspace values (torques or velocities)
+ * @param valOut vector of values projected into the nullspace (torques or velocities)
+ * @return
+ */
+bool KinematicsTools::projectJointValuesToNullspace(std::vector<double> jointsIn, std::vector<double> &valIn, std::vector<double> &valOut)
+/*
+{
+  boost::shared_lock<boost::shared_mutex> lock(m_pKDLInfo->getMutex());
+
+  // check that we have have a 7 joint angles and the proper memory allocated for val in/out
+  if ( jointsIn.size() != 7 )
+  {
+    ROS_ERROR("KT: Improper sized joint vector for Nullspace projection. Need 7 joints");
+    return false;
+  }
+  if ( valIn.size() != 7 )
+  {
+    ROS_ERROR("KT: Improper sized input vector for nullspace conversion values. Need 7 values.");
+    return false;
+  }
+  if ( valOut.size() != 7 )
+  {
+    ROS_ERROR("KT: Improper sized output vector for nullspace conversion values. Need 7 values.");
+    return false;
+  }
+
+  // copy joint positions into kdl JntArray
+  KDL::JntArray jntPosIn;
+  jntPosIn.resize(jointsIn.size());
+  for (uint32_t i = 0; i < jointsIn.size(); i++)
+  {
+    jntPosIn(i) = jointsIn[i];
+  }
+
+  // update the Jacobian using these new joint angles
+  KDL::Jacobian  jacTip;
+  jacTip.resize(m_pKDLInfo->getChain()->getNrOfJoints());
+  m_pKDLInfo->getJntToJacSolver()->JntToJac(jntPosIn, jacTip);
+
+  // For reference of below see:
+  // Khatib, O. (1995). Inertial properties in robotics manipulation: An object-level framework.
+
+  // calculate the dyn. consistent generalized inverse of the jacobian (Jbar)
+  Eigen::Matrix<double,6,6> JJt = jacTip.data * jacTip.data.transpose();
+
+  // Here we want to construct Jbar = J^T * (JJ^T)^-1
+  //
+  //
+  // First start by calculating (JJ^T)^-1 by the following procedure:
+  // For arbitrary matrix A: A(A^-1) = I
+  // If A (original matrix) and I (identity matrix) are known we can
+  // use a LU decomposition to solve for (A^-1). Let's do that but replace A = JJ^T
+  //
+  Eigen::MatrixXd I6 = Eigen::MatrixXd::Random(6,6);
+  I6.setIdentity();
+  Eigen::MatrixXd JJt_inv = Eigen::MatrixXd::Random(6,6);
+  Eigen::FullPivLU<Eigen::Matrix<double,6,6> > luOfJJt(JJt);
+
+  if(luOfJJt.isInvertible())
+  {
+    JJt_inv = JJt.fullPivLu().solve(I6);
+  }
+  else
+  {
+    ROS_WARN_THROTTLE(1,"KT: Jacobian Matrix not invertible for Nullspace calculation!");
+    return false;
+  }
+
+  // Now we use this to calculate Jbar
+  Eigen::Matrix<double,7,6> Jbar = jacTip.data.transpose() * JJt_inv;
+
+  // calculate the nullspace
+  Eigen::Matrix<double,7,7> I7;
+  I7.setIdentity();
+  Eigen::Matrix<double,7,7> NS = I7 - Jbar * jacTip.data;
+
+  // create our input and output vectors (1-D Eigen Matrices)
+  Eigen::Matrix<double,7,1> input;
+  Eigen::Matrix<double,7,1> projection;
+
+  // fill the input vector with the correct values
+  for (uint32_t i = 0 ; i < 7; i++)
+  {
+    input(i,0) = valIn[i];
+  }
+
+  // project the input values into the nullspace
+  projection = NS*input;
+
+  // copy the projected torques back into a std vector
+  for (uint32_t i = 0 ; i < 7; i++)
+  {
+    valOut[i] = projection(i,0);
+  }
+
+  return true;
+}*/
+
+
+/**
+ * compute an external wrench on the robot
+ *
+ * @param subchain to evalute the wrench against
+ * @param jointIn vector of joint positions
+ * @param the desired wrench
+ * @param torquesOut vector of torques
+ * @return
+*/
+bool KinematicsTools::getWrenchTorquesOnSubchain(std::string subchain,
+                                                 std::vector<double> jointsIn,
+                                                 Heartland::Wrench wrenchIn,
+                                                 std::vector<double> &torquesOut)
+/*
+{
+  // get an iterator to the sub jacobian and sub chain
+  KDLJacobianMap :: iterator jacIter =
+    m_jacSubchainMap.find(subchain);
+  KDLInfoMap :: iterator  chainIter =
+    m_KDLSubchainInfoMap.find(subchain);
+
+  // if the chains don't exist return false
+  if (jacIter == m_jacSubchainMap.end() || chainIter == m_KDLSubchainInfoMap.end())
+  {
+    ROS_ERROR("KT: Chain or Jacobian does not exist. Did you attach your chain?");
+    return false;
+  }
+
+  // get a copy of the chain and jacobian
+  KDLInfo::Ptr pKDLSubchainInfo = chainIter->second;
+  uint32_t nr_of_joints = pKDLSubchainInfo->getChain()->getNrOfJoints();
+  boost::shared_lock<boost::shared_mutex> lock(pKDLSubchainInfo->getMutex());
+
+  // copy joint positions into kdl JntArray
+  KDL::JntArray jntPosIn;
+  jntPosIn.resize(nr_of_joints);
+  for (uint32_t i = 0; i < nr_of_joints; i++)
+    jntPosIn(i) = jointsIn[i];
+
+  // update the Jacobian using these new joint angles
+  pKDLSubchainInfo->getJntToJacSolver()->JntToJac(jntPosIn,jacIter->second);
+
+  Heartland::Vector6d wrench = wrenchIn.toEigenVector6d();
+
+  for (uint32_t i = 0; i < nr_of_joints; i++)
+  {
+    torquesOut[i] = 0;
+    for (uint32_t j = 0 ; j < 6 ; j++)
+      torquesOut[i] += (jacIter->second)(j,i) * wrench(j);
+  }
+
+  return true;
+}
+*/
+
+
+/**
+ * Method for computing inverse kinematics (joint angle velocity) given a desired end-effector twist.  Assumes that desired twist is (x,y,z) in meters/s
+ * and angular is (x,y,z) in radians/s.
+ * The origin is assumed to be base_name and the end-effector is tip_name defined on parameter server for KinematicTools.
+ * Takes Joints in to extract commanded position to use a seed for solver and returns a vector containing the joint angles velocity in radians/s.
+ *
+ * Does NOT include any Nullspace motion. This can be used as an alternative to getKDLVelocityIK for testing and simple checks
+ *
+ * @param jointsIn: a length 7 vector that contains the joint angles to evaluate the robot at
+ * @param twistDesired: a base-frame twist to apply to the end-effector (m/s, rad/s)
+ * @param jointsVelOut: a length 7 vector of joint velocities (rad/s) that will result in an instantaneous motion of twistDesired
+ * @return true: if solver successfully generates joint angle velocities (currently not implemented)
+ */
+bool KinematicsTools::getVelocityIKNoNullspace(std::vector<double> jointsIn,const geometry_msgs::Twist &twistDesired, std::vector<double> &jointsVelOut)
+{
+  boost::shared_lock<boost::shared_mutex> lock(m_pKDLInfo->getMutex());
+
+  KDL::Twist kdl_twist;
+  //create the KDL twist from the geometry_msg Twist
+  tf::twistMsgToKDL (twistDesired, kdl_twist);
+
+  // copy joint positions into kdl JntArray
+  KDL::JntArray jntPosIn;
+  jntPosIn.resize(jointsIn.size());
+  for (uint32_t i = 0; i < jointsIn.size(); i++)
+    jntPosIn(i) = jointsIn[i];
+
+  // update the Jacobian using these new joint angles
+  KDL::Jacobian  jacTip;
+  jacTip.resize(m_pKDLInfo->getChain()->getNrOfJoints());
+  m_pKDLInfo->getJntToJacSolver()->JntToJac(jntPosIn, jacTip);
+
+  // use the Jacobian Transpose method for calculating Cartesian output
+  for (uint32_t i = 0 ; i < m_pKDLInfo->getChain()->getNrOfJoints(); i++)
+  {
+    jointsVelOut[i] = 0;
+    for (uint32_t j = 0 ; j < 6 ; j++)
+      jointsVelOut[i] += jacTip(j,i) * kdl_twist(j);
+  }
+
+  return true;
+}
+
+/**
+ * Method that returns pose of end-effector (known as tip_name) with respect to base frame (known as base_name), given set of joints
+ * that must exist along kinematic chain between base and tip.  Presently the KDL fk solver will fail if joints are inconsistent.  However,
+ * there presently is no test for whether or not joints are the same as those defined in the actual kinematic chain between base and tip.
+ *
+ * @param joints_in: valid set of joints from the robot model, must be same joints as those between base and tip in urdf (joint angles expected in radians)
+ * @param poseOut: end-effector pose, location in (x,y,z) linear in meters from base frame and quaternion representation for orientation (assumes radians)
+ * @return true: if successfully calculated endpoint pose
+ */
+bool KinematicsTools::getPositionFK(std::vector<Joint*> joints_in, geometry_msgs::Pose &poseOut)
+{
+  boost::shared_lock<boost::shared_mutex> lock(m_pKDLInfo->getMutex());
+
+  KDL::Frame kdl_pose;
+  KDL::JntArray jnt_pos_in;
+
+  if(!m_pKDLInfo)
+  {
+    ROS_WARN("KT: m_pKDLInfo not initialized!");
+    return false;
+  }
+
+  //get the joint angles
+  jnt_pos_in.resize(joints_in.size());
+  for (uint32_t i = 0; i < joints_in.size(); i++)
+  {
+    jnt_pos_in(i) = joints_in[i]->state.position;
+  }
+
+  if (m_pKDLInfo->getFkSolverPos()->JntToCart(jnt_pos_in, kdl_pose) >= 0)
+  {
+    //convert to geometry_msgs::Pose
+    tf::poseKDLToMsg(kdl_pose, poseOut);
+  }
+  else
+  {
+    ROS_WARN("KT: Could not compute FK ");
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Method that returns pose of a subhchain endpoint with respect to base frame (known as base_name), given set of joints
+ * that must exist along kinematic chain between base and tip.  Presently the KDL fk solver will fail if joints are inconsistent.  However,
+ * there presently is no test for whether or not joints are the same as those defined in the actual kinematic chain between base and tip.
+ * If more joints are passed in the array that exist in the chain it starts at 0 and takes the first N joints (where N is length of the chain).
+ *
+ * @param joints_in: valid set of joints from the robot model, must be same joints as those between base and elbow in urdf (joint angles expected in radians)
+ * @param poseOut: chain endpoint pose, location in (x,y,z) linear in meters from base frame and quaternion representation for orientation (assumes radians)
+ * @return true: if successfully calculated endpoint pose
+ */
+bool KinematicsTools::getSubchainPositionFK(std::string subchain, std::vector<Joint*> joints_in, geometry_msgs::Pose &poseOut)
+{
+
+  // get an iterator to the sub chain
+  KDLInfoMap :: iterator  chainIter =
+    m_KDLSubchainInfoMap.find(subchain);
+
+  // if the chains don't exist return false
+  if (chainIter == m_KDLSubchainInfoMap.end())
+  {
+    ROS_ERROR("KT: Chain does not exist. Did you attach your chain?");
+    return false;
+  }
+
+  // get a copy of the chain and jacobian
+  KDLInfo::Ptr pKDLSubchainInfo = chainIter->second;
+
+  boost::shared_lock<boost::shared_mutex> lock(pKDLSubchainInfo->getMutex());
+
+  KDL::Frame kdl_pose;
+  KDL::JntArray jnt_pos_in;
+
+  if(!pKDLSubchainInfo)
+  {
+    ROS_WARN("KT: pKDLSubchainInfo not initialized! \
+    Did you call the attachIntermediateChain fnc correctly?");
+    return false;
+  }
+
+  //get the joint angles
+  uint32_t num_joints = pKDLSubchainInfo->getChain()->getNrOfJoints();
+  jnt_pos_in.resize(num_joints);
+  for (uint32_t i = 0; i <  num_joints; i++)
+  {
+    jnt_pos_in(i) = joints_in[i]->state.position;
+  }
+
+  if (pKDLSubchainInfo->getFkSolverPos()->JntToCart(jnt_pos_in, kdl_pose) >= 0)
+  {
+    //convert to geometry_msgs::Pose
+    tf::poseKDLToMsg(kdl_pose, poseOut);
+  }
+  else
+  {
+    ROS_WARN("KT: Could not compute FK ");
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Method that returns velocity of end-effector (known as tip_name) with respect to base frame (known as base_name), given set of joints
+ * that must exist along kinematic chain between base and tip.
+ *
+ * @param joints_in: valid set of joints from the robot model, must be same joints as those between base and tip in urdf (joint angles expected in radians)
+ * @param joints_vel: set of joint velocities, must match the ordering of joints_in above
+ * @param twistOut: the resulting instantenous twist created by applying joints_vel at robot pose joints_in
+ * @return true: if successfully calculated endpoint velocity (curently not implemented)
+ */
+bool KinematicsTools::getVelocityFK(std::vector<double> joints_in, std::vector<double> joints_vel, std::vector<double> &twistOut)
+{
+  boost::shared_lock<boost::shared_mutex> lock(m_pKDLInfo->getMutex());
+
+  KDL::JntArray jnt_pos_in;
+  KDL::JntArray jnt_vel_in;
+
+  //get the joint angles
+  jnt_pos_in.resize(joints_in.size());
+  jnt_vel_in.resize(joints_vel.size());
+  for (uint32_t i = 0; i < joints_in.size(); i++)
+    jnt_pos_in(i) = joints_in[i];
+  for (uint32_t i = 0; i < joints_vel.size(); i++)
+    jnt_vel_in(i) = joints_vel[i];
+
+  // update the Jacobian using these new joint angles
+  KDL::Jacobian  jacTip;
+  jacTip.resize(m_pKDLInfo->getChain()->getNrOfJoints());
+  m_pKDLInfo->getJntToJacSolver()->JntToJac(jnt_pos_in, jacTip);
+
+  for (uint32_t i = 0 ; i < 6; i++)
+  {
+    twistOut[i] = 0;
+    for (uint32_t j = 0 ; j < m_pKDLInfo->getChain()->getNrOfJoints(); j++)
+      twistOut[i] += jacTip(i,j) * jnt_vel_in(j);
+  }
+
+  return true;
+}
+
+/**
+ * Method that returns pose of end-effector (known as tip_name) with respect to base frame (known as base_name), given set of joints
+ * that must exist along kinematic chain between base and tip.  Presently the KDL fk solver will fail if joints are inconsistent.  However,
+ * there presently is no test for whether or not joints are the same as those defined in the actual kinematic chain between base and tip.
+ *
+ * @param joints_in: joint angles expected in radians, must be size of chain
+ * @param poseOut: end-effector pose, location in (x,y,z) linear in meters from base frame and quaternion representation for orientation (assumes radians)
+ * @return true: if successfully calculated endpoint pose
+ */
+bool KinematicsTools::getPositionFK(const std::vector<double> &angles_in, geometry_msgs::Pose &poseOut)
+{
+  boost::shared_lock<boost::shared_mutex> lock(m_pKDLInfo->getMutex());
+
+  KDL::Frame kdl_pose;
+  KDL::JntArray jnt_pos_in;
+
+  if(!m_pKDLInfo)
+  {
+    ROS_WARN("KT: m_pKDLInfo not initialized!");
+    return false;
+  }
+
+  if(angles_in.size() != m_pKDLInfo->getChain()->getNrOfJoints())
+  {
+    ROS_ERROR("KT: incorrect number of joints for FK");
+    return false;
+  }
+
+  //get the joint angles
+  jnt_pos_in.resize(angles_in.size());
+  for (uint32_t i = 0; i < angles_in.size(); i++)
+  {
+    jnt_pos_in(i) = angles_in[i];
+  }
+
+  if (m_pKDLInfo->getFkSolverPos()->JntToCart(jnt_pos_in, kdl_pose) >= 0)
+  {
+    //convert to geometry_msgs::Pose
+    tf::poseKDLToMsg(kdl_pose, poseOut);
+  }
+  else
+  {
+    ROS_WARN("KT: Could not compute FK ");
+    return false;
+  }
+
+  return true;
+}
+
+bool
+KinematicsTools::getPositionFK(
+  const MotorControlMsgs::JointPosition &joint_configuration,
+  RigidTransform *pose)
+{
+  geometry_msgs::Pose ros_pose;
+
+  // sort the input angles from base to tip
+  MotorControlMsgs::JointPosition orderedConfig =
+    orderJointConfiguration(joint_configuration);
+
+  bool retval = getPositionFK(orderedConfig.angles, ros_pose);
+  *pose = RosMsgTools::toRigidTransform(ros_pose);
+
+  return retval;
+}
+
+bool
+KinematicsTools::getPositionIK(
+  const RigidTransform &pose,
+  const MotorControlMsgs::JointPosition &seed,
+  MotorControlMsgs::JointPosition *joint_configuration)
+{
+  boost::shared_lock<boost::shared_mutex> lock(m_pKDLInfo->getMutex());
+
+  KDL::Frame    kdl_pose;
+  KDL::JntArray jnt_pos_in;
+  KDL::JntArray jnt_pos_out;
+
+  // construct an ordered seed configuration
+  MotorControlMsgs::JointPosition oseed = orderJointConfiguration(seed);
+
+  //create the KDL frame from the geometry_msg Pose
+  kdl_pose = KDLTypeConversions::toKDLFrame(pose);
+
+  // store the number of joints in this chain
+  const unsigned int njoints = getChainLength();
+
+  if(njoints != oseed.angles.size())
+  {
+    ROS_ERROR("KT: getPositionIK received seed vector of incorrect size "
+              "%d, should be %d", oseed.angles.size(), njoints);
+    return false;
+  }
+
+  //size out kdl joint structures
+  jnt_pos_in.resize(njoints);
+  jnt_pos_out.resize(njoints);
+
+  // convert to a kdl joint structure
+  for (size_t i = 0; i < njoints; i++)
+    jnt_pos_in(i) = oseed.angles[i];
+
+  //attempt to solve for joint angles
+  int ik_valid = m_pKDLInfo->getIkSolverPos()->CartToJnt(jnt_pos_in,
+                                                         kdl_pose,
+                                                         jnt_pos_out);
+
+  //if valid send the new joint angles
+  if(ik_valid >= 0)
+  {
+    // size the output message
+    joint_configuration->angles.resize(njoints);
+    joint_configuration->names = oseed.names;
+
+    for (size_t i = 0; i < njoints; i++)
+     joint_configuration->angles[i] = jnt_pos_out(i);
+
+    return true;
+  }
+
+  return false;
+}
+
+
+/**
+ * Method for computing inverse kinematics (joint angle velocity) given a desired end-effector twist.  Assumes that desired twist is (x,y,z) in meters/s
+ * and angular is (x,y,z) in radians/s.
+ * The origin is assumed to be base_name and the end-effector is tip_name defined on parameter server for KinematicTools.
+ * Takes Joints in to extract commanded position to use a seed for solver and returns a vector containing the joint angles velocity in radians/s.
+ * Solver uses @see ChainIkSolverVel_wdls.
+ *
+ * Now includes motion in the null space, calculated by moving the arm towards an optimal position
+ * with a set of weights
+ *
+ * lambda parameter is shared between arms - m_IKvelLambda
+ *
+ * @param twistDesired: desired end-effector twist in m/s and rad/s
+ * @param joints_in: vector of joints that must be the same and in order as those in urdf defined from base_name to tip_name
+ * @param result: vector of joint angle velocities
+ * @param robotJointState: Joint vector of robot state information at the current pose (used for collision-avoidance biased solutions)
+ * @return true: if solver successfully generates joint angle velocities
+ */
+int32_t KinematicsTools::getVelocityIK(const geometry_msgs::Twist &twistDesired,
+                                       std::vector<double> joints_in,
+                                       std::vector<Joint*> robotJointState,
+                                       std::vector<double> &result)
+
+
+{
+  boost::shared_lock<boost::shared_mutex> lock(m_pKDLInfo->getMutex());
+
+  KDL::JntArray jnt_pos_in;
+  KDL::JntArray jnt_vel_out;
+  KDL::Twist kdl_twist;
+
+  //create the KDL twist from the geometry_msg Twist
+  tf::twistMsgToKDL (twistDesired, kdl_twist);
+
+
+  if(m_pKDLInfo->getChain()->getNrOfJoints() != joints_in.size())
+  {
+    ROS_ERROR("KT: getVelocityIK received joint vector of incorrect size %d, should be %d", joints_in.size(), m_pKDLInfo->getChain()->getNrOfJoints());
+    return -5;
+  }
+
+  //get the joint angles, weights and fill in optimal position
+  jnt_pos_in.resize(joints_in.size());
+  jnt_vel_out.resize(joints_in.size());
+
+  for (unsigned int i = 0; i < joints_in.size(); i++)
+  {
+    jnt_pos_in(i) = joints_in[i];
+  }
+
+  //take the twist, calculate joint angle velocities
+  Eigen::MatrixXd Mq = Eigen::MatrixXd::Identity(joints_in.size(),joints_in.size());
+  Mq(3,3) = 10.0;  // This is the E0 joint. Weighting this higher lessens the burden on
+                   // the S0 joint, especially for motions that go behind the back.
+  Mq(6,6) = 100.0; // This is the W2 joint. Because it's the end of the chain, we should
+                   // try to use W2 as much as possible, when allowed.  If input
+                   // command is purely Z rotation of the hand frame, we want the w2 only
+                   // result in order to eliminate excessive shoulder/elbow motion.
+  m_pKDLInfo->getIkSolverVel()->setWeightJS(Mq);
+
+  int32_t ik_valid = 0;
+  ik_valid = m_pKDLInfo->getIkSolverVel()->CartToJnt(jnt_pos_in, kdl_twist, jnt_vel_out);
+
+  if(ik_valid >= 0)
+  {
+    result.clear();
+    //test result for very large velocities and attenuate, otherwise pass through to result
+    for (unsigned int i = 0; i < joints_in.size(); i++)
+    {
+      if(jnt_vel_out(i) > 100.0)
+      {
+        result.push_back(100.0);
+        ROS_ERROR_THROTTLE(1,"KT: Scaling down gigantic joint velocity.");
+      }
+      else if(jnt_vel_out(i) < -100.0)
+      {
+        result.push_back(-100.0);
+        ROS_ERROR_THROTTLE(1,"KT: Scaling down gigantic joint velocity.");
+      }
+      else
+      {
+        result.push_back(jnt_vel_out(i));
+      }
+    }
+  }
+  else
+  {
+    //do nothing, velocity output is zero
+    result.clear();
+    for (unsigned int i = 0; i < joints_in.size(); i++)
+    {
+      result.push_back(0.0);
+      ROS_ERROR_THROTTLE(1,"KT: Invalid IK for velocity solution. Setting 0 velocity.");
+    }
+  }
+  return ik_valid;
+}
+
+
+/**
+ * Method for returning the joint limits for each joint as defined along kinematic chain given base_name and tip_name during init.  Returns two vectors,
+ * the lower and the upper limits for each joint.
+ *
+ * @param lower: vector of lower joint limits in radians
+ * @param upper: vector of upper joint limits in radians
+ * @return true: if vectors are successfully loaded with values
+ */
+bool KinematicsTools::getJointLimits(std::vector<double> &lower, std::vector<double> &upper)
+{
+  boost::shared_lock<boost::shared_mutex> lock(m_pKDLInfo->getMutex());
+
+  if( (upper.size() != m_jointLimitMax.rows()) || (lower.size() != m_jointLimitMin.rows()) )
+  {
+    ROS_ERROR("KT: get joint limits parameter incorrect size: max %d,%d, min %d,%d line %d, file %s",
+              upper.size(), m_jointLimitMax.rows(), lower.size(), m_jointLimitMin.rows(), __LINE__, __FILE__);
+    return false;
+  }
+
+  for (uint32_t i = 0; i < m_jointLimitMax.rows(); i++)
+  {
+    lower[i] = m_jointLimitMin.data[i];
+    upper[i] = m_jointLimitMax.data[i];
+  }
+
+  return true;
+}
+
+
+/**
+ * Method that accepts a vector of @see Joint and sets the command position state of each of the joints
+ * to values within the joints limits.  The joint limits that this test uses are extracted from the urdf.
+ *
+ * @param joints_in: vector of robot model Joint types.  These are assumed to be ordered and have the
+ * length equivalent to the chain created by parsing the robot urdf  between base_name and tip_name.
+ * @return true: if limits have been applied successfully.  The method will fail if KinematicTools has not be initialize and
+ * if the size of joints_in is not equal to the length equivalent to the chain created by parsing the robot urdf  between
+ * base_name and tip_name.
+ */
+bool KinematicsTools::setJointCommandWithinLimits(std::vector<Joint*>  joints_in)
+{
+
+  //test for correct size
+  if( (joints_in.size() != m_jointLimitMax.rows()) || (joints_in.size() != m_jointLimitMin.rows()) )
+  {
+    ROS_ERROR_THROTTLE(1.0, "KT: get joint limits parameter incorrect size -- max %d, %d; min %d %d",
+              joints_in.size(), m_jointLimitMax.rows(), joints_in.size(), m_jointLimitMin.rows());
+    return false;
+  }
+
+  //for each joint, reset command.position if it is outside of joint limits
+  for (uint32_t j = 0; j < joints_in.size(); j++)
+  {
+    //set values within joint limits
+    if(joints_in[j]->command.position < m_jointLimitMin.data[j])
+    {
+      joints_in[j]->command.position = m_jointLimitMin.data[j];
+    }
+    else if(joints_in[j]->command.position > m_jointLimitMax.data[j])
+    {
+      joints_in[j]->command.position = m_jointLimitMax.data[j];
+    }
+    else
+    {
+      // do nothing
+    }
+  }
+
+  return true;
+}
+
+
+/**
+ * Method that accepts a vector of @see Joint and sets the command position state of each of the joints
+ * to values within the joints limits, otherwise copies the actual state to the command.
+ * The joint limits that this test uses are extracted from the urdf.
+ *
+ * @param joints_in: vector of robot model @see Joint types.  These are assumed to be ordered and have the
+ * length equivalent to the chain created by parsing the robot urdf  between base_name and tip_name.
+ * @return true: if command value has been applied successfully.  The method will fail if
+ * KinematicTools has not be initialize and if the size of joints_in is not equal to the length equivalent
+ * to the chain created by parsing the robot urdf  between base_name and tip_name.
+ */
+bool KinematicsTools::resetJointCommandToActualWithinLimits(std::vector<Joint*>  joints_in)
+{
+
+  //test for correct size
+  if( (joints_in.size() != m_jointLimitMax.rows()) || (joints_in.size() != m_jointLimitMin.rows()) )
+  {
+    ROS_ERROR("KT: get joint limits parameter incorrect size");
+    return false;
+  }
+
+  //for each joint, reset command.position if it is outside of joint limits, otherwise set to state.position
+  for (uint32_t j = 0; j < joints_in.size(); j++)
+  {
+    //set values within joint limits
+    if(joints_in[j]->state.position < m_jointLimitMin.data[j])
+    {
+      ROS_ERROR("KT: joint state %d (%s) exceeds lower limit, setting command to lower %f",
+                j, joints_in[j]->getName().c_str(), m_jointLimitMin.data[j]);
+      joints_in[j]->command.position = m_jointLimitMin.data[j];
+    }
+    else if(joints_in[j]->state.position > m_jointLimitMax.data[j])
+    {
+      ROS_ERROR("KT: joint state %d (%s) exceeds upper limit, setting command to upper %f",
+                j, joints_in[j]->getName().c_str(), m_jointLimitMax.data[j]);
+      joints_in[j]->command.position = m_jointLimitMax.data[j];
+    }
+    else
+    {
+      joints_in[j]->command.position = joints_in[j]->state.position;
+    }
+  }
+
+  return true;
+}
+
+
+/**
+ * @}
+ * @}
+ */
+
+
+
+}}

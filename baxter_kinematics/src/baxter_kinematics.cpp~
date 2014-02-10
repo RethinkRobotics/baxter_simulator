@@ -1,0 +1,240 @@
+/****************************************************************************
+* baxter_kinematics.cpp
+* Copyright (c) 2008-2012, Rethink Robotics, Inc.
+****************************************************************************/
+
+#include "baxter_kinematics.h"
+
+#include <signal.h>
+#include <string>
+
+#include <RosMsgTools/RosMsgTools.h>
+//#include <baxter_simulation/arm_kinematics.h>
+
+namespace rmt = Heartland::RosMsgTools;
+
+namespace Heartland {
+namespace ExternalTools {
+
+/**
+* Method to allocate and initialize all resources required by the IK Node
+* @return true if succeeds.
+*/
+bool baxter_kinematics::init(std::string side)
+{
+  // capture the side we are working on
+  m_limbName = side;
+
+  //setup handle for the topics
+  std::string node_path = "/ExternalTools/" + m_limbName +
+      "/baxter_kinematics";
+  ros::NodeHandle handle(node_path);
+
+  std::string topic1="/robot/joint_states";
+  std::string topic2="/robot/limb/"+side+"/endpoint_state";
+
+  //setup the service server
+  m_ikService =
+      handle.advertiseService("IKService",
+                              &baxter_kinematics::IKCallback,this);
+
+  //setup the fk request-reply server
+  /*m_fkServer =
+    rmt::RequestServer::createServer<
+      MotorControlMsgs::SolvePositionFKRequest,
+      MotorControlMsgs::SolvePositionFKReply>
+    (node_path + "/FKServer",
+     boost::bind(&baxter_kinematics::FKCallback, this, _1));*/
+
+  //setup the ik request-reply server
+  m_ikServer =
+    rmt::RequestServer::createServer<
+      MotorControlMsgs::SolvePositionIKRequest,
+      MotorControlMsgs::SolvePositionIKReply>
+    (node_path + "/IKServer",
+     boost::bind(&baxter_kinematics::IKCallback, this, _1));
+
+
+  joint_state_sub=nh_.subscribe<MotorControlMsgs::JointPosition>(topic1,100,&baxter_kinematics::joint_callback, this);
+  end_pointstate_pub=nh_.advertise<geometry_msgs::Pose>(topic2,100);
+
+  // create the kinematics model
+/*  m_kinematicsModel =
+      ExternalTools::HLRKinematicsModel::create(side);*/
+    m_kinematicsModel =
+      arm_kinematics::create();
+
+  return true;
+
+}
+
+void baxter_kinematics::joint_callback(const sensor_msgs::JointPosition& msg)
+{
+	MotorControlMsgs::SolvePositionFKReply reply;
+	//joint=*msg
+	baxter_kinematics::JointStatetoJointPosition(&msg,&joint)
+	reply=baxter_kinematics::FKCallback(&joint);
+	for (size_t reply_index = 0; reply_index < reply.pose.size(); reply_index++)
+  	{
+		end_pointstate_pub.publish(reply.pose[reply_index]);
+	}
+	
+}
+
+void baxter_kinematics::JointStatetoJointPosition(const sensor_msgs::JointPosition& msg,MotorControlMsgs::JointPosition &res){
+	for(size_t ind=0;ind<msg.names.size();ind++)
+	{
+		if ((msg.name[ind]).std::string::find(m_limbName) != std::string::npos)
+		{
+			res.names[ind]=msg.name[ind];
+			res.angles[ind]=msg.position[ind];
+		}
+	}
+}
+
+MotorControlMsgs::SolvePositionFKReply
+baxter_kinematics::FKCallback(
+    const MotorControlMsgs::SolvePositionFKRequest &req)
+{
+  std:string frame_id="torso"
+  MotorControlMsgs::SolvePositionFKReply reply;
+  reply.pose.resize(req.configuration.size());
+  reply.isValid.resize(req.configuration.size());
+
+  for (size_t reply_index = 0; reply_index < reply.pose.size(); reply_index++)
+  {
+    RigidTransform fk_result;
+    reply.isValid[reply_index] =
+        m_kinematicsModel->computeFK(frame_id,req.configuration[reply_index], &fk_result);
+    reply.pose[reply_index] = rmt::toRosPose(fk_result);
+  }
+  return reply;
+}
+
+
+MotorControlMsgs::SolvePositionIKReply
+baxter_kinematics::IKCallback(
+    const MotorControlMsgs::SolvePositionIKRequest &req)
+{
+  MotorControlMsgs::SolvePositionIKReply res;
+
+  // allocate memory for the reponse
+  res.joints.resize(req.seeded_pose.size());
+  res.isValid.resize(req.seeded_pose.size());
+
+  // iterate over each ik request in the incoming vector
+  for (size_t req_index = 0; req_index < req.seeded_pose.size(); req_index++)
+  {
+    // if the seed is empty use a default seed
+    if (req.seeded_pose[req_index].seed.angles.empty() ||
+        req.seeded_pose[req_index].seed.names.empty() )
+    {
+      // compute IK with an assumed seed from the pose map
+      res.isValid[req_index] = m_kinematicsModel->computeIK(
+          req.seeded_pose[req_index].pose_stamp,joint,
+          &res.joints[req_index]);
+
+    }
+    else
+    {
+      // compute IK with an assumed seed from the pose map
+      res.isValid[req_index] = m_kinematicsModel->computeIK(
+          req.seeded_pose[req_index].pose_stamp,
+          req.seeded_pose[req_index].seed,
+          &res.joints[req_index]);
+    }
+  }
+
+  return res;
+}
+
+bool
+baxter_kinematics::IKCallback(MotorControlMsgs::SolvePositionIK::Request  &req,
+                                   MotorControlMsgs::SolvePositionIK::Response &res)
+{
+  // allocate memory for the reponse
+  res.joints.resize(req.pose_stamp.size());
+  res.isValid.resize(req.pose_stamp.size());
+
+  // iterate over each ik request in the incoming vector
+  for (size_t req_index = 0; req_index < req.pose_stamp.size(); req_index++)
+  {
+    MotorControlMsgs::JointPosition joint_pose;
+
+    // compute IK with an assumed seed from the pose map
+    res.isValid[req_index] = m_kinematicsModel->computeIK(
+        req.pose_stamp[req_index],
+        &joint_pose);
+
+    // copy over the data into the baxter_core_msgs RSDK data structure
+    res.joints[req_index].name.resize(joint_pose.names.size());
+    res.joints[req_index].position.resize(joint_pose.angles.size());
+    res.joints[req_index].name = joint_pose.names;
+    res.joints[req_index].position = joint_pose.angles;
+  }
+
+  return true;
+}
+
+}
+}
+
+
+
+/***************************************************************************************************/
+
+
+//! global pointer to Node
+Heartland::ExternalTools::baxter_kinematics::Ptr g_pNode;
+
+
+//! Helper function for
+void quitRequested (int)
+{
+  ROS_INFO ("baxter_kinematics: Terminating program...");
+  if(g_pNode)
+  {
+    g_pNode->exit();
+    g_pNode.reset();
+  }
+}
+
+
+
+/**
+ * Entry point for program. Sets up Node, parses
+ * command line arguments, then control loop (calling run() on Node)
+ */
+int main(int argc, char* argv[])
+{
+  std::string side = argc > 1 ? argv[1] : "";
+  if(side != "left" && side != "right")
+  {
+    fprintf(stderr, "Usage: %s <left | right>\n", argv[0]);
+    return 1;
+  }
+
+  rmt::init(argc, argv, "baxter_kinematics_" + side);
+  rmt::connectFrameGraphToTf();
+
+  //capture signals and attempt to cleanup Node
+  signal(SIGTERM, quitRequested);
+  signal(SIGINT,  quitRequested);
+  signal(SIGHUP,  quitRequested);
+
+
+  //create a Node
+  g_pNode = Heartland::ExternalTools::baxter_kinematics::create(side);
+
+  //test to see if pointer is valid
+  if(g_pNode)
+  {
+    g_pNode->run();
+  }
+
+  //baxter_kinematics calls ros::shutdown upon exit, just return here
+  return 0;
+}
+
+
+

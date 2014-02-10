@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<package>
+  <name>baxter_kinematics</name>
+  <version>0.2.0</version>
+  <description>
+    Baxter Kinematics for the FK and Ik calculations
+  </description>
+
+  <maintainer email="rsdk.support@rethinkrobotics.com">
+    Rethink Robotics Inc.
+  </maintainer>
+  <license>BSD</license>
+  <url type="website">http://www.rethinkrobotics.com/sdk</url>
+  <url type="repository">
+    https://github.com/RethinkRobotics/baxter_simulator
+  </url>
+  <url type="bugtracker">
+    https://github.com/RethinkRobotics/baxter_simulator/issues
+  </url>
+  <author>Rethink Robotics Inc.</author>
+  <author>Hariharasudan Malaichamee</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>baxter_core_msgs</build_depend>
+  <build_depend>motor_control_msgs</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>kdl_parser</build_depend>
+  <build_depend>tf</build_depend>
+  <build_depend>tf_conversions</build_depend>
+
+  <run_depend>moveit_ros_planning_interface</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>roscpp</run_depend>
+
+  <run_depend>baxter_core_msgs</run_depend>
+  <run_depend>motor_control_msgs</run_depend>
+
+  <run_depend>tf</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>tf_conversions</run_depend>
+
+  <run_depend>kdl_parser</run_depend>
+<!--  <run_depend>kinematics_msgs</run_depend> -->
+
+</package>
+
+

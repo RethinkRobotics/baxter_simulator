@@ -1,0 +1,5 @@
+<launch>
+	<node pkg="arm_kinematics_constraint_aware" type="arm_kinematics_constraint_aware" name="baxter_arm_kinematics" output="screen">
+		<rosparam command="load" file="$(find baxter_kinematics)/baxter_kinematics.yaml" />
+	</node>
+</launch>

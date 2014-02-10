@@ -1,0 +1,133 @@
+/****************************************************************************
+* baxter_kinematics.h
+* Copyright (c) 2008-2012, Rethink Robotics, Inc.
+****************************************************************************/
+
+
+#ifndef BAXTER_KINEMATICS_H_
+#define BAXTER_KINEMATICS_H_
+
+#include <ros/ros.h>
+
+#include <boost/shared_ptr.hpp>
+#include <boost/bind.hpp>
+#include <RosMsgTools/RequestServer.h>
+
+#include <MotorControlMsgs/JointPosition.h>
+#include <MotorControlMsgs/SolvePositionFKRequest.h>
+#include <MotorControlMsgs/SolvePositionFKReply.h>
+#include <MotorControlMsgs/SolvePositionIKRequest.h>
+#include <MotorControlMsgs/SolvePositionIKReply.h>
+#include <MotorControlMsgs/SolvePositionIK.h>
+#include <RosMsgTools/RosMsgTools.h>
+#include <baxter_simulation/arm_kinematics.h>
+#include <sensor_msgs/JointState.h>
+//#include <ExternalTools/HLRKinematicsModel.h>
+
+
+namespace Heartland {
+namespace ExternalTools {
+
+class baxter_kinematics
+{
+protected:
+  baxter_kinematics() {};
+
+  bool init(std::string side);
+
+public:
+
+  //! return types of create() and createOnStack()
+  typedef boost::shared_ptr<baxter_kinematics> Ptr;
+
+  /**
+   * Factory method that creates a new instance of baxter_kinematics(),
+   * calls init and returns initialized non-NULL pointer if init succeeds.
+   * Returns an empty pointer when init fails.  Design pattern expects that
+   * we always check to see if a pointer is not NULL before assuming we can
+   * use it.
+   *
+   * @return boost::shared_ptr
+   */
+  static Ptr create(std::string side)
+  {
+    Ptr pbaxter_kinematics = Ptr(new baxter_kinematics());
+    if(pbaxter_kinematics->init(side))
+    {
+      return pbaxter_kinematics;
+    }
+    return Ptr();
+  }
+
+  /**
+   * Method that serves as the main execution loop of the Node.  This is called in the main() function to 'run'
+   * and only returns after exit or ros::shutdown is called.
+   */
+  void run()
+  {
+    ROS_INFO("Node entering Run loop");
+
+    //just do spin here (blocks until shutdown), remove while loop
+    ros::spin();
+
+    //we have left the ros spin loop, clean up (if needed) then shutdown
+    exit();
+
+    //attempt proper shutdown
+    ros::shutdown();
+  }
+
+
+
+  /**
+   * Method that allows signals (from their main function) to trigger any
+   * cleanup and manually exit the node's run loop.
+   * This is usually triggered by capturing a SIGTERM, etc.
+   */
+  void exit()
+  {
+    //Do anything to shut down cleanly
+    //Note: Run loop will call shutdown before exiting
+
+    m_ikService.shutdown();
+  }
+
+
+private:
+
+  MotorControlMsgs::SolvePositionFKReply
+  FKCallback(const MotorControlMsgs::SolvePositionFKRequest &req);
+
+  MotorControlMsgs::SolvePositionIKReply
+  IKCallback(const MotorControlMsgs::SolvePositionIKRequest &req);
+
+  void baxter_kinematics::joint_callback(const MotorControlMsgs::JointPosition& msg);
+  void baxter_kinematics::JointStatetoJointPosition(const sensor_msgs::JointPosition& msg,MotorControlMsgs::JointPosition &res)
+  /**
+  * RSDK ROS service based version of the IK call
+  */
+  bool
+  IKCallback(MotorControlMsgs::SolvePositionIK::Request  &req,
+             MotorControlMsgs::SolvePositionIK::Response &res);
+
+  //! Initialization variables
+  std::string                                     m_limbName;
+
+  //! Subscriber for external API desired Pose msg, returning joint space angles
+  ros::ServiceServer                              m_ikService;
+  Heartland::RosMsgTools::RequestServer::Ptr      m_fkServer;
+  Heartland::RosMsgTools::RequestServer::Ptr      m_ikServer;
+  ExternalTools::HLRKinematicsModel::Ptr          m_kinematicsModel;
+
+  // Subscriber for the Joint state commands
+  ros::Nodehandle nh_;
+  ros::Subscriber joint_states_sub;
+  ros::Publisher end_pointstate_pub;
+  MotorControlMsgs::JointPosition joint;
+};
+
+
+}
+}
+
+#endif /* baxter_kinematics_H_ */

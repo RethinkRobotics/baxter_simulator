@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+
+  <!-- Load the URDF into the ROS Parameter Server -->
+  <param name="urdf"
+	 command="cat '$(find baxter_description)/urdf/baxter.urdf'" />
+  <param name="root_name" value="left_arm_mount" />
+  <param name="tip_name" value="left_wrist" />
+  <node name="baxter_kinematics_left" pkg="baxter_kinematics" type="baxter_kinematics" respawn="false" output="screen" args="left">
+</node>
+  <node name="baxter_kinematics_right" pkg="baxter_kinematics" type="baxter_kinematics" respawn="false" output="screen" args="right">
+  </node>
+
+
+</launch>
