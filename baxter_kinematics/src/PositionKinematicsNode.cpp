@@ -43,6 +43,8 @@ static const std::string left_tip_name = "left_wrist";
 static const std::string right_tip_name = "right_wrist";
 static const int no_jts = 7;
 static const std::string ref_frame_id="base";
+static const std::string topic1="/robot/joint_states";
+static const std::string topic4="/robot/state";
 
 /**
 * Method to intialize the publishing and subscribing topics, services and to acquire the resources required
@@ -50,6 +52,9 @@ static const std::string ref_frame_id="base";
 */
 bool kinematics::PositionKinematicsNode::init(std::string side)
 {
+	//Robot would be disabled initially
+	isEnabled=false;
+
   	// capture the side we are working on
   	m_limbName = side;
 
@@ -59,9 +64,9 @@ bool kinematics::PositionKinematicsNode::init(std::string side)
 
   	//setup a private handle
   	ros::NodeHandle handle;
-  	std::string topic1="/robot/joint_states";
-  	std::string topic2="/robot/limb/"+side+"/endpoint_state";
-	std::string topic3="/robot/limb/"+side+"/joint_command";
+
+  	static const std::string topic2="/robot/limb/"+side+"/endpoint_state";
+  	static const std::string topic3="/robot/limb/"+side+"/joint_command";
 
   	//setup the service server for the Inverse Kinematics
   	m_ikService = handle1.advertiseService("IKService",&PositionKinematicsNode::IKCallback,this);
@@ -71,20 +76,30 @@ bool kinematics::PositionKinematicsNode::init(std::string side)
   	end_pointstate_pub=handle.advertise<baxter_core_msgs::EndpointState>(topic2,100);
 	gravity_pub=handle.advertise<baxter_core_msgs::JointCommand>(topic3,100);
 
+	//Subscribe to the robot state
+	robot_state_sub=handle.subscribe<baxter_core_msgs::AssemblyState>(topic4,100,&PositionKinematicsNode::stateCB, this);
+
   	//Initialize the Parameter server with the root_name and tip_name of the Kinematic Chain based on the side
   	handle.setParam("root_name","torso");
+
   	if (side=="right")
-		//handle.setParam("tip_name",left_tip_name);
 		m_kinematicsModel = arm_kinematics::Kinematics::create(right_tip_name);
   	else
-		//handle.setParam("tip_name",right_tip_name);
 		m_kinematicsModel = arm_kinematics::Kinematics::create(left_tip_name);
-  
-  	// create a pointer to the Arm kinemtics
-  	//m_kinematicsModel = arm_kinematics::Kinematics::create(tip_name);
 
   return true;
 
+}
+
+/**
+ * Callback function that checks and sets the robot enabled flag
+ */
+void kinematics::PositionKinematicsNode::stateCB(const baxter_core_msgs::AssemblyState msg)
+{
+	if (msg.enabled)
+		isEnabled=true;
+	else
+		isEnabled=false;
 }
 
 /**
@@ -93,37 +108,40 @@ bool kinematics::PositionKinematicsNode::init(std::string side)
 */
 void kinematics::PositionKinematicsNode::FKCallback(const sensor_msgs::JointState msg)
 {
-	bool isV;
-	std::vector<double> torques;
-	baxter_core_msgs::JointCommand grav_comp;
-	baxter_core_msgs::EndpointState endpoint;
-
-	arm_kinematics::FKReply reply;
-	sensor_msgs::JointState configuration;
-
-	PositionKinematicsNode::FilterJointState(&msg,joint);
-	//Copy the current Joint positions and names of the appropriate side to the configuration
-        //configuration=joint;
-
-	reply=PositionKinematicsNode::FKCalc(joint);
-
-	//The 6th index holds the PoseStamp of the end effector while the other preceeding indices holds that of the preceeding joints
-	endpoint.pose=reply.pose[6].pose;
-	end_pointstate_pub.publish(endpoint);
-	
-	//Gravity Compensation
-	isV=m_kinematicsModel->getGravityTorques(joint, torques);
-	if(isV)
+	if (isEnabled)
 	{
-		grav_comp.command.resize(torques.size());
-		grav_comp.names.resize(joint.name.size());
-		grav_comp.mode=3;
-		grav_comp.command=torques;
-		grav_comp.names=joint.name;
-		gravity_pub.publish(grav_comp);
+		bool isV;
+		std::vector<double> torques;
+		baxter_core_msgs::JointCommand grav_comp;
+		baxter_core_msgs::EndpointState endpoint;
+
+		arm_kinematics::FKReply reply;
+		sensor_msgs::JointState configuration;
+
+		PositionKinematicsNode::FilterJointState(&msg,joint);
+		//Copy the current Joint positions and names of the appropriate side to the configuration
+			//configuration=joint;
+
+		reply=PositionKinematicsNode::FKCalc(joint);
+	
+		//The 6th index holds the PoseStamp of the end effector while the other preceeding indices holds that of the preceeding joints
+		endpoint.pose=reply.pose[6].pose;
+		end_pointstate_pub.publish(endpoint);
+
+		//Gravity Compensation
+		isV=m_kinematicsModel->getGravityTorques(joint, torques);
+		if(isV)
+		{
+			grav_comp.command.resize(torques.size());
+			grav_comp.names.resize(joint.name.size());
+			grav_comp.mode=3;
+			grav_comp.command=torques;
+			grav_comp.names=joint.name;
+			//gravity_pub.publish(grav_comp);
+		}
+		else
+			ROS_ERROR("Gravity compensation was not successfull");
 	}
-	else
-		ROS_ERROR("Gravity compensation was not successfull");
 	
 }
 
@@ -166,22 +184,25 @@ kinematics::PositionKinematicsNode::FKCalc(const sensor_msgs::JointState configu
 */
 bool kinematics::PositionKinematicsNode::IKCallback( baxter_core_msgs::SolvePositionIK::Request &req,baxter_core_msgs::SolvePositionIK::Response &res)
 {
-	sensor_msgs::JointState joint_pose;
-	res.joints.resize(req.pose_stamp.size());
-  	res.isValid.resize(req.pose_stamp.size());
-	for (size_t req_index = 0; req_index < req.pose_stamp.size(); req_index++)
-  	{
-      		res.isValid[req_index] = m_kinematicsModel->getPositionIK(
-          	req.pose_stamp[req_index],joint,&joint_pose);
-          	res.joints[req_index].name.resize(joint_pose.name.size());
-
-		if (res.isValid[req_index])
+	if(isEnabled)
+	{
+		sensor_msgs::JointState joint_pose;
+		res.joints.resize(req.pose_stamp.size());
+		res.isValid.resize(req.pose_stamp.size());
+		for (size_t req_index = 0; req_index < req.pose_stamp.size(); req_index++)
 		{
-          		res.joints[req_index].position.resize(joint_pose.position.size());
-	  		res.joints[req_index].name=joint_pose.name;
-	  		res.joints[req_index].position=joint_pose.position;
+				res.isValid[req_index] = m_kinematicsModel->getPositionIK(
+				req.pose_stamp[req_index],joint,&joint_pose);
+				res.joints[req_index].name.resize(joint_pose.name.size());
+
+			if (res.isValid[req_index])
+			{
+					res.joints[req_index].position.resize(joint_pose.position.size());
+				res.joints[req_index].name=joint_pose.name;
+				res.joints[req_index].position=joint_pose.position;
+			}
 		}
-  	}
+	}
 
 }
 

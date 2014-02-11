@@ -41,6 +41,7 @@
 #include <baxter_core_msgs/SolvePositionIK.h>
 #include <baxter_core_msgs/JointCommand.h>
 #include <baxter_core_msgs/EndpointState.h>
+#include <baxter_core_msgs/AssemblyState.h>
 #include <arm_kinematics.h>
 #include <sensor_msgs/JointState.h>
 
@@ -114,6 +115,11 @@ public:
 private:
   
   /**
+   * Callback function that checks and sets the robot enabled flag
+   */
+  void stateCB(const baxter_core_msgs::AssemblyState msg);
+
+  /**
   * Method to pass the desired configuration of the joints and calculate the FK
   * @return calculated FK
   */
@@ -138,10 +144,11 @@ private:
 					sensor_msgs::JointState &res);
 
   //! Initialization variables
+  bool isEnabled;
   std::string                                     m_limbName;
   ros::ServiceServer                              m_ikService;
   arm_kinematics::Kinematics::Ptr m_kinematicsModel;
-  ros::Subscriber joint_states_sub;
+  ros::Subscriber joint_states_sub,robot_state_sub;
   ros::Publisher end_pointstate_pub,gravity_pub;
   sensor_msgs::JointState joint;
 };
