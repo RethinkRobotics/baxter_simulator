@@ -224,6 +224,4 @@ void BaxterVelocityController::commandCB(const baxter_core_msgs::JointCommandCon
 
 } // namespace
 
-PLUGINLIB_EXPORT_CLASS(
-  baxter_controllers::BaxterVelocityController,
-  controller_interface::ControllerBase)
+PLUGINLIB_EXPORT_CLASS( baxter_controllers::BaxterVelocityController,controller_interface::ControllerBase)

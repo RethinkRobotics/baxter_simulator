@@ -143,10 +143,10 @@ private:
   void FilterJointState(const sensor_msgs::JointState *msg, 
 					sensor_msgs::JointState &res);
 
-  //! Initialization variables
+  //! Declaring variables
   bool isEnabled;
-  std::string                                     m_limbName;
-  ros::ServiceServer                              m_ikService;
+  std::string m_limbName;
+  ros::ServiceServer m_ikService;
   arm_kinematics::Kinematics::Ptr m_kinematicsModel;
   ros::Subscriber joint_states_sub,robot_state_sub;
   ros::Publisher end_pointstate_pub,gravity_pub;

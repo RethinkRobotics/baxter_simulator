@@ -9,7 +9,6 @@ find_package(catkin
   effort_controllers
   baxter_core_msgs
 )
-
 find_package(Boost REQUIRED COMPONENTS system)
 
 catkin_package(
@@ -31,6 +30,7 @@ add_library(${PROJECT_NAME}
   src/baxter_position_controller.cpp
   src/baxter_velocity_controller.cpp
   src/baxter_gripper_controller.cpp
+  src/baxter_effort_controller.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}

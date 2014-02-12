@@ -27,5 +27,5 @@
 	respawn="false" output="screen">
     <remap from="/joint_states" to="/robot/joint_states" />
   </node>
-
+  
 </launch>

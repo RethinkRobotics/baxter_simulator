@@ -108,6 +108,7 @@ void kinematics::PositionKinematicsNode::stateCB(const baxter_core_msgs::Assembl
 */
 void kinematics::PositionKinematicsNode::FKCallback(const sensor_msgs::JointState msg)
 {
+	ros::Rate loop_rate(100);
 	if (isEnabled)
 	{
 		bool isV;
@@ -127,6 +128,7 @@ void kinematics::PositionKinematicsNode::FKCallback(const sensor_msgs::JointStat
 		//The 6th index holds the PoseStamp of the end effector while the other preceeding indices holds that of the preceeding joints
 		endpoint.pose=reply.pose[6].pose;
 		end_pointstate_pub.publish(endpoint);
+		loop_rate.sleep();
 
 		//Gravity Compensation
 		isV=m_kinematicsModel->getGravityTorques(joint, torques);
@@ -184,6 +186,7 @@ kinematics::PositionKinematicsNode::FKCalc(const sensor_msgs::JointState configu
 */
 bool kinematics::PositionKinematicsNode::IKCallback( baxter_core_msgs::SolvePositionIK::Request &req,baxter_core_msgs::SolvePositionIK::Response &res)
 {
+	ros::Rate loop_rate(100);
 	if(isEnabled)
 	{
 		sensor_msgs::JointState joint_pose;
@@ -203,7 +206,7 @@ bool kinematics::PositionKinematicsNode::IKCallback( baxter_core_msgs::SolvePosi
 			}
 		}
 	}
-
+	loop_rate.sleep();
 }
 
 }//namespace

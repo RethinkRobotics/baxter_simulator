@@ -8,10 +8,6 @@
   <arg name="headless" default="false"/>
   <arg name="debug" default="false"/>
 
-  
-  <!-- baxter_kinematics launch file to do the Forward/Inverse Kinematics -->
-  <include file="$(find baxter_kinematics)/launch/baxter_kinematics.launch" />
-
   <!-- We resume the logic in empty_world.launch, changing the name of the world to be launched -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(find baxter_gazebo)/worlds/baxter.world"/>
@@ -48,6 +44,7 @@
   <!-- ros_control baxter launch file -->
   <include file="$(find baxter_control)/launch/baxter_sdk_control.launch" />
   
-
+  <!-- baxter_kinematics launch file to do the Forward/Inverse Kinematics -->
+  <include file="$(find baxter_kinematics)/launch/baxter_kinematics.launch" />
 
 </launch>

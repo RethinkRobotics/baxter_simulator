@@ -112,7 +112,6 @@ robot:
         pid: {p: 100.0, i: 0.01, d: 0.1}
 
   # Individual Joint Controllers: Position --------------------------
-
   right_s0_position_controller:
     type: effort_controllers/JointPositionController
     joint: right_s0
@@ -170,3 +169,43 @@ robot:
     type: effort_controllers/JointPositionController
     joint: left_w2
     pid: {p: 100.0, i: 0.01, d: 0.1}
+
+  # Baxter SDK Controllers: Effort --------------------------
+  right_joint_effort_controller:
+    type: baxter_controllers/BaxterEffortController
+    topic: /robot/limb/right/joint_command
+    joints:
+      right_s0_controller:
+        joint: right_s0
+      right_s1_controller:
+        joint: right_s1
+      right_e0_controller:
+        joint: right_e0
+      right_e1_controller:
+        joint: right_e1
+      right_w0_controller:
+        joint: right_w0
+      right_w1_controller:
+        joint: right_w1
+      right_w2_controller:
+        joint: right_w2
+
+  left_joint_effort_controller:
+    type: baxter_controllers/BaxterEffortController
+    topic: /robot/limb/left/joint_command
+    joints:
+      left_s0_controller:
+        joint: left_s0
+      left_s1_controller:
+        joint: left_s1
+      left_e0_controller:
+        joint: left_e0
+      left_e1_controller:
+        joint: left_e1
+      left_w0_controller:
+        joint: left_w0
+      left_w1_controller:
+        joint: left_w1
+      left_w2_controller:
+        joint: left_w2
+

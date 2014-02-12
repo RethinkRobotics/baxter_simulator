@@ -1,9 +1,43 @@
+/*********************************************************************
+# Copyright (c) 2014, Rethink Robotics
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice,
+#    this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+# 3. Neither the name of the Rethink Robotics nor the names of its
+#    contributors may be used to endorse or promote products derived from
+#    this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+ *********************************************************************/
+
+/**
+ *  \author Hariharasudan Malaichamee
+ *  \desc   Node that lies on the top and controls the robot based on the enable, disable, stop and reset commands
+ */
+
 #include "ros/ros.h"
-#include "std_msgs/Bool.h"
-#include "std_msgs/Empty.h"
-#include <baxter_core_msgs/AssemblyState.h>
-#include <baxter_core_msgs/EndEffectorState.h>
-#include <baxter_core_msgs/EndEffectorProperties.h>
+#include <std_msgs/Bool.h>
+#include <std_msgs/Empty.h>
+#include "baxter_core_msgs/AssemblyState.h"
+#include "baxter_core_msgs/EndEffectorState.h"
+#include "baxter_core_msgs/EndEffectorProperties.h"
 
 namespace baxter_en{
 
@@ -33,36 +67,19 @@ baxter_core_msgs::EndEffectorState right_grip_st;
 baxter_core_msgs::EndEffectorProperties left_grip_prop;
 baxter_core_msgs::EndEffectorProperties right_grip_prop;
 
-
-/*right_grip_prop.id=65664;
-right_grip_prop.ui_type: 2;
-right_grip_prop.manufacturer: 'test';
-right_grip_prop.product: 'test';
-right_grip_prop.product: 'test';
-right_grip_prop.hardware_rev: 'test';
-right_grip_prop.firmware_rev: 'test';
-right_grip_prop.firmware_date: 'test';
-right_grip_prop.controls_grip: True;
-right_grip_prop.senses_grip: True;
-right_grip_prop.reverses_grip: True;
-right_grip_prop.controls_force: True;
-right_grip_prop.state.op_mode=2;
-right_grip_prop.senses_force: True;
-right_grip_prop.controls_position: True;
-right_grip_prop.senses_position: True;
-right_grip_prop.properties: '';
-*/
+ros::Timer timer_;
 
 /**
  * Method to enable the robot
  */
 void enable(const std_msgs::Bool &msg)
 {
+	std::cout<<"Enabled is called------------------------------------------"<<std::endl;
 	if (msg.data)
-		assembly_state_.enabled=1;
+		assembly_state_.enabled=true;
 	else
-		assembly_state_.enabled=1;
-	assembly_state_.stopped=0;
+		assembly_state_.enabled=false;
+	assembly_state_.stopped=false;
 	assembly_state_.estop_button = baxter_core_msgs::AssemblyState::ESTOP_BUTTON_UNPRESSED;
 	assembly_state_.estop_source = baxter_core_msgs::AssemblyState::ESTOP_SOURCE_NONE;
 }
@@ -72,8 +89,9 @@ void enable(const std_msgs::Bool &msg)
  */
 void stop(const std_msgs::Empty &msg)
 {
-	assembly_state_.enabled=0;
-	assembly_state_.stopped=1;
+	std::cout<<"Stop is called------------------------------------------"<<std::endl;
+	assembly_state_.enabled=false;
+	assembly_state_.stopped=true;
 	assembly_state_.estop_button = baxter_core_msgs::AssemblyState::ESTOP_BUTTON_PRESSED;
 	assembly_state_.estop_source = baxter_core_msgs::AssemblyState::ESTOP_SOURCE_BRAIN;
 }
@@ -83,9 +101,10 @@ void stop(const std_msgs::Empty &msg)
  */
 void reset(const std_msgs::Empty &msg)
 {
-	assembly_state_.enabled=0;
-	assembly_state_.stopped=0;
-	assembly_state_.estop_button = baxter_core_msgs::AssemblyState::ESTOP_BUTTON_PRESSED;
+	std::cout<<"Reset is called------------------------------------------"<<std::endl;
+	assembly_state_.enabled=false;
+	assembly_state_.stopped=false;
+	assembly_state_.estop_button = baxter_core_msgs::AssemblyState::ESTOP_BUTTON_UNPRESSED;
 	assembly_state_.estop_source = baxter_core_msgs::AssemblyState::ESTOP_SOURCE_NONE;
 }
 
@@ -95,11 +114,11 @@ int main(int argc, char **argv)
 {
   ros::init(argc, argv, "baxter_enable");
   ros::NodeHandle n;
-
+  ros::Rate loop_rate(50);
   //Default values for the assembly state
-  baxter_en::assembly_state_.enabled = 0;             // true if enabled
-  baxter_en::assembly_state_.stopped = 0;            // true if stopped -- e-stop asserted
-  baxter_en::assembly_state_.error = 0;              // true if a component of the assembly has an error
+  baxter_en::assembly_state_.enabled = false;             // true if enabled
+  baxter_en::assembly_state_.stopped = false;            // true if stopped -- e-stop asserted
+  baxter_en::assembly_state_.error = false;              // true if a component of the assembly has an error
   baxter_en::assembly_state_.estop_button = baxter_core_msgs::AssemblyState::ESTOP_BUTTON_UNPRESSED;      // button status
   baxter_en::assembly_state_.estop_source = baxter_core_msgs::AssemblyState::ESTOP_SOURCE_NONE;     // If stopped is true, the source of the e-stop.
 
@@ -114,38 +133,16 @@ int main(int argc, char **argv)
   baxter_en::left_grip_st.gripping=0;
   baxter_en::left_grip_st.missed=0;
   baxter_en::left_grip_st.error=0;
-  //baxter_en::left_grip_st.command=0;
   baxter_en::left_grip_st.position=0.0;
   baxter_en::left_grip_st.force=0.0;
-  //baxter_en::left_grip_st.state.error_flag=0;
-  //baxter_en::left_grip_st.state.op_mode=2;
   baxter_en::left_grip_st.state="sample";
   baxter_en::left_grip_st.command="no_op";
   baxter_en::left_grip_st.command_sender="";
   baxter_en::left_grip_st.command_sequence=0;
 
-  baxter_en::right_grip_st=baxter_en::left_grip_st;
+  baxter_en::right_grip_st=baxter_en::left_grip_st; // Sample values recorded on both the grippers to do the spoof
 
-  /*
-  right_grip_st.timestamp.secs=0;
-  right_grip_st.timestamp.nsecs=0;
-  right_grip_st.id=1;
-  right_grip_st.enabled=1;
-  right_grip_st.calibrated=1;
-  right_grip_st.ready=1;
-  right_grip_st.moving=0;
-  right_grip_st.gripping=0;
-  right_grip_st.missed=0;
-  right_grip_st.error=0;
-  right_grip_st.command=0;
-  right_grip_st.position=0.0;
-  right_grip_st.force=0.0;
-  right_grip_st.state.error_flags=0;
-  right_grip_st.state.op_mode=2;
-  right_grip_st.command="no_op";
-  right_grip_st.command_sender="";
-  right_grip_st.command_sequence=0;
-  */
+
   //Default values for the left and the right gripper properties
   baxter_en::left_grip_prop.id=65664;
   baxter_en::left_grip_prop.ui_type=2;
@@ -164,18 +161,17 @@ int main(int argc, char **argv)
   baxter_en::left_grip_prop.senses_position=true;
   baxter_en::left_grip_prop.properties="";
 
-  baxter_en::right_grip_prop=baxter_en::left_grip_prop;
+  baxter_en::right_grip_prop=baxter_en::left_grip_prop; // Sample values recorded on both the grippers to do the spoof
 
-
-  baxter_en::assembly_state_pub_ = n.advertise<baxter_core_msgs::AssemblyState>(baxter_en::BAXTER_STATE_TOPIC,100);
-  baxter_en::left_grip_st_pub_ = n.advertise<baxter_core_msgs::EndEffectorState>(baxter_en::BAXTER_LEFT_GRIPPER_ST,100);
-  baxter_en::right_grip_st_pub_ = n.advertise<baxter_core_msgs::EndEffectorState>(baxter_en::BAXTER_RIGHT_GRIPPER_ST,100);
-  baxter_en::left_grip_prop_pub_ = n.advertise<baxter_core_msgs::EndEffectorProperties>(baxter_en::BAXTER_LEFT_GRIPPER_PROP,100);
-  baxter_en::left_grip_prop_pub_ = n.advertise<baxter_core_msgs::EndEffectorProperties>(baxter_en::BAXTER_RIGHT_GRIPPER_PROP,100);
+  baxter_en::assembly_state_pub_ = n.advertise<baxter_core_msgs::AssemblyState>(baxter_en::BAXTER_STATE_TOPIC,1);
+  baxter_en::left_grip_st_pub_ = n.advertise<baxter_core_msgs::EndEffectorState>(baxter_en::BAXTER_LEFT_GRIPPER_ST,1);
+  baxter_en::right_grip_st_pub_ = n.advertise<baxter_core_msgs::EndEffectorState>(baxter_en::BAXTER_RIGHT_GRIPPER_ST,1);
+  baxter_en::left_grip_prop_pub_ = n.advertise<baxter_core_msgs::EndEffectorProperties>(baxter_en::BAXTER_LEFT_GRIPPER_PROP,1);
+  baxter_en::right_grip_prop_pub_ = n.advertise<baxter_core_msgs::EndEffectorProperties>(baxter_en::BAXTER_RIGHT_GRIPPER_PROP,1);
 
   baxter_en::enable_sub_=n.subscribe(baxter_en::BAXTER_ENABLE_TOPIC,100,baxter_en::enable);
-  baxter_en::enable_sub_=n.subscribe(baxter_en::BAXTER_STOP_TOPIC,100,baxter_en::stop);
-  baxter_en::enable_sub_=n.subscribe(baxter_en::BAXTER_RESET_TOPIC,100,baxter_en::reset);
+  baxter_en::stop_sub_=n.subscribe(baxter_en::BAXTER_STOP_TOPIC,100,baxter_en::stop);
+  baxter_en::reset_sub_=n.subscribe(baxter_en::BAXTER_RESET_TOPIC,100,baxter_en::reset);
 
   while (ros::ok())
   {
@@ -183,8 +179,9 @@ int main(int argc, char **argv)
 	  baxter_en::left_grip_st_pub_.publish(baxter_en::left_grip_st);
 	  baxter_en::right_grip_st_pub_.publish(baxter_en::right_grip_st);
 	  baxter_en::left_grip_prop_pub_.publish(baxter_en::left_grip_prop);
-	  baxter_en::left_grip_prop_pub_.publish(baxter_en::right_grip_prop);
-    ros::spinOnce();
+	  baxter_en::right_grip_prop_pub_.publish(baxter_en::right_grip_prop);
+      ros::spinOnce();
+      loop_rate.sleep();
   }
   return 0;
 }

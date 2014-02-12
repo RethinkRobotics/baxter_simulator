@@ -24,5 +24,11 @@ include_directories(include
   ${Boost_INCLUDE_DIRS}
 )
 
+
 add_executable(baxter_enable src/baxter_enable.cpp)
 target_link_libraries(baxter_enable ${catkin_LIBRARIES})
+#add_dependencies(baxter_enable baxter_enable_generate_messages_cpp)
+
+add_dependencies(baxter_enable
+  ${catkin_EXPORTED_TARGETS}
+  )

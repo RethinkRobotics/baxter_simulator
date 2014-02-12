@@ -24,4 +24,12 @@
     </description>
   </class>
 
+  <class name="baxter_controllers/BaxterEffortController" 
+	 type="baxter_controllers::BaxterEffortController" 
+	 base_class_type="controller_interface::ControllerBase">
+    <description>
+      The BaxterEffortController tracks position commands for the Baxter gripper. It expects a EffortJointInterface type of hardware interface.
+    </description>
+  </class>
+
 </library>

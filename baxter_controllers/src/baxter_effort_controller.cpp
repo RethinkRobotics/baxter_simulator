@@ -165,7 +165,6 @@ void BaxterEffortController::update(const ros::Time& time, const ros::Duration& 
 
 void BaxterEffortController::commandCB(const baxter_core_msgs::JointCommandConstPtr& msg)
 {
-
 //Check if the number of joints and effort values are equal
 if( msg->command.size() != msg->names.size() )
   {
