@@ -74,11 +74,14 @@ ros::Timer timer_;
  */
 void enable(const std_msgs::Bool &msg)
 {
-	std::cout<<"Enabled is called------------------------------------------"<<std::endl;
-	if (msg.data)
-		assembly_state_.enabled=true;
-	else
-		assembly_state_.enabled=false;
+
+	if (msg.data){
+	  assembly_state_.enabled=true;
+	}
+
+	else {
+	  assembly_state_.enabled=false;
+	}
 	assembly_state_.stopped=false;
 	assembly_state_.estop_button = baxter_core_msgs::AssemblyState::ESTOP_BUTTON_UNPRESSED;
 	assembly_state_.estop_source = baxter_core_msgs::AssemblyState::ESTOP_SOURCE_NONE;
@@ -89,10 +92,9 @@ void enable(const std_msgs::Bool &msg)
  */
 void stop(const std_msgs::Empty &msg)
 {
-	std::cout<<"Stop is called------------------------------------------"<<std::endl;
 	assembly_state_.enabled=false;
 	assembly_state_.stopped=true;
-	assembly_state_.estop_button = baxter_core_msgs::AssemblyState::ESTOP_BUTTON_PRESSED;
+	assembly_state_.estop_button = baxter_core_msgs::AssemblyState::ESTOP_BUTTON_UNPRESSED;
 	assembly_state_.estop_source = baxter_core_msgs::AssemblyState::ESTOP_SOURCE_BRAIN;
 }
 
@@ -101,7 +103,6 @@ void stop(const std_msgs::Empty &msg)
  */
 void reset(const std_msgs::Empty &msg)
 {
-	std::cout<<"Reset is called------------------------------------------"<<std::endl;
 	assembly_state_.enabled=false;
 	assembly_state_.stopped=false;
 	assembly_state_.estop_button = baxter_core_msgs::AssemblyState::ESTOP_BUTTON_UNPRESSED;
@@ -114,7 +115,7 @@ int main(int argc, char **argv)
 {
   ros::init(argc, argv, "baxter_enable");
   ros::NodeHandle n;
-  ros::Rate loop_rate(50);
+  ros::Rate loop_rate(100);
   //Default values for the assembly state
   baxter_en::assembly_state_.enabled = false;             // true if enabled
   baxter_en::assembly_state_.stopped = false;            // true if stopped -- e-stop asserted
