@@ -5,6 +5,8 @@ find_package(catkin
   REQUIRED COMPONENTS
   roscpp
   baxter_core_msgs
+  cv_bridge
+  image_transport
   )
   
 find_package(Boost REQUIRED COMPONENTS system)
@@ -16,6 +18,8 @@ catkin_package(
   std_msgs
   roscpp
   baxter_core_msgs
+  cv_bridge
+  image_transport
   LIBRARIES ${PROJECT_NAME}
 )
 

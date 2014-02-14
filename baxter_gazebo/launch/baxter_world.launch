@@ -23,7 +23,7 @@
 	 command="cat '$(find baxter_description)/urdf/baxter.urdf'" />
 
   <!-- Run a python script to the send a service call to gazebo_ros to spawn a URDF robot -->
-  <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
+   <node name="urdf_spawner1" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
 	args="-file $(find baxter_description)/urdf/baxter.urdf -urdf -z 0.93 -model baxter
 	      -J baxter::right_s0 -0.272659
 	      -J baxter::right_s1 1.04701
@@ -38,8 +38,7 @@
 	      -J baxter::left_e1 0.491094
 	      -J baxter::left_w0 -0.178079
 	      -J baxter::left_w1 -0.0610333
-	      -J baxter::left_w2 -0.0124707
-	      " />
+	      -J baxter::left_w2 -0.0124707" />
 
   <!-- ros_control baxter launch file -->
   <include file="$(find baxter_control)/launch/baxter_sdk_control.launch" />

@@ -5,7 +5,7 @@
 
   <!-- load the baxter_control node -->
   <node name="baxter_enable" pkg="baxter_control" type="baxter_enable" respawn="false"
-	output="screen" />
+	output="screen" args="$(find baxter_tools)/share/images/researchsdk.png"/>
 
   <!-- load the default controllers -->
   <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"

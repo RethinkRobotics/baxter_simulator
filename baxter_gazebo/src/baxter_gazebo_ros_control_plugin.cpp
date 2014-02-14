@@ -193,7 +193,7 @@ class BaxterGazeboRosControlPlugin :
           ROS_ERROR_STREAM_NAMED("baxter_gazebo_ros_control_plugin",
                                  "Unknown command mode " << msg->mode);
           return;
-      }
+    }
     //Checks if we have already disabled the controllers
     /** \brief Switch multiple controllers simultaneously.
      *
