@@ -66,7 +66,7 @@ bool kinematics::PositionKinematicsNode::init(std::string side)
   	ros::NodeHandle handle;
 
   	static const std::string topic2="/robot/limb/"+side+"/endpoint_state";
-  	static const std::string topic3="/robot/limb/"+side+"/joint_command";
+  	static const std::string topic3="/robot/limb/"+side+"/gravity_command";
 
   	//setup the service server for the Inverse Kinematics
   	m_ikService = handle1.advertiseService("IKService",&PositionKinematicsNode::IKCallback,this);
@@ -142,7 +142,7 @@ void kinematics::PositionKinematicsNode::FKCallback(const sensor_msgs::JointStat
 			//gravity_pub.publish(grav_comp);
 		}
 		else
-			ROS_ERROR("Gravity compensation was not successfull");
+			ROS_ERROR("Gravity compensation was not successful");
 	}
 	
 }
