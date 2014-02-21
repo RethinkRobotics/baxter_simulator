@@ -29,20 +29,11 @@
 
 /**
  *  \author Hariharasudan Malaichamee
- *  \desc   Node that lies on the top and controls the robot based on the enable, disable, stop and reset commands
+ *  \desc   Node that lies on the top and controls the robot based on the enable, disable, stop and reset  
+ *		commands
  */
 
-#include "ros/ros.h"
-#include <std_msgs/Bool.h>
-#include <std_msgs/Empty.h>
-#include "baxter_core_msgs/AssemblyState.h"
-#include "baxter_core_msgs/EndEffectorState.h"
-#include "baxter_core_msgs/EndEffectorProperties.h"
-#include <image_transport/image_transport.h>
-#include <opencv/cvwimage.h>
-#include <opencv/highgui.h>
-#include <cv_bridge/cv_bridge.h>
-#include <sensor_msgs/image_encodings.h>
+#include <baxter_control/baxter_enable.h>
 
 namespace baxter_en{
 
@@ -58,28 +49,124 @@ static const std::string BAXTER_RIGHT_GRIPPER_ST = "/robot/end_effector/right_gr
 static const std::string BAXTER_LEFT_GRIPPER_PROP = "/robot/end_effector/left_gripper/properties";
 static const std::string BAXTER_RIGHT_GRIPPER_PROP = "/robot/end_effector/right_gripper/properties";
 
-ros::Subscriber enable_sub_;
-ros::Subscriber stop_sub_;
-ros::Subscriber reset_sub_;
-ros::Publisher assembly_state_pub_;
-ros::Publisher left_grip_st_pub_;
-ros::Publisher right_grip_st_pub_;
-ros::Publisher left_grip_prop_pub_;
-ros::Publisher right_grip_prop_pub_;
-//ros::Publisher display_pub_;
+static const int TIMEOUT = 25; // Timeout for publishing a single RSDK image on start up
 
-baxter_core_msgs::AssemblyState assembly_state_;
-baxter_core_msgs::EndEffectorState left_grip_st;
-baxter_core_msgs::EndEffectorState right_grip_st;
-baxter_core_msgs::EndEffectorProperties left_grip_prop;
-baxter_core_msgs::EndEffectorProperties right_grip_prop;
+/**
+ * Method to initialize the default values for all the variables, instantiate the publishers and subscribers
+ * @param img_path that refers the path of the image that loads on start up
+ */
+bool baxter_enable::init(const std::string &img_path) {
 
-ros::Timer timer_;
+  //Default values for the assembly state
+  assembly_state_.enabled = false;             // true if enabled
+  assembly_state_.stopped = false;            // true if stopped -- e-stop asserted
+  assembly_state_.error = false;              // true if a component of the assembly has an error
+  assembly_state_.estop_button = baxter_core_msgs::AssemblyState::ESTOP_BUTTON_UNPRESSED;      // button status
+  assembly_state_.estop_source = baxter_core_msgs::AssemblyState::ESTOP_SOURCE_NONE;     // If stopped is 										true, the source of the e-stop.
 
+  //Default values for the left and right gripper end effector states
+  left_grip_st.timestamp.sec=0;
+  left_grip_st.timestamp.nsec=0;
+  left_grip_st.id=1;
+  left_grip_st.enabled=1;
+  left_grip_st.calibrated=1;
+  left_grip_st.ready=1;
+  left_grip_st.moving=0;
+  left_grip_st.gripping=0;
+  left_grip_st.missed=0;
+  left_grip_st.error=0;
+  left_grip_st.position=0.0;
+  left_grip_st.force=0.0;
+  left_grip_st.state="sample";
+  left_grip_st.command="no_op";
+  left_grip_st.command_sender="";
+  left_grip_st.command_sequence=0;
+
+  right_grip_st=left_grip_st; // Sample values recorded on both the grippers to do the spoof
+
+  //Default values for the left and the right gripper properties
+  left_grip_prop.id=65664;
+  left_grip_prop.ui_type=2;
+  left_grip_prop.manufacturer="test";
+  left_grip_prop.product="test";
+  left_grip_prop.product="test";
+  left_grip_prop.hardware_rev="test";
+  left_grip_prop.firmware_rev="test";
+  left_grip_prop.firmware_date="test";
+  left_grip_prop.controls_grip=true;
+  left_grip_prop.senses_grip=true;
+  left_grip_prop.reverses_grip=true;
+  left_grip_prop.controls_force=true;
+  left_grip_prop.senses_force=true;
+  left_grip_prop.controls_position=true;
+  left_grip_prop.senses_position=true;
+  left_grip_prop.properties="";
+
+  right_grip_prop=left_grip_prop; // Sample values recorded on both the grippers to do the spoof
+
+  ros::NodeHandle n;
+
+  // Inititalize the publishers
+  assembly_state_pub_ = n.advertise<baxter_core_msgs::AssemblyState>(BAXTER_STATE_TOPIC,1);
+  left_grip_st_pub_ = n.advertise<baxter_core_msgs::EndEffectorState>(BAXTER_LEFT_GRIPPER_ST,1);
+  right_grip_st_pub_ = n.advertise<baxter_core_msgs::EndEffectorState>(BAXTER_RIGHT_GRIPPER_ST,1);
+  left_grip_prop_pub_ = n.advertise<baxter_core_msgs::EndEffectorProperties>(BAXTER_LEFT_GRIPPER_PROP,1);
+  right_grip_prop_pub_ = n.advertise<baxter_core_msgs::EndEffectorProperties>(BAXTER_RIGHT_GRIPPER_PROP,1);
+
+  // Initialize the subscribers
+  enable_sub_=n.subscribe(BAXTER_ENABLE_TOPIC,100,&baxter_enable::enable_cb,this);
+  stop_sub_=n.subscribe(BAXTER_STOP_TOPIC,100,&baxter_enable::stop_cb,this);
+  reset_sub_=n.subscribe(BAXTER_RESET_TOPIC,100,&baxter_enable::reset_cb,this);
+
+  baxter_enable::publish(n,img_path);
+
+}
+
+/**
+ * Method to publish the loading image on baxter's screen and other publishers that were instantiated
+ * @param Nodehandle to initialize the image transport
+ * @param img_path that refers the path of the image that loads on start up
+ */
+void baxter_enable::publish(ros::NodeHandle &n,const std::string &img_path) {
+
+  ros::Rate loop_rate(100);
+  image_transport::ImageTransport it(n);
+  image_transport::Publisher display_pub_ = it.advertise(BAXTER_DISPLAY_TOPIC, 1);
+
+  // Read OpenCV Mat image and convert it to ROS message
+  cv_bridge::CvImagePtr cv_ptr(new cv_bridge::CvImage);
+  try
+  {
+    cv_ptr->image=cv::imread(img_path,CV_LOAD_IMAGE_UNCHANGED);
+    if (cv_ptr->image.data)
+    {
+      cv_ptr->encoding = sensor_msgs::image_encodings::BGR8;
+      sleep(TIMEOUT); // Wait for the model to load
+
+      display_pub_.publish(cv_ptr->toImageMsg());
+    }
+  }
+  catch(std::exception e)
+  {
+    ROS_WARN("Unable to load the startup picture to display on the display");
+  }
+
+  while (ros::ok())
+  {
+	assembly_state_pub_.publish(assembly_state_);
+	left_grip_st_pub_.publish(left_grip_st);
+	right_grip_st_pub_.publish(right_grip_st);
+	left_grip_prop_pub_.publish(left_grip_prop);
+	right_grip_prop_pub_.publish(right_grip_prop);
+      	ros::spinOnce();
+      	loop_rate.sleep();
+  }
+
+}
 /**
  * Method to enable the robot
  */
-void enable(const std_msgs::Bool &msg)
+void baxter_enable::enable_cb(const std_msgs::Bool &msg)
 {
 
 	if (msg.data){
@@ -97,7 +184,7 @@ void enable(const std_msgs::Bool &msg)
 /**
  * Method to stop the robot and capture the source of the stop
  */
-void stop(const std_msgs::Empty &msg)
+void baxter_enable::stop_cb(const std_msgs::Empty &msg)
 {
 	assembly_state_.enabled=false;
 	assembly_state_.stopped=true;
@@ -108,7 +195,7 @@ void stop(const std_msgs::Empty &msg)
 /**
  * Method resets all the values to False and 0s
  */
-void reset(const std_msgs::Empty &msg)
+void baxter_enable::reset_cb(const std_msgs::Empty &msg)
 {
 	assembly_state_.enabled=false;
 	assembly_state_.stopped=false;
@@ -121,101 +208,12 @@ void reset(const std_msgs::Empty &msg)
 int main(int argc, char *argv[])
 {
   ros::init(argc, argv, "baxter_enable");
-  ros::NodeHandle n;
-  ros::Rate loop_rate(100);
-  image_transport::ImageTransport it(n);
-  image_transport::Publisher display_pub_ = it.advertise(baxter_en::BAXTER_DISPLAY_TOPIC, 1);
+
   std::string img_path = argc > 1 ? argv[1] : "";
+  
+  baxter_en::baxter_enable enable;
 
-  //Default values for the assembly state
-  baxter_en::assembly_state_.enabled = false;             // true if enabled
-  baxter_en::assembly_state_.stopped = false;            // true if stopped -- e-stop asserted
-  baxter_en::assembly_state_.error = false;              // true if a component of the assembly has an error
-  baxter_en::assembly_state_.estop_button = baxter_core_msgs::AssemblyState::ESTOP_BUTTON_UNPRESSED;      // button status
-  baxter_en::assembly_state_.estop_source = baxter_core_msgs::AssemblyState::ESTOP_SOURCE_NONE;     // If stopped is true, the source of the e-stop.
+  bool result=enable.init(img_path);
 
-  //Default values for the left and right gripper end effector states
-  baxter_en::left_grip_st.timestamp.sec=0;
-  baxter_en::left_grip_st.timestamp.nsec=0;
-  baxter_en::left_grip_st.id=1;
-  baxter_en::left_grip_st.enabled=1;
-  baxter_en::left_grip_st.calibrated=1;
-  baxter_en::left_grip_st.ready=1;
-  baxter_en::left_grip_st.moving=0;
-  baxter_en::left_grip_st.gripping=0;
-  baxter_en::left_grip_st.missed=0;
-  baxter_en::left_grip_st.error=0;
-  baxter_en::left_grip_st.position=0.0;
-  baxter_en::left_grip_st.force=0.0;
-  baxter_en::left_grip_st.state="sample";
-  baxter_en::left_grip_st.command="no_op";
-  baxter_en::left_grip_st.command_sender="";
-  baxter_en::left_grip_st.command_sequence=0;
-
-  baxter_en::right_grip_st=baxter_en::left_grip_st; // Sample values recorded on both the grippers to do the spoof
-
-
-  //Default values for the left and the right gripper properties
-  baxter_en::left_grip_prop.id=65664;
-  baxter_en::left_grip_prop.ui_type=2;
-  baxter_en::left_grip_prop.manufacturer="test";
-  baxter_en::left_grip_prop.product="test";
-  baxter_en::left_grip_prop.product="test";
-  baxter_en::left_grip_prop.hardware_rev="test";
-  baxter_en::left_grip_prop.firmware_rev="test";
-  baxter_en::left_grip_prop.firmware_date="test";
-  baxter_en::left_grip_prop.controls_grip=true;
-  baxter_en::left_grip_prop.senses_grip=true;
-  baxter_en::left_grip_prop.reverses_grip=true;
-  baxter_en::left_grip_prop.controls_force=true;
-  baxter_en::left_grip_prop.senses_force=true;
-  baxter_en::left_grip_prop.controls_position=true;
-  baxter_en::left_grip_prop.senses_position=true;
-  baxter_en::left_grip_prop.properties="";
-
-  baxter_en::right_grip_prop=baxter_en::left_grip_prop; // Sample values recorded on both the grippers to do the spoof
-
-  baxter_en::assembly_state_pub_ = n.advertise<baxter_core_msgs::AssemblyState>(baxter_en::BAXTER_STATE_TOPIC,1);
-  baxter_en::left_grip_st_pub_ = n.advertise<baxter_core_msgs::EndEffectorState>(baxter_en::BAXTER_LEFT_GRIPPER_ST,1);
-  baxter_en::right_grip_st_pub_ = n.advertise<baxter_core_msgs::EndEffectorState>(baxter_en::BAXTER_RIGHT_GRIPPER_ST,1);
-  baxter_en::left_grip_prop_pub_ = n.advertise<baxter_core_msgs::EndEffectorProperties>(baxter_en::BAXTER_LEFT_GRIPPER_PROP,1);
-  baxter_en::right_grip_prop_pub_ = n.advertise<baxter_core_msgs::EndEffectorProperties>(baxter_en::BAXTER_RIGHT_GRIPPER_PROP,1);
-  //baxter_en::display_pub_ = n.advertise(baxter_en::BAXTER_DISPLAY_TOPIC,1);
-
-  baxter_en::enable_sub_=n.subscribe(baxter_en::BAXTER_ENABLE_TOPIC,100,baxter_en::enable);
-  baxter_en::stop_sub_=n.subscribe(baxter_en::BAXTER_STOP_TOPIC,100,baxter_en::stop);
-  baxter_en::reset_sub_=n.subscribe(baxter_en::BAXTER_RESET_TOPIC,100,baxter_en::reset);
-
-  // Read OpenCV Mat image and convert it to ROS message
-  cv_bridge::CvImagePtr cv_ptr(new cv_bridge::CvImage);
-  try
-  {
-    cv_ptr->image=cv::imread(img_path,CV_LOAD_IMAGE_UNCHANGED);
-    if (cv_ptr->image.data)
-    {
-      cv_ptr->encoding = sensor_msgs::image_encodings::BGR8;
-      sleep(5); // Wait for the model to load
-
-      display_pub_.publish(cv_ptr->toImageMsg());
-    }
-  }
-  catch(std::exception e)
-  {
-    ROS_WARN("Unable to load the startup picture to display on the display");
-  }
-
-
-  while (ros::ok())
-  {
-
-	  baxter_en::assembly_state_pub_.publish(baxter_en::assembly_state_);
-	  baxter_en::left_grip_st_pub_.publish(baxter_en::left_grip_st);
-	  baxter_en::right_grip_st_pub_.publish(baxter_en::right_grip_st);
-	  baxter_en::left_grip_prop_pub_.publish(baxter_en::left_grip_prop);
-	  baxter_en::right_grip_prop_pub_.publish(baxter_en::right_grip_prop);
-	  //display_pub_.publish(cv_ptr->toImageMsg());
-      ros::spinOnce();
-      loop_rate.sleep();
-  }
   return 0;
 }

@@ -20,6 +20,7 @@
   </url>
   <author>Rethink Robotics Inc.</author>
   <author>Dave Coleman</author>
+  <author>Hariharasudan Malaichamee</author>
 
   <buildtool_depend>catkin</buildtool_depend>
   
