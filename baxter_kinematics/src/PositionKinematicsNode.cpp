@@ -85,8 +85,11 @@ bool kinematics::PositionKinematicsNode::init(std::string side)
   	if (side=="right")
 		m_kinematicsModel = arm_kinematics::Kinematics::create(right_tip_name);
   	else
+	{
 		m_kinematicsModel = arm_kinematics::Kinematics::create(left_tip_name);
-
+		kinematics::PositionKinematicsNode::test++;
+	}
+std::cout<<"Side is "<<m_limbName<<" and test is "<<kinematics::PositionKinematicsNode::test<<std::endl;
   return true;
 
 }
@@ -136,10 +139,46 @@ void kinematics::PositionKinematicsNode::FKCallback(const sensor_msgs::JointStat
 		{
 			grav_comp.command.resize(torques.size());
 			grav_comp.names.resize(joint.name.size());
+				//PositionKinematicsNode::left_grav_cmd.resize(torques.size());
+				//PositionKinematicsNode::left_grav_name.resize(joint.name.size());
+				//PositionKinematicsNode::right_grav_cmd.resize(torques.size());
+				//PositionKinematicsNode::right_grav_name.resize(joint.name.size());
 			grav_comp.mode=3;
 			grav_comp.command=torques;
 			grav_comp.names=joint.name;
-			//gravity_pub.publish(grav_comp);
+			gravity_pub.publish(grav_comp);
+			
+			if(m_limbName=="left")
+			{
+				//kinematics::PositionKinematicsNode::test++;
+				PositionKinematicsNode::left_grav_cmd=torques;
+				PositionKinematicsNode::left_grav_name=joint.name;
+			}
+			else
+			{
+
+				PositionKinematicsNode::right_grav_cmd=torques;
+				PositionKinematicsNode::right_grav_name=joint.name;
+			}
+			//if(PositionKinematicsNode::int_mutex)
+			//{
+			PositionKinematicsNode::int_mutex=false;
+			PositionKinematicsNode::mutex=false;
+			PositionKinematicsNode::grav_cmd.clear();
+			PositionKinematicsNode::grav_name.clear();
+			PositionKinematicsNode::grav_cmd.reserve(PositionKinematicsNode::left_grav_cmd.size()+PositionKinematicsNode::right_grav_cmd.size());
+			PositionKinematicsNode::grav_cmd.insert(PositionKinematicsNode::grav_cmd.end(),PositionKinematicsNode::left_grav_cmd.begin(),PositionKinematicsNode::left_grav_cmd.end());
+			PositionKinematicsNode::grav_cmd.insert(PositionKinematicsNode::grav_cmd.end(),PositionKinematicsNode::right_grav_cmd.begin(),PositionKinematicsNode::right_grav_cmd.end());
+			PositionKinematicsNode::grav_name.reserve(PositionKinematicsNode::left_grav_name.size()+PositionKinematicsNode::right_grav_name.size());
+			PositionKinematicsNode::grav_name.insert(PositionKinematicsNode::grav_name.end(),PositionKinematicsNode::left_grav_name.begin(),PositionKinematicsNode::left_grav_name.end());
+			PositionKinematicsNode::grav_name.insert(PositionKinematicsNode::grav_name.end(),PositionKinematicsNode::right_grav_name.begin(),PositionKinematicsNode::right_grav_name.end());
+			PositionKinematicsNode::mutex=true;
+			PositionKinematicsNode::int_mutex=true;
+			//}
+			//std::cout<<"The size1 is "<<PositionKinematicsNode::left_grav_name.size()<<std::endl;
+			//std::cout<<"The size2 is "<<PositionKinematicsNode::left_grav_name.size()<<std::endl;
+			//std::cout<<"The name is "<<PositionKinematicsNode::grav_name[0]<<" and side is "<<m_limbName<<" left is "<<PositionKinematicsNode::left_grav_name[0]<<" right is "<<PositionKinematicsNode::right_grav_name[0]<<std::endl;
+			//std::cout<<"Side is "<<m_limbName<<" and test is "<<kinematics::PositionKinematicsNode::test<<std::endl;
 		}
 		else
 			ROS_ERROR("Gravity compensation was not successful");

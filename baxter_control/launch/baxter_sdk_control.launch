@@ -26,4 +26,8 @@
 	respawn="false" output="screen">
     <remap from="/joint_states" to="/robot/joint_states" />
   </node>
+
+  <node name="qt_controls" pkg="qt_controls" type="qt_controls"
+	respawn="false" output="screen">
+  </node>
 </launch>

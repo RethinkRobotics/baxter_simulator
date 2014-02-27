@@ -40,5 +40,6 @@ target_link_libraries(${PROJECT_NAME}
 
 add_dependencies(${PROJECT_NAME}
   ${catkin_EXPORTED_TARGETS}
+  baxter_core_msgs_gencpp
 )
 

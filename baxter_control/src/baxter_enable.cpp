@@ -49,7 +49,29 @@ static const std::string BAXTER_RIGHT_GRIPPER_ST = "/robot/end_effector/right_gr
 static const std::string BAXTER_LEFT_GRIPPER_PROP = "/robot/end_effector/left_gripper/properties";
 static const std::string BAXTER_RIGHT_GRIPPER_PROP = "/robot/end_effector/right_gripper/properties";
 
-static const int TIMEOUT = 25; // Timeout for publishing a single RSDK image on start up
+static const std::string BAXTER_LEFT_GRAVITY_TOPIC = "/robot/limb/left/gravity_command";
+static const std::string BAXTER_RIGHT_GRAVITY_TOPIC = "/robot/limb/right/gravity_command";
+
+static const std::string BAXTER_LEFT_LASER_TOPIC = "/robot/laserscan/left_hand_range/state";
+static const std::string BAXTER_RIGHT_LASER_TOPIC = "/robot/laserscan/right_hand_range/state";
+static const std::string BAXTER_LEFT_IR_TOPIC = "/robot/range/left_hand_range";
+static const std::string BAXTER_RIGHT_IR_TOPIC = "/robot/range/right_hand_range";
+static const std::string BAXTER_LEFT_IR_STATE_TOPIC = "/robot/analog_io/left_hand_range/state";
+static const std::string BAXTER_RIGHT_IR_STATE_TOPIC = "/robot/analog_io/right_hand_range/state";
+static const std::string BAXTER_LEFT_IR_INT_TOPIC = "/robot/analog_io/left_hand_range/value_uint32";
+static const std::string BAXTER_RIGHT_IR_INT_TOPIC = "/robot/analog_io/right_hand_range/value_uint32";
+
+static const std::string BAXTER_NAV_LIGHT_TOPIC = "/robot/digital_io/command";
+static const std::string BAXTER_LEFTIL_TOPIC = "/robot/digital_io/left_itb_light_inner/state";
+static const std::string BAXTER_LEFTOL_TOPIC = "/robot/digital_io/left_itb_light_outer/state";
+static const std::string BAXTER_TORSO_LEFTIL_TOPIC = "/robot/digital_io/torso_left_itb_light_inner/state";
+static const std::string BAXTER_TORSO_LEFTOL_TOPIC = "/robot/digital_io/torso_left_itb_light_outer/state";
+static const std::string BAXTER_rightIL_TOPIC = "/robot/digital_io/right_itb_light_inner/state";
+static const std::string BAXTER_rightOL_TOPIC = "/robot/digital_io/right_itb_light_outer/state";
+static const std::string BAXTER_TORSO_rightIL_TOPIC = "/robot/digital_io/torso_right_itb_light_inner/state";
+static const std::string BAXTER_TORSO_rightOL_TOPIC = "/robot/digital_io/torso_right_itb_light_outer/state";
+
+static const int DELAY = 25; // Timeout for publishing a single RSDK image on start up
 
 /**
  * Method to initialize the default values for all the variables, instantiate the publishers and subscribers
@@ -104,6 +126,24 @@ bool baxter_enable::init(const std::string &img_path) {
 
   right_grip_prop=left_grip_prop; // Sample values recorded on both the grippers to do the spoof
 
+  baxter_enable::leftIL_nav_light.isInputOnly=false;
+  baxter_enable::leftOL_nav_light.isInputOnly=false;
+  baxter_enable::torso_leftIL_nav_light.isInputOnly=false;
+  baxter_enable::torso_leftOL_nav_light.isInputOnly=false;
+  baxter_enable::rightIL_nav_light.isInputOnly=false;
+  baxter_enable::rightOL_nav_light.isInputOnly=false;
+  baxter_enable::torso_rightIL_nav_light.isInputOnly=false;
+  baxter_enable::torso_rightOL_nav_light.isInputOnly=false;
+
+  baxter_enable::leftIL_nav_light.state=baxter_core_msgs::DigitalIOState::OFF;
+  baxter_enable::leftOL_nav_light.state=baxter_core_msgs::DigitalIOState::OFF;
+  baxter_enable::torso_leftIL_nav_light.state=baxter_core_msgs::DigitalIOState::OFF;
+  baxter_enable::torso_leftOL_nav_light.state=baxter_core_msgs::DigitalIOState::OFF;
+  baxter_enable::rightIL_nav_light.state=baxter_core_msgs::DigitalIOState::OFF;
+  baxter_enable::rightOL_nav_light.state=baxter_core_msgs::DigitalIOState::OFF;
+  baxter_enable::torso_rightIL_nav_light.state=baxter_core_msgs::DigitalIOState::OFF;
+  baxter_enable::torso_rightOL_nav_light.state=baxter_core_msgs::DigitalIOState::OFF;
+
   ros::NodeHandle n;
 
   // Inititalize the publishers
@@ -112,11 +152,36 @@ bool baxter_enable::init(const std::string &img_path) {
   right_grip_st_pub_ = n.advertise<baxter_core_msgs::EndEffectorState>(BAXTER_RIGHT_GRIPPER_ST,1);
   left_grip_prop_pub_ = n.advertise<baxter_core_msgs::EndEffectorProperties>(BAXTER_LEFT_GRIPPER_PROP,1);
   right_grip_prop_pub_ = n.advertise<baxter_core_msgs::EndEffectorProperties>(BAXTER_RIGHT_GRIPPER_PROP,1);
+  left_ir_pub = n.advertise<sensor_msgs::Range>(BAXTER_LEFT_IR_TOPIC,1);
+  right_ir_pub = n.advertise<sensor_msgs::Range>(BAXTER_RIGHT_IR_TOPIC,1);
+  left_ir_state_pub = n.advertise<baxter_core_msgs::AnalogIOState>(BAXTER_LEFT_IR_STATE_TOPIC,1);
+  right_ir_state_pub = n.advertise<baxter_core_msgs::AnalogIOState>(BAXTER_RIGHT_IR_STATE_TOPIC,1);
+  left_ir_int_pub = n.advertise<std_msgs::UInt32>(BAXTER_LEFT_IR_INT_TOPIC,1);
+  right_ir_int_pub = n.advertise<std_msgs::UInt32>(BAXTER_RIGHT_IR_INT_TOPIC,1);
+	
+  left_itb_innerL_pub = n.advertise<baxter_core_msgs::DigitalIOState>(BAXTER_LEFTIL_TOPIC,1);
+  left_itb_outerL_pub = n.advertise<baxter_core_msgs::DigitalIOState>(BAXTER_LEFTOL_TOPIC,1);
+  torso_left_innerL_pub = n.advertise<baxter_core_msgs::DigitalIOState>
+				(BAXTER_TORSO_LEFTIL_TOPIC,1);
+  torso_left_outerL_pub = n.advertise<baxter_core_msgs::DigitalIOState>
+				(BAXTER_TORSO_LEFTOL_TOPIC,1);
+
+  right_itb_innerL_pub = n.advertise<baxter_core_msgs::DigitalIOState>(BAXTER_rightIL_TOPIC,1);
+  right_itb_outerL_pub = n.advertise<baxter_core_msgs::DigitalIOState>(BAXTER_rightOL_TOPIC,1);
+  torso_right_innerL_pub = n.advertise<baxter_core_msgs::DigitalIOState>
+				(BAXTER_TORSO_rightIL_TOPIC,1);
+  torso_right_outerL_pub = n.advertise<baxter_core_msgs::DigitalIOState>
+				(BAXTER_TORSO_rightOL_TOPIC,1);
 
   // Initialize the subscribers
   enable_sub_=n.subscribe(BAXTER_ENABLE_TOPIC,100,&baxter_enable::enable_cb,this);
   stop_sub_=n.subscribe(BAXTER_STOP_TOPIC,100,&baxter_enable::stop_cb,this);
   reset_sub_=n.subscribe(BAXTER_RESET_TOPIC,100,&baxter_enable::reset_cb,this);
+  left_grav=n.subscribe(BAXTER_LEFT_GRAVITY_TOPIC,100,&baxter_enable::left_grav_cb,this);
+  right_grav=n.subscribe(BAXTER_RIGHT_GRAVITY_TOPIC,100,&baxter_enable::right_grav_cb,this);
+  left_laser_sub=n.subscribe(BAXTER_LEFT_LASER_TOPIC,100,&baxter_enable::left_laser_cb,this);
+  right_laser_sub=n.subscribe(BAXTER_RIGHT_LASER_TOPIC,100,&baxter_enable::right_laser_cb,this);
+  nav_light_sub=n.subscribe(BAXTER_NAV_LIGHT_TOPIC,100,&baxter_enable::nav_light_cb, this);
 
   baxter_enable::publish(n,img_path);
 
@@ -141,8 +206,7 @@ void baxter_enable::publish(ros::NodeHandle &n,const std::string &img_path) {
     if (cv_ptr->image.data)
     {
       cv_ptr->encoding = sensor_msgs::image_encodings::BGR8;
-      sleep(TIMEOUT); // Wait for the model to load
-
+      sleep(DELAY); // Wait for the model to load
       display_pub_.publish(cv_ptr->toImageMsg());
     }
   }
@@ -179,6 +243,7 @@ void baxter_enable::enable_cb(const std_msgs::Bool &msg)
 	assembly_state_.stopped=false;
 	assembly_state_.estop_button = baxter_core_msgs::AssemblyState::ESTOP_BUTTON_UNPRESSED;
 	assembly_state_.estop_source = baxter_core_msgs::AssemblyState::ESTOP_SOURCE_NONE;
+	baxter_enable::enable=assembly_state_.enabled;
 }
 
 /**
@@ -190,6 +255,7 @@ void baxter_enable::stop_cb(const std_msgs::Empty &msg)
 	assembly_state_.stopped=true;
 	assembly_state_.estop_button = baxter_core_msgs::AssemblyState::ESTOP_BUTTON_UNPRESSED;
 	assembly_state_.estop_source = baxter_core_msgs::AssemblyState::ESTOP_SOURCE_BRAIN;
+	baxter_enable::enable=false;
 }
 
 /**
@@ -201,8 +267,180 @@ void baxter_enable::reset_cb(const std_msgs::Empty &msg)
 	assembly_state_.stopped=false;
 	assembly_state_.estop_button = baxter_core_msgs::AssemblyState::ESTOP_BUTTON_UNPRESSED;
 	assembly_state_.estop_source = baxter_core_msgs::AssemblyState::ESTOP_SOURCE_NONE;
+	baxter_enable::enable=false;
 }
 
+/**
+ * Method to capture the laser data and pass it as IR data for the left arm
+ */
+void baxter_enable::left_laser_cb(const sensor_msgs::LaserScan &msg)
+{
+	left_ir.header=msg.header;
+	left_ir.min_range=msg.range_min;
+	left_ir.max_range=msg.range_max;
+	left_ir.radiation_type=1;
+	if(msg.ranges[0]<msg.range_max && msg.ranges[0]>msg.range_min)
+		left_ir.range=msg.ranges[0];
+	else
+		left_ir.range=65.5350036621;
+	left_ir_state.timestamp=left_ir.header.stamp;
+	left_ir_state.value=left_ir.range/1000;
+	left_ir_state.isInputOnly=true;
+	left_ir_int.data=left_ir.range;
+	if (baxter_enable::enable)
+		{
+		left_ir_pub.publish(left_ir);
+		left_ir_state_pub.publish(left_ir_state);
+		left_ir_int_pub.publish(left_ir_int);
+		left_itb_innerL_pub.publish(leftIL_nav_light);
+		left_itb_outerL_pub.publish(rightIL_nav_light);
+		torso_left_innerL_pub.publish(torso_leftIL_nav_light);
+		torso_left_outerL_pub.publish(torso_rightIL_nav_light);
+		}
+}
+
+/**
+ * Method to capture the laser data and pass it as IR data for the right arm
+ */
+void baxter_enable::right_laser_cb(const sensor_msgs::LaserScan &msg)
+{
+	right_ir.header=msg.header;
+	right_ir.min_range=msg.range_min;
+	right_ir.max_range=msg.range_max;
+	right_ir.radiation_type=1;
+	if(msg.ranges[0]<msg.range_max && msg.ranges[0]>msg.range_min)
+		right_ir.range=msg.ranges[0];
+	else
+		right_ir.range=65.5350036621;
+	right_ir_state.timestamp=right_ir.header.stamp;
+	right_ir_state.value=right_ir.range/1000;
+	right_ir_state.isInputOnly=true;
+	right_ir_int.data=right_ir.range;
+	if (baxter_enable::enable)
+		{
+		right_ir_pub.publish(right_ir);
+		right_ir_state_pub.publish(right_ir_state);
+		right_ir_int_pub.publish(right_ir_int);
+		right_itb_innerL_pub.publish(rightIL_nav_light);
+		right_itb_outerL_pub.publish(rightIL_nav_light);
+		torso_right_innerL_pub.publish(torso_rightIL_nav_light);
+		torso_right_outerL_pub.publish(torso_rightIL_nav_light);
+		}
+}
+
+
+void baxter_enable::nav_light_cb(const baxter_core_msgs::DigitalOutputCommand &msg)
+{
+	if(msg.name== "left_itb_light_inner") {
+		if (msg.value)
+			leftIL_nav_light.state=baxter_core_msgs::DigitalIOState::ON;
+		else
+			leftIL_nav_light.state=baxter_core_msgs::DigitalIOState::OFF;
+	}
+	else if( msg.name=="right_itb_light_inner") {
+		if (msg.value)
+			rightIL_nav_light.state=baxter_core_msgs::DigitalIOState::ON;
+		else
+			rightIL_nav_light.state=baxter_core_msgs::DigitalIOState::OFF;
+	}
+	else if( msg.name=="torso_left_itb_light_inner"){
+		if (msg.value)
+			torso_leftIL_nav_light.state=baxter_core_msgs::DigitalIOState::ON;
+		else
+			torso_leftIL_nav_light.state=baxter_core_msgs::DigitalIOState::OFF;
+	}
+	else if( msg.name=="torso_right_itb_light_inner") {
+		if (msg.value)
+			torso_rightIL_nav_light.state=baxter_core_msgs::DigitalIOState::ON;
+		else
+			torso_rightIL_nav_light.state=baxter_core_msgs::DigitalIOState::OFF;
+	}
+	else if( msg.name=="left_itb_light_outer") {
+		if (msg.value)
+			leftOL_nav_light.state=baxter_core_msgs::DigitalIOState::ON;
+		else
+			leftOL_nav_light.state=baxter_core_msgs::DigitalIOState::OFF;
+	}
+	else if( msg.name=="right_itb_light_outer") {
+		if (msg.value)
+			rightOL_nav_light.state=baxter_core_msgs::DigitalIOState::ON;
+		else
+			rightOL_nav_light.state=baxter_core_msgs::DigitalIOState::OFF;
+	}
+	else if( msg.name=="torso_left_itb_light_outer") {
+		if (msg.value)
+			torso_leftOL_nav_light.state=baxter_core_msgs::DigitalIOState::ON;
+		else
+			torso_leftOL_nav_light.state=baxter_core_msgs::DigitalIOState::OFF;
+	}
+	else if( msg.name=="torso_right_itb_light_outer") {
+		if (msg.value)
+			torso_rightOL_nav_light.state=baxter_core_msgs::DigitalIOState::ON;
+		else
+			torso_rightOL_nav_light.state=baxter_core_msgs::DigitalIOState::OFF;
+	}
+	else
+		ROS_ERROR("Not a valid componenet id");
+	
+}
+void baxter_enable::left_grav_cb(const baxter_core_msgs::JointCommand &msg)
+{
+//std::cout<<"left "<<read_l<<std::endl;
+	if(!baxter_enable::read_l)
+	{
+		//std::cout<<"intoread_le"<<std::endl;
+	left_grav_cmd.resize(msg.command.size());
+	left_grav_name.resize(msg.names.size());
+	left_grav_cmd=msg.command;
+	left_grav_name=msg.names;
+	read_l=true;
+		//std::cout<<"last_l"<<std::endl;
+	baxter_enable::update_grav();
+	}
+}
+
+void baxter_enable::right_grav_cb(const baxter_core_msgs::JointCommand &msg)
+{
+//std::cout<<"right "<<read_r<<std::endl;
+	if(!baxter_enable::read_r)
+	{
+		//std::cout<<"intoread_r"<<std::endl;
+	right_grav_cmd.resize(msg.command.size());
+	right_grav_name.resize(msg.names.size());
+	right_grav_cmd=msg.command;
+	right_grav_name=msg.names;
+	read_r=true;
+		//std::cout<<"last_r"<<std::endl;
+	baxter_enable::update_grav();
+	}
+	
+}
+
+void baxter_enable::update_grav()
+{
+	//std::cout<<"update called l and r are "<<baxter_enable::read_l<<" "<<baxter_enable::read_r<<std::endl;
+	if(baxter_enable::read_l && baxter_enable::read_r)
+	{
+			mutex=false;
+			grav_cmd.clear();
+			grav_name.clear();
+			grav_cmd.reserve(baxter_enable::left_grav_cmd.size()+baxter_enable::right_grav_cmd.size());
+			grav_cmd.insert(grav_cmd.end(),baxter_enable::left_grav_cmd.begin(),baxter_enable::left_grav_cmd.end());
+			grav_cmd.insert(grav_cmd.end(),baxter_enable::right_grav_cmd.begin(),baxter_enable::right_grav_cmd.end());
+			grav_name.reserve(baxter_enable::left_grav_name.size()+baxter_enable::right_grav_name.size());
+			grav_name.insert(grav_name.end(),baxter_enable::left_grav_name.begin(),baxter_enable::left_grav_name.end());
+			grav_name.insert(grav_name.end(),baxter_enable::right_grav_name.begin(),baxter_enable::right_grav_name.end());
+			mutex=true;
+			baxter_enable::read_l=false;
+			baxter_enable::read_r=false;
+			//baxter_enable::test=1;
+
+	}
+	//if (baxter_enable::test==1)
+//std::cout<<"for left and right "<<grav_name[0]<<" "<<grav_name[7]<<std::endl;
+	//std::cout<<"Ingava"<<std::endl;
+	
+}
 }//namespace
 
 int main(int argc, char *argv[])

@@ -39,17 +39,26 @@
 #include "ros/ros.h"
 #include <std_msgs/Bool.h>
 #include <std_msgs/Empty.h>
+#include <std_msgs/UInt32.h>
 #include "baxter_core_msgs/AssemblyState.h"
 #include "baxter_core_msgs/EndEffectorState.h"
 #include "baxter_core_msgs/EndEffectorProperties.h"
+#include "baxter_core_msgs/JointCommand.h"
 #include <image_transport/image_transport.h>
 #include <opencv/cvwimage.h>
 #include <opencv/highgui.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
+#include <sensor_msgs/Range.h>
+#include <sensor_msgs/LaserScan.h>
+#include <baxter_core_msgs/AnalogIOState.h>
+#include <baxter_core_msgs/DigitalOutputCommand.h>
+#include <baxter_core_msgs/DigitalIOState.h>
 
 namespace baxter_en {
-
+	static std::vector<double> grav_cmd;
+	static std::vector<std::string> grav_name;
+	static bool mutex=true;
 class baxter_enable {
 
   public:
@@ -59,17 +68,33 @@ class baxter_enable {
  	*/
 	bool init(const std::string &img_path);
 
+
+	static std::vector<double> left_grav_cmd, right_grav_cmd;
+	static std::vector<std::string> left_grav_name, right_grav_name;
+	static bool read_l,read_r;
+	static bool enable;
+	static baxter_core_msgs::DigitalIOState leftIL_nav_light, leftOL_nav_light,
+		torso_leftIL_nav_light, torso_leftOL_nav_light,
+		rightIL_nav_light, rightOL_nav_light,
+		torso_rightIL_nav_light, torso_rightOL_nav_light;
   private:
-	ros::Subscriber enable_sub_, stop_sub_,reset_sub_;
+	ros::Subscriber enable_sub_, stop_sub_,reset_sub_,left_grav,right_grav, 
+		left_laser_sub, right_laser_sub, nav_light_sub;
+
 	ros::Publisher assembly_state_pub_, left_grip_st_pub_, right_grip_st_pub_, 
-			left_grip_prop_pub_, right_grip_prop_pub_;
+		left_grip_prop_pub_, right_grip_prop_pub_, left_ir_pub, right_ir_pub,
+		left_ir_int_pub, right_ir_int_pub, left_ir_state_pub, right_ir_state_pub,
+                left_itb_innerL_pub,right_itb_innerL_pub,torso_left_innerL_pub, 
+		torso_right_innerL_pub,left_itb_outerL_pub,right_itb_outerL_pub,torso_left_outerL_pub, 			torso_right_outerL_pub;
 
 	baxter_core_msgs::AssemblyState assembly_state_;
 	baxter_core_msgs::EndEffectorState left_grip_st, right_grip_st;
 	baxter_core_msgs::EndEffectorProperties left_grip_prop, right_grip_prop;
+	sensor_msgs::Range left_ir, right_ir;
+	baxter_core_msgs::AnalogIOState left_ir_state, right_ir_state;
+	std_msgs::UInt32 left_ir_int, right_ir_int;
 
 	ros::Timer timer_;
-
 	/**
  	* Method to publish the loading image on baxter's screen and other publishers that were instantiated
  	* @param Nodehandle to initialize the image transport
@@ -88,12 +113,44 @@ class baxter_enable {
 	void stop_cb(const std_msgs::Empty &msg);
 
 	/**
-	* Callback function all the values to False and 0s
+	* Callback function to reset all the values to False and 0s
  	*/
 	void reset_cb(const std_msgs::Empty &msg);
+	
+	void left_laser_cb(const sensor_msgs::LaserScan &msg);
+
+	void right_laser_cb(const sensor_msgs::LaserScan &msg);
+
+	void nav_light_cb(const baxter_core_msgs::DigitalOutputCommand &msg);
+
+	/**
+	* Callback function to read the left gravity comp values
+ 	*/
+	void left_grav_cb(const baxter_core_msgs::JointCommand &msg);
+
+	/**
+	* Callback function to read the right gravity comp values
+ 	*/
+	void right_grav_cb(const baxter_core_msgs::JointCommand &msg);
+
+	/**
+	* Method that updates the global gravity variable
+ 	*/
+	void update_grav();
 
 };
 
+std::vector<double> baxter_enable::left_grav_cmd, baxter_enable::right_grav_cmd;
+std::vector<std::string> baxter_enable::left_grav_name,
+		baxter_enable::right_grav_name;
+bool baxter_enable::read_l=false;
+bool baxter_enable::read_r=false;
+//bool mutex=true;
+bool baxter_enable::enable=false;
+baxter_core_msgs::DigitalIOState baxter_enable::leftIL_nav_light, baxter_enable::leftOL_nav_light,
+	baxter_enable::torso_leftIL_nav_light, baxter_enable::torso_leftOL_nav_light,
+	baxter_enable::rightIL_nav_light, baxter_enable::rightOL_nav_light,
+	baxter_enable::torso_rightIL_nav_light, baxter_enable::torso_rightOL_nav_light;
 } // namespace
 
 #endif /* BAXTER_ENABLE_H_ */

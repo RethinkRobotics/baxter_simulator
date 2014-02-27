@@ -111,9 +111,12 @@ public:
     m_ikService.shutdown();
   }
 
-
+  static std::vector<double> grav_cmd,left_grav_cmd, right_grav_cmd;
+  static std::vector<std::string> grav_name,left_grav_name, right_grav_name;
+  static bool mutex,int_mutex;
+  static int test;
 private:
-  
+  //static bool test;
   /**
    * Callback function that checks and sets the robot enabled flag
    */
@@ -151,9 +154,18 @@ private:
   ros::Subscriber joint_states_sub,robot_state_sub;
   ros::Publisher end_pointstate_pub,gravity_pub;
   sensor_msgs::JointState joint;
+ // std::vector<double> left_grav_cmd, right_grav_cmd;
+ // std::vector<std::string> left_grav_name, right_grav_name;
+  
 };
 
-
+int PositionKinematicsNode::test=0;
+bool PositionKinematicsNode::mutex=true;
+bool PositionKinematicsNode::int_mutex=true;
+std::vector<double> PositionKinematicsNode::grav_cmd;
+std::vector<std::string> PositionKinematicsNode::grav_name;
+  std::vector<double> PositionKinematicsNode::left_grav_cmd(7), PositionKinematicsNode::right_grav_cmd(7);
+  std::vector<std::string> PositionKinematicsNode::left_grav_name(7), PositionKinematicsNode::right_grav_name(7);
 }
 
 #endif /* POSITIONKINEMATICSNODE_H_ */
