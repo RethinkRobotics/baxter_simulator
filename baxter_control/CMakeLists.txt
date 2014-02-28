@@ -39,3 +39,4 @@ add_dependencies(baxter_enable
   ${catkin_EXPORTED_TARGETS}
   baxter_core_msgs_gencpp
   )
+

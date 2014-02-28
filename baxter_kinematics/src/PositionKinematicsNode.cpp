@@ -112,8 +112,8 @@ void kinematics::PositionKinematicsNode::stateCB(const baxter_core_msgs::Assembl
 void kinematics::PositionKinematicsNode::FKCallback(const sensor_msgs::JointState msg)
 {
 	ros::Rate loop_rate(100);
-	if (isEnabled)
-	{
+	//if (isEnabled)
+	//{
 		bool isV;
 		std::vector<double> torques;
 		baxter_core_msgs::JointCommand grav_comp;
@@ -182,7 +182,7 @@ void kinematics::PositionKinematicsNode::FKCallback(const sensor_msgs::JointStat
 		}
 		else
 			ROS_ERROR("Gravity compensation was not successful");
-	}
+	//}
 	
 }
 
@@ -226,8 +226,8 @@ kinematics::PositionKinematicsNode::FKCalc(const sensor_msgs::JointState configu
 bool kinematics::PositionKinematicsNode::IKCallback( baxter_core_msgs::SolvePositionIK::Request &req,baxter_core_msgs::SolvePositionIK::Response &res)
 {
 	ros::Rate loop_rate(100);
-	if(isEnabled)
-	{
+	//if(isEnabled)
+	//{
 		sensor_msgs::JointState joint_pose;
 		res.joints.resize(req.pose_stamp.size());
 		res.isValid.resize(req.pose_stamp.size());
@@ -244,7 +244,7 @@ bool kinematics::PositionKinematicsNode::IKCallback( baxter_core_msgs::SolvePosi
 				res.joints[req_index].position=joint_pose.position;
 			}
 		}
-	}
+	//}
 	loop_rate.sleep();
 }
 

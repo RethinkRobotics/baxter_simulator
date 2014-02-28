@@ -71,7 +71,7 @@ static const std::string BAXTER_rightOL_TOPIC = "/robot/digital_io/right_itb_lig
 static const std::string BAXTER_TORSO_rightIL_TOPIC = "/robot/digital_io/torso_right_itb_light_inner/state";
 static const std::string BAXTER_TORSO_rightOL_TOPIC = "/robot/digital_io/torso_right_itb_light_outer/state";
 
-static const int DELAY = 25; // Timeout for publishing a single RSDK image on start up
+static const int DELAY = 35; // Timeout for publishing a single RSDK image on start up
 
 /**
  * Method to initialize the default values for all the variables, instantiate the publishers and subscribers
@@ -287,8 +287,8 @@ void baxter_enable::left_laser_cb(const sensor_msgs::LaserScan &msg)
 	left_ir_state.value=left_ir.range/1000;
 	left_ir_state.isInputOnly=true;
 	left_ir_int.data=left_ir.range;
-	if (baxter_enable::enable)
-		{
+	//if (baxter_enable::enable)
+		//{
 		left_ir_pub.publish(left_ir);
 		left_ir_state_pub.publish(left_ir_state);
 		left_ir_int_pub.publish(left_ir_int);
@@ -296,7 +296,7 @@ void baxter_enable::left_laser_cb(const sensor_msgs::LaserScan &msg)
 		left_itb_outerL_pub.publish(rightIL_nav_light);
 		torso_left_innerL_pub.publish(torso_leftIL_nav_light);
 		torso_left_outerL_pub.publish(torso_rightIL_nav_light);
-		}
+		//}
 }
 
 /**
@@ -316,8 +316,8 @@ void baxter_enable::right_laser_cb(const sensor_msgs::LaserScan &msg)
 	right_ir_state.value=right_ir.range/1000;
 	right_ir_state.isInputOnly=true;
 	right_ir_int.data=right_ir.range;
-	if (baxter_enable::enable)
-		{
+	//if (baxter_enable::enable)
+	//	{
 		right_ir_pub.publish(right_ir);
 		right_ir_state_pub.publish(right_ir_state);
 		right_ir_int_pub.publish(right_ir_int);
@@ -325,7 +325,7 @@ void baxter_enable::right_laser_cb(const sensor_msgs::LaserScan &msg)
 		right_itb_outerL_pub.publish(rightIL_nav_light);
 		torso_right_innerL_pub.publish(torso_rightIL_nav_light);
 		torso_right_outerL_pub.publish(torso_rightIL_nav_light);
-		}
+	//	}
 }
 
 

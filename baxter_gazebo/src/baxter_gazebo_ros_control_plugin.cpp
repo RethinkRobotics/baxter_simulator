@@ -92,7 +92,7 @@ class BaxterGazeboRosControlPlugin :
         nh_.subscribe < baxter_core_msgs::AssemblyState
             > ("/robot/state", 1, &BaxterGazeboRosControlPlugin::enableCommandCallback, this);
 
-    enabled = true;
+    enabled = false;
     isDisabled = false;
     right_command_mode_.mode = -1;
     left_command_mode_.mode = -1;
