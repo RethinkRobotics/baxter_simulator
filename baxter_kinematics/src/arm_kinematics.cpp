@@ -40,6 +40,62 @@ namespace arm_kinematics {
 Kinematics::Kinematics(): nh_private ("~") {
 }
 
+Kinematics::Kinematics(const std::vector<std::string> &joint_names,std::vector<double> &gravity)
+{
+ torquesOut=&gravity;
+
+ std::string urdf_xml, full_urdf_xml;
+     //tip_name=tip;
+     nh.param("urdf_xml",urdf_xml,std::string("robot_description"));
+     nh.searchParam(urdf_xml,full_urdf_xml);
+     ROS_DEBUG("Reading xml file from parameter server");
+     std::string result;
+     if (!nh.getParam(full_urdf_xml, result)) {
+         ROS_FATAL("Could not load the xml from parameter server: %s", urdf_xml.c_str());
+         //return false;
+     }
+
+    /* if (!nh.getParam("grav_root_name", root_name)) {
+         ROS_FATAL("GenericIK: No root name for gravity found on parameter server");
+        // return false;
+     }*/
+     if (!nh.getParam("grav_left_name", tip_name)) {
+         ROS_FATAL("GenericIK: No tip name for gravity found on parameter server");
+        // return false;
+     }
+     if (!nh.getParam("grav_right_name", root_name)) {
+         ROS_FATAL("GenericIK: No tip name for gravity found on parameter server");
+        // return false;
+     }
+     //tip_name=left_name;
+     std::cout<<"the root name is "<<root_name<<std::endl;
+     std::cout<<"the tip name is "<<tip_name<<std::endl;
+     root_name="base";
+         tip_name="left_wrist";
+     if (!loadModel(result)) {
+         ROS_FATAL("Could not load models!");
+       //  return false;
+     }
+     indd[num_joints];
+     for (unsigned int i=0; i < num_joints; i++) {
+     for (unsigned int j=0; i < info.joint_names.size(); i++) {
+         if (info.joint_names[i] == joint_names[j]){
+             indd[i]=j;
+             break;
+         }
+     }
+     }
+     std::cout<<"Suceeded--------"<<std::endl;
+std::cout<<"Num joints is "<<num_joints<<std::endl;
+     gravity_solver = new KDL::ChainIdSolver_RNE(chain,KDL::Vector(0.0,0.0,-9.8));
+     std::cout<<"grav_solver init--------"<<std::endl;
+
+
+
+
+ //return true;
+}
+
 /* Initializes the solvers and the other variables required
 *  @returns true is successful
 */
@@ -81,7 +137,7 @@ bool Kinematics::init(std::string tip) {
     ik_solver_vel = new KDL::ChainIkSolverVel_pinv(chain);
     ik_solver_pos = new KDL::ChainIkSolverPos_NR_JL(chain, joint_min, joint_max,
             *fk_solver, *ik_solver_vel, maxIterations, epsilon);
-    gravity_solver = new KDL::ChainIdSolver_RNE(chain,KDL::Vector(0.0,0.0,-9.8));
+    //gravity_solver = new KDL::ChainIdSolver_RNE(chain,KDL::Vector(0.0,0.0,-9.8));
     return true;
 }
 
@@ -119,9 +175,18 @@ bool Kinematics::readJoints(urdf::Model &robot_model) {
     num_joints = 0;
     boost::shared_ptr<const urdf::Link> link = robot_model.getLink(tip_name);
     boost::shared_ptr<const urdf::Joint> joint;
-
+    for (int i=0;i<chain.getNrOfSegments();i++)
+    std::cout<<"The names are "<<chain.getSegment(i).getJoint().getName()<<std::endl;
     while (link && link->name != root_name) {
+      std::cout<<"Is the problem in getting parent name "<<std::endl;
+      if(!(link->parent_joint))
+      {
+        ROS_ERROR("Finally caught");
+        break;
+      }
+      //std::cout<<"Link name and its parent is "<<link->name<<" "<<link->parent_joint->name<<std::endl;
         joint = robot_model.getJoint(link->parent_joint->name);
+        std::cout<<"Link name and root name are and the joint is "<<link->name<<" "<<root_name<<" "<<joint<<std::endl;
         if (!joint) {
             ROS_ERROR("Could not find joint: %s",link->parent_joint->name.c_str());
             return false;
@@ -130,9 +195,13 @@ bool Kinematics::readJoints(urdf::Model &robot_model) {
             ROS_INFO( "adding joint: [%s]", joint->name.c_str() );
             num_joints++;
         }
+        std::cout<<"Outta loop"<<std::endl;
         link = robot_model.getLink(link->getParent()->name);
+        //std::cout<<"The link name parent pbm is "<<link->getParent()->name<<std::endl;
+        std::cout<<"Before the next iter "<<std::endl;
+       // std::cout<<" at end Link name and its parent is "<<link->name<<" "<<link->parent_joint->name<<std::endl;
     }
-
+std::cout<<"Outside the loop "<<std::endl;
     joint_min.resize(num_joints);
     joint_max.resize(num_joints);
     info.joint_names.resize(num_joints);
@@ -162,6 +231,7 @@ bool Kinematics::readJoints(urdf::Model &robot_model) {
             joint_max.data[index] = upper;
             info.joint_names[index] = joint->name;
             info.link_names[index] = link->name;
+            std::cout<<"The joint and link names are "<<joint->name<<" "<<link->name<<std::endl;
             i++;
         }
         link = robot_model.getLink(link->getParent()->name);
@@ -181,15 +251,76 @@ bool arm_kinematics::Kinematics::getGravityTorques(const sensor_msgs::JointState
 
   torques.resize(joint_configuration.position.size());
   jntPosIn.resize(joint_configuration.name.size());
-  torquesOut.resize(joint_configuration.position.size());
+  //torquesOut.resize(joint_configuration.position.size());
 
   jntPosIn.resize(num_joints);
+ // std::cout<<"Get segments "<<chain_g.getNrOfSegments()<<std::endl;
+ // std::cout<<"Get joints "<<chain_g.getNrOfJoints()<<std::endl;
+ // std::cout<<"Get segments "<<chain.getNrOfSegments()<<std::endl;
+ // std::cout<<"Get joints "<<chain.getNrOfJoints()<<std::endl;
+  //std::cout<<"Number of joints "<<num_joints<<std::endl;
+for (int i=0;i<chain.getNrOfSegments();i++)
+ std::cout<<"The names are "<<chain.getSegment(i).getJoint().getName()<<std::endl;
+//std::cout<<"Over-------------------"<<std::endl;
   // Copying the positions of the joints relative to its index in the KDL chain
   for (unsigned int i=0; i < num_joints; i++) {
 	int tmp_index = getJointIndex(joint_configuration.name[i]);
         if (tmp_index >=0)
 		jntPosIn(tmp_index) = joint_configuration.position[i];
-		ind[i]=tmp_index;
+	//	ind[i]=tmp_index;
+    }
+
+  KDL::JntArray jntArrayNull(joint_configuration.name.size());
+  KDL::Wrenches wrenchNull(chain.getNrOfSegments(), KDL::Wrench::Zero());
+  int code = gravity_solver->CartToJnt(jntPosIn, jntArrayNull, jntArrayNull, wrenchNull, torques);
+  std::cout<<"Till here this is called -------------------------"<<std::endl;
+  for (int i=0;i<chain.getNrOfSegments();i++)
+   std::cout<<"The names are "<<chain.getSegment(i).getJoint().getName()<<std::endl;
+  for (int j=0;j<joint_configuration.position.size();j++)
+  std::cout<<"The torques are "<<torques(j)<<std::endl;
+  for (unsigned int i=0; i < info.joint_names.size(); i++) {
+    std::cout<<"The names are "<<info.joint_names[i]<<std::endl;
+
+  }
+  if (code >= 0)
+  {
+    // copy torques into result
+    for (unsigned int i = 0; i < joint_configuration.name.size(); i++)
+    {
+	//torquesOut[ind[i]]=torques(i);
+    }
+    return true;
+  }
+  else
+  {
+    ROS_ERROR_THROTTLE(1.0, "KT: Failed to compute gravity torques from KDL return code %d", code);
+   // torquesOut.clear();
+    return false;
+  }
+}
+
+bool arm_kinematics::Kinematics::getGravityTorques_n(const sensor_msgs::JointState &joint_configuration)
+{
+
+  KDL::JntArray torques;
+  KDL::JntArray jntPosIn;
+  //int ind [num_joints];
+
+  torques.resize(joint_configuration.position.size());
+  jntPosIn.resize(joint_configuration.name.size());
+  torquesOut->resize(joint_configuration.position.size());
+
+  jntPosIn.resize(num_joints);
+  //std::cout<<"Get segments "<<chain_g.getNrOfSegments()<<std::endl;
+ // std::cout<<"Get joints "<<chain_g.getNrOfJoints()<<std::endl;
+//for (int i=0;i<chain_g.getNrOfSegments();i++)
+//std::cout<<"The names are "<<chain.getSegment(i).getJoint().getName()<<std::endl;
+  // Copying the positions of the joints relative to its index in the KDL chain
+  for (unsigned int i=0; i < num_joints; i++) {
+  int tmp_index = getJointIndex(joint_configuration.name[i]);
+        if (tmp_index >=0)
+    jntPosIn(tmp_index) = joint_configuration.position[i];
+    //ind[i]=tmp_index;
     }
 
   KDL::JntArray jntArrayNull(joint_configuration.name.size());
@@ -200,14 +331,14 @@ bool arm_kinematics::Kinematics::getGravityTorques(const sensor_msgs::JointState
     // copy torques into result
     for (unsigned int i = 0; i < joint_configuration.name.size(); i++)
     {
-	torquesOut[ind[i]]=torques(i);
+  (*torquesOut)[indd[i]]=torques(i);
     }
     return true;
   }
   else
   {
     ROS_ERROR_THROTTLE(1.0, "KT: Failed to compute gravity torques from KDL return code %d", code);
-    torquesOut.clear();
+    torquesOut->clear();
     return false;
   }
 }

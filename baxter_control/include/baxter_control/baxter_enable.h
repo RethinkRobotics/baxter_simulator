@@ -1,30 +1,30 @@
 /*********************************************************************
-# Copyright (c) 2014, Rethink Robotics
-# All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are met:
-#
-# 1. Redistributions of source code must retain the above copyright notice,
-#    this list of conditions and the following disclaimer.
-# 2. Redistributions in binary form must reproduce the above copyright
-#    notice, this list of conditions and the following disclaimer in the
-#    documentation and/or other materials provided with the distribution.
-# 3. Neither the name of the Rethink Robotics nor the names of its
-#    contributors may be used to endorse or promote products derived from
-#    this software without specific prior written permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
-# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-# POSSIBILITY OF SUCH DAMAGE.
+ # Copyright (c) 2014, Rethink Robotics
+ # All rights reserved.
+ #
+ # Redistribution and use in source and binary forms, with or without
+ # modification, are permitted provided that the following conditions are met:
+ #
+ # 1. Redistributions of source code must retain the above copyright notice,
+ #    this list of conditions and the following disclaimer.
+ # 2. Redistributions in binary form must reproduce the above copyright
+ #    notice, this list of conditions and the following disclaimer in the
+ #    documentation and/or other materials provided with the distribution.
+ # 3. Neither the name of the Rethink Robotics nor the names of its
+ #    contributors may be used to endorse or promote products derived from
+ #    this software without specific prior written permission.
+ #
+ # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ # IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ # ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ # LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ # INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ # POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
 /**
@@ -54,103 +54,118 @@
 #include <baxter_core_msgs/AnalogIOState.h>
 #include <baxter_core_msgs/DigitalOutputCommand.h>
 #include <baxter_core_msgs/DigitalIOState.h>
+#include <sensor_msgs/JointState.h>
+#include "../../baxter_kinematics/include/arm_kinematics.h"
 
 namespace baxter_en {
-	static std::vector<double> grav_cmd;
-	static std::vector<std::string> grav_name;
-	static bool mutex=true;
+extern std::vector<double> grav_cmd;
+extern std::vector<std::string> grav_name;
+
 class baxter_enable {
 
-  public:
-	/**
- 	* Method to initialize the default values for all the variables, instantiate the publishers and 	* subscribers
- 	* @param img_path that refers the path of the image that loads on start up
- 	*/
-	bool init(const std::string &img_path);
+ public:
+  /**
+   * Method to initialize the default values for all the variables, instantiate the publishers and 	* subscribers
+   * @param img_path that refers the path of the image that loads on start up
+   */
 
+  baxter_enable();
 
-	static std::vector<double> left_grav_cmd, right_grav_cmd;
-	static std::vector<std::string> left_grav_name, right_grav_name;
-	static bool read_l,read_r;
-	static bool enable;
-	static baxter_core_msgs::DigitalIOState leftIL_nav_light, leftOL_nav_light,
-		torso_leftIL_nav_light, torso_leftOL_nav_light,
-		rightIL_nav_light, rightOL_nav_light,
-		torso_rightIL_nav_light, torso_rightOL_nav_light;
-  private:
-	ros::Subscriber enable_sub_, stop_sub_,reset_sub_,left_grav,right_grav, 
-		left_laser_sub, right_laser_sub, nav_light_sub;
+  baxter_enable(int &mut);
 
-	ros::Publisher assembly_state_pub_, left_grip_st_pub_, right_grip_st_pub_, 
-		left_grip_prop_pub_, right_grip_prop_pub_, left_ir_pub, right_ir_pub,
-		left_ir_int_pub, right_ir_int_pub, left_ir_state_pub, right_ir_state_pub,
-                left_itb_innerL_pub,right_itb_innerL_pub,torso_left_innerL_pub, 
-		torso_right_innerL_pub,left_itb_outerL_pub,right_itb_outerL_pub,torso_left_outerL_pub, 			torso_right_outerL_pub;
+  bool init(const std::string &img_path);
 
-	baxter_core_msgs::AssemblyState assembly_state_;
-	baxter_core_msgs::EndEffectorState left_grip_st, right_grip_st;
-	baxter_core_msgs::EndEffectorProperties left_grip_prop, right_grip_prop;
-	sensor_msgs::Range left_ir, right_ir;
-	baxter_core_msgs::AnalogIOState left_ir_state, right_ir_state;
-	std_msgs::UInt32 left_ir_int, right_ir_int;
+  static int test;
+  static std::vector<double> left_grav_cmd, right_grav_cmd;
+  static std::vector<std::string> left_grav_name, right_grav_name;
+  static bool read_l, read_r;
+  static bool enable;
+  static baxter_core_msgs::DigitalIOState leftIL_nav_light, leftOL_nav_light,
+      torso_leftIL_nav_light, torso_leftOL_nav_light, rightIL_nav_light,
+      rightOL_nav_light, torso_rightIL_nav_light, torso_rightOL_nav_light;
+  //static bool mutex;
 
-	ros::Timer timer_;
-	/**
- 	* Method to publish the loading image on baxter's screen and other publishers that were instantiated
- 	* @param Nodehandle to initialize the image transport
- 	* @param img_path that refers the path of the image that loads on start up
- 	*/
-	void publish(ros::NodeHandle &n,const std::string &img_path);
-	
-	/**
- 	* Callback function to enable the robot
- 	*/
-	void enable_cb(const std_msgs::Bool &msg);
+ // arm_kinematics::Kinematics m_kinematicsModel;
+ private:
+  int *mutex,ini;
+  ros::Subscriber enable_sub_, stop_sub_, reset_sub_, left_grav, right_grav,
+      left_laser_sub, right_laser_sub, nav_light_sub;
 
-	/**
- 	* Callback function to stop the robot and capture the source of the stop
- 	*/
-	void stop_cb(const std_msgs::Empty &msg);
+  ros::Publisher assembly_state_pub_, left_grip_st_pub_, right_grip_st_pub_,
+      left_grip_prop_pub_, right_grip_prop_pub_, left_ir_pub, right_ir_pub,
+      left_ir_int_pub, right_ir_int_pub, left_ir_state_pub, right_ir_state_pub,
+      left_itb_innerL_pub, right_itb_innerL_pub, torso_left_innerL_pub,
+      torso_right_innerL_pub, left_itb_outerL_pub, right_itb_outerL_pub,
+      torso_left_outerL_pub, torso_right_outerL_pub;
 
-	/**
-	* Callback function to reset all the values to False and 0s
- 	*/
-	void reset_cb(const std_msgs::Empty &msg);
-	
-	void left_laser_cb(const sensor_msgs::LaserScan &msg);
+  baxter_core_msgs::AssemblyState assembly_state_;
+  baxter_core_msgs::EndEffectorState left_grip_st, right_grip_st;
+  baxter_core_msgs::EndEffectorProperties left_grip_prop, right_grip_prop;
+  sensor_msgs::Range left_ir, right_ir;
+  baxter_core_msgs::AnalogIOState left_ir_state, right_ir_state;
+  std_msgs::UInt32 left_ir_int, right_ir_int;
 
-	void right_laser_cb(const sensor_msgs::LaserScan &msg);
+  ros::Timer timer_;
+  /**
+   * Method to publish the loading image on baxter's screen and other publishers that were instantiated
+   * @param Nodehandle to initialize the image transport
+   * @param img_path that refers the path of the image that loads on start up
+   */
+  //baxter_enable(bool *mutex);
+  void publish(ros::NodeHandle &n, const std::string &img_path);
 
-	void nav_light_cb(const baxter_core_msgs::DigitalOutputCommand &msg);
+  /**
+   * Callback function to enable the robot
+   */
+  void enable_cb(const std_msgs::Bool &msg);
 
-	/**
-	* Callback function to read the left gravity comp values
- 	*/
-	void left_grav_cb(const baxter_core_msgs::JointCommand &msg);
+  /**
+   * Callback function to stop the robot and capture the source of the stop
+   */
+  void stop_cb(const std_msgs::Empty &msg);
 
-	/**
-	* Callback function to read the right gravity comp values
- 	*/
-	void right_grav_cb(const baxter_core_msgs::JointCommand &msg);
+  /**
+   * Callback function to reset all the values to False and 0s
+   */
+  void reset_cb(const std_msgs::Empty &msg);
 
-	/**
-	* Method that updates the global gravity variable
- 	*/
-	void update_grav();
+  void left_laser_cb(const sensor_msgs::LaserScan &msg);
+
+  void right_laser_cb(const sensor_msgs::LaserScan &msg);
+
+  void nav_light_cb(const baxter_core_msgs::DigitalOutputCommand &msg);
+
+  /**
+   * Callback function to read the left gravity comp values
+   */
+  void left_grav_cb(const baxter_core_msgs::JointCommand &msg);
+
+  /**
+   * Callback function to read the right gravity comp values
+   */
+  void right_grav_cb(const baxter_core_msgs::JointCommand &msg);
+
+  /**
+   * Method that updates the global gravity variable
+   */
+  void update_grav(const sensor_msgs::JointState msg);
 
 };
 
 std::vector<double> baxter_enable::left_grav_cmd, baxter_enable::right_grav_cmd;
 std::vector<std::string> baxter_enable::left_grav_name,
-		baxter_enable::right_grav_name;
-bool baxter_enable::read_l=false;
-bool baxter_enable::read_r=false;
-//bool mutex=true;
-bool baxter_enable::enable=false;
-baxter_core_msgs::DigitalIOState baxter_enable::leftIL_nav_light, baxter_enable::leftOL_nav_light,
-	baxter_enable::torso_leftIL_nav_light, baxter_enable::torso_leftOL_nav_light,
-	baxter_enable::rightIL_nav_light, baxter_enable::rightOL_nav_light,
-	baxter_enable::torso_rightIL_nav_light, baxter_enable::torso_rightOL_nav_light;
-} // namespace
+    baxter_enable::right_grav_name;
+bool baxter_enable::read_l = false;
+bool baxter_enable::read_r = false;
+//bool baxter_enable::mutex=true;
+bool baxter_enable::enable = false;
+baxter_core_msgs::DigitalIOState baxter_enable::leftIL_nav_light,
+    baxter_enable::leftOL_nav_light, baxter_enable::torso_leftIL_nav_light,
+    baxter_enable::torso_leftOL_nav_light, baxter_enable::rightIL_nav_light,
+    baxter_enable::rightOL_nav_light, baxter_enable::torso_rightIL_nav_light,
+    baxter_enable::torso_rightOL_nav_light;
+int baxter_enable::test = 0;
+//arm_kinematics::Kinematics m_kinematicsModel();
+}  // namespace
 
 #endif /* BAXTER_ENABLE_H_ */

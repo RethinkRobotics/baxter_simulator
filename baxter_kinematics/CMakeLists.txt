@@ -35,13 +35,13 @@ include_directories(include
 
 
  #target_link_libraries(baxter_kinematics ${catkin_LIBRARIES})
-add_library(arm_kinematics src/arm_kinematics.cpp)
-target_link_libraries(arm_kinematics ${catkin_LIBRARIES})
+add_library(${PROJECT_NAME} src/arm_kinematics.cpp)
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
-add_executable(baxter_kinematics src/PositionKinematicsNode.cpp)
-target_link_libraries(baxter_kinematics ${catkin_LIBRARIES} arm_kinematics)
+add_executable(kinematics src/PositionKinematicsNode.cpp)
+target_link_libraries(kinematics ${catkin_LIBRARIES} ${PROJECT_NAME})
 
- add_dependencies(${PROJECT_NAME}
+ add_dependencies(kinematics
   ${catkin_EXPORTED_TARGETS}
   baxter_core_msgs_gencpp
  )

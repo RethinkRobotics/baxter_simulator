@@ -47,7 +47,7 @@ static const std::string topic1="/robot/joint_states";
 static const std::string topic4="/robot/state";
 
 /**
-* Method to intialize the publishing and subscribing topics, services and to acquire the resources required
+* Method to initialize the publishing and subscribing topics, services and to acquire the resources required
 * @return true if succeeds.
 */
 bool kinematics::PositionKinematicsNode::init(std::string side)
@@ -89,7 +89,7 @@ bool kinematics::PositionKinematicsNode::init(std::string side)
 		m_kinematicsModel = arm_kinematics::Kinematics::create(left_tip_name);
 		kinematics::PositionKinematicsNode::test++;
 	}
-std::cout<<"Side is "<<m_limbName<<" and test is "<<kinematics::PositionKinematicsNode::test<<std::endl;
+//std::cout<<"Side is "<<m_limbName<<" and test is "<<kinematics::PositionKinematicsNode::test<<std::endl;
   return true;
 
 }
@@ -114,6 +114,8 @@ void kinematics::PositionKinematicsNode::FKCallback(const sensor_msgs::JointStat
 	ros::Rate loop_rate(100);
 	//if (isEnabled)
 	//{
+	std::cout<<"Why do we get seg1 fault--------------"<<std::endl;
+
 		bool isV;
 		std::vector<double> torques;
 		baxter_core_msgs::JointCommand grav_comp;
@@ -127,14 +129,15 @@ void kinematics::PositionKinematicsNode::FKCallback(const sensor_msgs::JointStat
 			//configuration=joint;
 
 		reply=PositionKinematicsNode::FKCalc(joint);
-	
+
 		//The 6th index holds the PoseStamp of the end effector while the other preceeding indices holds that of the preceeding joints
 		endpoint.pose=reply.pose[6].pose;
 		end_pointstate_pub.publish(endpoint);
 		loop_rate.sleep();
-
+std::cout<<"Why do we get seg fault--------------"<<std::endl;
 		//Gravity Compensation
 		isV=m_kinematicsModel->getGravityTorques(joint, torques);
+		//isV=false;
 		if(isV)
 		{
 			grav_comp.command.resize(torques.size());
@@ -147,7 +150,7 @@ void kinematics::PositionKinematicsNode::FKCallback(const sensor_msgs::JointStat
 			grav_comp.command=torques;
 			grav_comp.names=joint.name;
 			gravity_pub.publish(grav_comp);
-			
+
 			if(m_limbName=="left")
 			{
 				//kinematics::PositionKinematicsNode::test++;
@@ -183,7 +186,7 @@ void kinematics::PositionKinematicsNode::FKCallback(const sensor_msgs::JointStat
 		else
 			ROS_ERROR("Gravity compensation was not successful");
 	//}
-	
+
 }
 
 /**
@@ -272,6 +275,7 @@ void quitRequested (int)
  */
 int main(int argc, char* argv[])
 {
+  std::cout<<"Int is called +++++++++++"<<std::endl;
   	std::string side = argc > 1 ? argv[1] : "";
   	if(side != "left" && side != "right")
   	{
@@ -279,13 +283,14 @@ int main(int argc, char* argv[])
     	   return 1;
   	}
 	ros::init(argc,argv,"baxter_kinematics_"+side);
-
+std::cout<<"Ros is initialized 000000000000000000000000000000000000000000000"<<std::endl;
   	//capture signals and attempt to cleanup Node
   	signal(SIGTERM, quitRequested);
   	signal(SIGINT,  quitRequested);
   	signal(SIGHUP,  quitRequested);
 
 	g_pNode = kinematics::PositionKinematicsNode::create(side);
+	std::cout<<"side is 000000000000000000000000000000000000000000000 "<<side<<std::endl;
 
   	//test to see if pointer is valid
   	if(g_pNode)

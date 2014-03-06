@@ -10,7 +10,7 @@ find_package(catkin
   )
   
 find_package(Boost REQUIRED COMPONENTS system)
-
+find_package(Eigen REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
   CATKIN_DEPENDS
@@ -26,6 +26,7 @@ include_directories(include
   ${catkin_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
   ${QT_USE_FILE}
+  ${EIGEN_INCLUDE_DIRS}
 )
 
 

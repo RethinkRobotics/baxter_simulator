@@ -36,7 +36,9 @@
 #include <baxter_control/baxter_enable.h>
 
 namespace baxter_en{
-
+std::vector<double> grav_cmd;
+std::vector<std::string> grav_name;
+///bool mutex=true;
 //Topics to subscribe and publish
 static const std::string BAXTER_STATE_TOPIC = "/robot/state";
 static const std::string BAXTER_ENABLE_TOPIC = "/robot/set_super_enable";
@@ -51,6 +53,8 @@ static const std::string BAXTER_RIGHT_GRIPPER_PROP = "/robot/end_effector/right_
 
 static const std::string BAXTER_LEFT_GRAVITY_TOPIC = "/robot/limb/left/gravity_command";
 static const std::string BAXTER_RIGHT_GRAVITY_TOPIC = "/robot/limb/right/gravity_command";
+static const std::string BAXTER_JOINT_TOPIC = "/robot/joint_states";
+
 
 static const std::string BAXTER_LEFT_LASER_TOPIC = "/robot/laserscan/left_hand_range/state";
 static const std::string BAXTER_RIGHT_LASER_TOPIC = "/robot/laserscan/right_hand_range/state";
@@ -177,11 +181,13 @@ bool baxter_enable::init(const std::string &img_path) {
   enable_sub_=n.subscribe(BAXTER_ENABLE_TOPIC,100,&baxter_enable::enable_cb,this);
   stop_sub_=n.subscribe(BAXTER_STOP_TOPIC,100,&baxter_enable::stop_cb,this);
   reset_sub_=n.subscribe(BAXTER_RESET_TOPIC,100,&baxter_enable::reset_cb,this);
-  left_grav=n.subscribe(BAXTER_LEFT_GRAVITY_TOPIC,100,&baxter_enable::left_grav_cb,this);
-  right_grav=n.subscribe(BAXTER_RIGHT_GRAVITY_TOPIC,100,&baxter_enable::right_grav_cb,this);
+ // left_grav=n.subscribe(BAXTER_LEFT_GRAVITY_TOPIC,100,&baxter_enable::left_grav_cb,this);
+ // right_grav=n.subscribe(BAXTER_RIGHT_GRAVITY_TOPIC,100,&baxter_enable::right_grav_cb,this);
+  right_grav=n.subscribe(BAXTER_JOINT_TOPIC,100,&baxter_enable::update_grav,this);
   left_laser_sub=n.subscribe(BAXTER_LEFT_LASER_TOPIC,100,&baxter_enable::left_laser_cb,this);
   right_laser_sub=n.subscribe(BAXTER_RIGHT_LASER_TOPIC,100,&baxter_enable::right_laser_cb,this);
   nav_light_sub=n.subscribe(BAXTER_NAV_LIGHT_TOPIC,100,&baxter_enable::nav_light_cb, this);
+
 
   baxter_enable::publish(n,img_path);
 
@@ -196,7 +202,7 @@ void baxter_enable::publish(ros::NodeHandle &n,const std::string &img_path) {
 
   ros::Rate loop_rate(100);
   image_transport::ImageTransport it(n);
-  image_transport::Publisher display_pub_ = it.advertise(BAXTER_DISPLAY_TOPIC, 1);
+  //image_transport::Publisher display_pub_ = it.advertise(BAXTER_DISPLAY_TOPIC, 1);
 
   // Read OpenCV Mat image and convert it to ROS message
   cv_bridge::CvImagePtr cv_ptr(new cv_bridge::CvImage);
@@ -207,14 +213,14 @@ void baxter_enable::publish(ros::NodeHandle &n,const std::string &img_path) {
     {
       cv_ptr->encoding = sensor_msgs::image_encodings::BGR8;
       sleep(DELAY); // Wait for the model to load
-      display_pub_.publish(cv_ptr->toImageMsg());
+     // display_pub_.publish(cv_ptr->toImageMsg());
     }
   }
   catch(std::exception e)
   {
     ROS_WARN("Unable to load the startup picture to display on the display");
   }
-
+std::cout<<"going to publish assembly state&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&77"<<std::endl;
   while (ros::ok())
   {
 	assembly_state_pub_.publish(assembly_state_);
@@ -395,7 +401,7 @@ void baxter_enable::left_grav_cb(const baxter_core_msgs::JointCommand &msg)
 	left_grav_name=msg.names;
 	read_l=true;
 		//std::cout<<"last_l"<<std::endl;
-	baxter_enable::update_grav();
+	//baxter_enable::update_grav();
 	}
 }
 
@@ -411,17 +417,23 @@ void baxter_enable::right_grav_cb(const baxter_core_msgs::JointCommand &msg)
 	right_grav_name=msg.names;
 	read_r=true;
 		//std::cout<<"last_r"<<std::endl;
-	baxter_enable::update_grav();
+	//baxter_enable::update_grav();
 	}
 	
 }
 
-void baxter_enable::update_grav()
+void baxter_enable::update_grav(const sensor_msgs::JointState msg)
 {
+  bool isV;
+ //isV=m_kinematicsModel.getGravityTorques_n(msg);
 	//std::cout<<"update called l and r are "<<baxter_enable::read_l<<" "<<baxter_enable::read_r<<std::endl;
-	if(baxter_enable::read_l && baxter_enable::read_r)
+/*	if(baxter_enable::read_l && baxter_enable::read_r)
 	{
-			mutex=false;
+	    std::cout<<"OOOOOOOOd------------------------------------"<<std::endl;
+
+	    //int samp=0;
+	    *mutex =10233;
+			//mutex=&samp;
 			grav_cmd.clear();
 			grav_name.clear();
 			grav_cmd.reserve(baxter_enable::left_grav_cmd.size()+baxter_enable::right_grav_cmd.size());
@@ -430,17 +442,42 @@ void baxter_enable::update_grav()
 			grav_name.reserve(baxter_enable::left_grav_name.size()+baxter_enable::right_grav_name.size());
 			grav_name.insert(grav_name.end(),baxter_enable::left_grav_name.begin(),baxter_enable::left_grav_name.end());
 			grav_name.insert(grav_name.end(),baxter_enable::right_grav_name.begin(),baxter_enable::right_grav_name.end());
-			mutex=true;
+			//mutex=true;
 			baxter_enable::read_l=false;
 			baxter_enable::read_r=false;
+			std::cout<<"Address is "<<mutex<<" and value is "<<*mutex<<std::endl;
+			std::cout<<"the address of ini is "<<&ini<<std::endl;
+			//mutex =true;
+			//*mutex=samp;
+			//std::cout<<"After "<<*mutex<<std::endl;
 			//baxter_enable::test=1;
-
-	}
+//std::cout<<"for left and right "<<baxter_en::grav_name[0]<<" "<<baxter_en::grav_name[7]<<"-------------------------------------------------------------------------------"<<std::endl;
+	}*/
 	//if (baxter_enable::test==1)
-//std::cout<<"for left and right "<<grav_name[0]<<" "<<grav_name[7]<<std::endl;
+
 	//std::cout<<"Ingava"<<std::endl;
 	
 }
+baxter_enable::baxter_enable()
+{
+ // std::cout<<"her "<<typeid(mutex).name()<<std::endl;
+  //int samp;
+  mutex=&ini;
+  //*mutex=10;
+  //std::cout<<"h "<<std::endl;
+}
+baxter_enable::baxter_enable(int &mut)
+{
+  mutex=&mut;
+  std::cout<<"Address at init is "<<&mut<<mutex<<std::endl;
+  std::cout<<"The values at init is "<<mut<<" "<<*mutex<<std::endl;
+}
+/*baxter_enable::baxter_enable(bool *mut)
+{
+*mut=*mutex;
+}*/
+
+
 }//namespace
 
 int main(int argc, char *argv[])
@@ -448,8 +485,10 @@ int main(int argc, char *argv[])
   ros::init(argc, argv, "baxter_enable");
 
   std::string img_path = argc > 1 ? argv[1] : "";
-  
+
+  std::cout<<"hh "<<std::endl;
   baxter_en::baxter_enable enable;
+  std::cout<<"vvh "<<std::endl;
 
   bool result=enable.init(img_path);
 
