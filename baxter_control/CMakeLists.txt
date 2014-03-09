@@ -7,6 +7,7 @@ find_package(catkin
   baxter_core_msgs
   cv_bridge
   image_transport
+baxter_kinematics
   )
   
 find_package(Boost REQUIRED COMPONENTS system)
@@ -19,6 +20,7 @@ catkin_package(
   baxter_core_msgs
   cv_bridge
   image_transport
+baxter_kinematics
   LIBRARIES ${PROJECT_NAME}
 )
 

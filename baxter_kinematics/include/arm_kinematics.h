@@ -64,7 +64,7 @@ typedef struct fkr{
 class Kinematics {
     public:
         Kinematics();
-        Kinematics(const std::vector<std::string> &joint_names,std::vector<double> &gravity);
+        Kinematics(std::vector<std::string> &joint_names,std::vector<double> &gravity);
 	
 	/* Initializes the solvers and the other variables required
 	*  @returns true is successful
@@ -99,19 +99,19 @@ class Kinematics {
 	*/
 	bool getGravityTorques(const sensor_msgs::JointState &joint_configuration, 
 				std::vector<double> &torquesOut);	
-  bool getGravityTorques_n(const sensor_msgs::JointState &joint_configuration);
+        bool getGravityTorques_n(const sensor_msgs::JointState joint_configuration);
 
     private:
         ros::NodeHandle nh, nh_private;
         std::string root_name, tip_name, left_name,right_name;
         KDL::JntArray joint_min, joint_max;
-        KDL::Chain chain,chain_g;
+        KDL::Chain chain,grav_chain_l,grav_chain_r;
         unsigned int num_joints;
 
         KDL::ChainFkSolverPos_recursive* fk_solver;
         KDL::ChainIkSolverPos_NR_JL *ik_solver_pos;
         KDL::ChainIkSolverVel_pinv* ik_solver_vel;
-	KDL::ChainIdSolver_RNE *gravity_solver;
+	KDL::ChainIdSolver_RNE *gravity_solver_l, *gravity_solver_r;
 
         ros::ServiceServer ik_service,ik_solver_info_service;
         ros::ServiceServer fk_service,fk_solver_info_service;
@@ -121,7 +121,7 @@ class Kinematics {
         int indd[];
 	
 	//arm_kinematics::KinematicSolverInfo info;
-KinematicSolverInfo info;
+KinematicSolverInfo info,grav_info_l,grav_info_r;
 	
 	/* Method to load all the values from the parameter server
 	*  @returns true is successful

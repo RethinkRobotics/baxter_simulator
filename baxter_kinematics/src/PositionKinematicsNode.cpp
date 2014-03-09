@@ -134,10 +134,10 @@ void kinematics::PositionKinematicsNode::FKCallback(const sensor_msgs::JointStat
 		endpoint.pose=reply.pose[6].pose;
 		end_pointstate_pub.publish(endpoint);
 		loop_rate.sleep();
-std::cout<<"Why do we get seg fault--------------"<<std::endl;
+//std::cout<<"Why do we get seg fault--------------"<<std::endl;
 		//Gravity Compensation
-		isV=m_kinematicsModel->getGravityTorques(joint, torques);
-		//isV=false;
+		//isV=m_kinematicsModel->getGravityTorques(joint, torques);
+		isV=false;
 		if(isV)
 		{
 			grav_comp.command.resize(torques.size());
@@ -183,8 +183,8 @@ std::cout<<"Why do we get seg fault--------------"<<std::endl;
 			//std::cout<<"The name is "<<PositionKinematicsNode::grav_name[0]<<" and side is "<<m_limbName<<" left is "<<PositionKinematicsNode::left_grav_name[0]<<" right is "<<PositionKinematicsNode::right_grav_name[0]<<std::endl;
 			//std::cout<<"Side is "<<m_limbName<<" and test is "<<kinematics::PositionKinematicsNode::test<<std::endl;
 		}
-		else
-			ROS_ERROR("Gravity compensation was not successful");
+		//else
+			//ROS_ERROR("Gravity compensation was not successful");
 	//}
 
 }

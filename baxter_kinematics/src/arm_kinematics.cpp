@@ -40,8 +40,9 @@ namespace arm_kinematics {
 Kinematics::Kinematics(): nh_private ("~") {
 }
 
-Kinematics::Kinematics(const std::vector<std::string> &joint_names,std::vector<double> &gravity)
+Kinematics::Kinematics(std::vector<std::string> &joint_names,std::vector<double> &gravity)
 {
+torquesOut->resize(gravity.size());
  torquesOut=&gravity;
 
  std::string urdf_xml, full_urdf_xml;
@@ -68,26 +69,48 @@ Kinematics::Kinematics(const std::vector<std::string> &joint_names,std::vector<d
         // return false;
      }
      //tip_name=left_name;
-     std::cout<<"the root name is "<<root_name<<std::endl;
-     std::cout<<"the tip name is "<<tip_name<<std::endl;
-     root_name="base";
-         tip_name="left_wrist";
+     root_name="torso";
+     tip_name="left_wrist";
+     std::cout<<"the root1 name is "<<root_name<<std::endl;
+     std::cout<<"the tip1 name is "<<tip_name<<std::endl;
      if (!loadModel(result)) {
          ROS_FATAL("Could not load models!");
        //  return false;
      }
-     indd[num_joints];
-     for (unsigned int i=0; i < num_joints; i++) {
-     for (unsigned int j=0; i < info.joint_names.size(); i++) {
-         if (info.joint_names[i] == joint_names[j]){
-             indd[i]=j;
+     grav_chain_l=chain;
+     grav_info_l=info;
+gravity_solver_l = new KDL::ChainIdSolver_RNE(grav_chain_l,KDL::Vector(0.0,0.0,-9.8));
+     //root_name="torso";
+     tip_name="right_wrist";
+     std::cout<<"the root name is "<<root_name<<std::endl;
+     std::cout<<"the tip name is "<<tip_name<<std::endl;
+
+     if (!loadModel(result)) {
+         ROS_FATAL("Could not load models!");
+       //  return false;
+     }
+     grav_chain_r=chain;
+     grav_info_r=info;
+gravity_solver_r = new KDL::ChainIdSolver_RNE(grav_chain_r,KDL::Vector(0.0,0.0,-9.8));
+     //num_joints=chain.getNrOfJoints();
+     indd[joint_names.size()];
+for (unsigned int j=0; j < joint_names.size(); j++) {
+     for (unsigned int i=0; i < num_joints; i++) { 
+         if (joint_names[j]==grav_info_l.joint_names[i]){
+             indd[j]=i;
              break;
          }
+	else if (joint_names[j]==grav_info_r.joint_names[i]){
+		indd[j]=i+num_joints;
+		break;
+	}
+	else
+		indd[j]=-1;
      }
      }
      std::cout<<"Suceeded--------"<<std::endl;
 std::cout<<"Num joints is "<<num_joints<<std::endl;
-     gravity_solver = new KDL::ChainIdSolver_RNE(chain,KDL::Vector(0.0,0.0,-9.8));
+     //gravity_solver = new KDL::ChainIdSolver_RNE(chain,KDL::Vector(0.0,0.0,-9.8));
      std::cout<<"grav_solver init--------"<<std::endl;
 
 
@@ -159,7 +182,6 @@ bool Kinematics::loadModel(const std::string xml) {
         ROS_ERROR("Could not initialize chain object");
         return false;
     }
-
     if (!readJoints(robot_model)) {
         ROS_FATAL("Could not read information about the joints");
         return false;
@@ -272,7 +294,7 @@ for (int i=0;i<chain.getNrOfSegments();i++)
 
   KDL::JntArray jntArrayNull(joint_configuration.name.size());
   KDL::Wrenches wrenchNull(chain.getNrOfSegments(), KDL::Wrench::Zero());
-  int code = gravity_solver->CartToJnt(jntPosIn, jntArrayNull, jntArrayNull, wrenchNull, torques);
+  int code = gravity_solver_l->CartToJnt(jntPosIn, jntArrayNull, jntArrayNull, wrenchNull, torques);
   std::cout<<"Till here this is called -------------------------"<<std::endl;
   for (int i=0;i<chain.getNrOfSegments();i++)
    std::cout<<"The names are "<<chain.getSegment(i).getJoint().getName()<<std::endl;
@@ -299,45 +321,80 @@ for (int i=0;i<chain.getNrOfSegments();i++)
   }
 }
 
-bool arm_kinematics::Kinematics::getGravityTorques_n(const sensor_msgs::JointState &joint_configuration)
+bool arm_kinematics::Kinematics::getGravityTorques_n(const sensor_msgs::JointState joint_configuration)
 {
 
-  KDL::JntArray torques;
-  KDL::JntArray jntPosIn;
+bool res;
+  KDL::JntArray torques_l,torques_r;
+  KDL::JntArray jntPosIn_l,jntPosIn_r;
   //int ind [num_joints];
 
-  torques.resize(joint_configuration.position.size());
-  jntPosIn.resize(joint_configuration.name.size());
-  torquesOut->resize(joint_configuration.position.size());
+  torques_l.resize(num_joints);
+  torques_r.resize(num_joints);
+  jntPosIn_l.resize(num_joints);
+  jntPosIn_r.resize(num_joints);
+  //torquesOut_l->resize(num_joints);
+  //torquesOut_r->resize(num_joints);
 
-  jntPosIn.resize(num_joints);
+  //jntPosIn.resize(num_joints);
   //std::cout<<"Get segments "<<chain_g.getNrOfSegments()<<std::endl;
  // std::cout<<"Get joints "<<chain_g.getNrOfJoints()<<std::endl;
 //for (int i=0;i<chain_g.getNrOfSegments();i++)
 //std::cout<<"The names are "<<chain.getSegment(i).getJoint().getName()<<std::endl;
   // Copying the positions of the joints relative to its index in the KDL chain
-  for (unsigned int i=0; i < num_joints; i++) {
-  int tmp_index = getJointIndex(joint_configuration.name[i]);
-        if (tmp_index >=0)
-    jntPosIn(tmp_index) = joint_configuration.position[i];
+  for (unsigned int j=0; j < joint_configuration.name.size(); j++) {
+ // int tmp_index = getJointIndex(joint_configuration.name[i]);
+     //   if (tmp_index >=0)
+	for (unsigned int i=0; i < num_joints; i++) { 
+	 if (joint_configuration.name[j]==grav_info_l.joint_names[i]){
+jntPosIn_l(i) = joint_configuration.position[j];
+   break;
+}
+else if (joint_configuration.name[j]==grav_info_r.joint_names[i]){
+jntPosIn_r(i) = joint_configuration.position[j];
+   break;
+}
+    //jntPosIn(tmp_index) = joint_configuration.position[i];
     //ind[i]=tmp_index;
+}
     }
 
-  KDL::JntArray jntArrayNull(joint_configuration.name.size());
-  KDL::Wrenches wrenchNull(chain.getNrOfSegments(), KDL::Wrench::Zero());
-  int code = gravity_solver->CartToJnt(jntPosIn, jntArrayNull, jntArrayNull, wrenchNull, torques);
-  if (code >= 0)
+/*for (unsigned int j=0; j < joint_names.size(); j++) {
+     for (unsigned int i=0; i < num_joints; i++) { 
+         if (joint_names[j]==grav_info_l.joint_names[i]){
+             indd[j]=i;
+             break;
+         }
+	else if (joint_names[j]==grav_info_r.joint_names[i]){
+		indd[j]=i+num_joints;
+		break;
+	}
+	else
+		indd[j]=-1;
+     }
+     }*/
+
+
+  KDL::JntArray jntArrayNull(num_joints);
+  KDL::Wrenches wrenchNull_l(grav_chain_l.getNrOfSegments(), KDL::Wrench::Zero());
+  int code_l = gravity_solver_l->CartToJnt(jntPosIn_l, jntArrayNull, jntArrayNull, wrenchNull_l, torques_l);
+  KDL::Wrenches wrenchNull_r(grav_chain_r.getNrOfSegments(), KDL::Wrench::Zero());
+  int code_r = gravity_solver_r->CartToJnt(jntPosIn_r, jntArrayNull, jntArrayNull, wrenchNull_r, torques_r);
+  if (code_l >= 0 && code_r >= 0)
   {
     // copy torques into result
-    for (unsigned int i = 0; i < joint_configuration.name.size(); i++)
+    for (unsigned int i = 0; i < num_joints; i++)
     {
-  (*torquesOut)[indd[i]]=torques(i);
+	if (indd[i]<num_joints)
+  (*torquesOut)[indd[i]]=torques_l(i);
+	else
+  (*torquesOut)[indd[i]]=torques_r(i);
     }
     return true;
   }
   else
   {
-    ROS_ERROR_THROTTLE(1.0, "KT: Failed to compute gravity torques from KDL return code %d", code);
+    ROS_ERROR_THROTTLE(1.0, "KT: Failed to compute gravity torques from KDL return code for left and right arms %d %d", code_l, code_r);
     torquesOut->clear();
     return false;
   }

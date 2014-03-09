@@ -55,7 +55,11 @@
 #include <baxter_core_msgs/DigitalOutputCommand.h>
 #include <baxter_core_msgs/DigitalIOState.h>
 #include <sensor_msgs/JointState.h>
-#include "../../baxter_kinematics/include/arm_kinematics.h"
+#include <arm_kinematics.h>
+//#include <boost/interprocess/shared_memory_object.hpp>
+//#include <boost/interprocess/mapped_region.hpp>
+//#include <boost/interprocess/sync/interprocess_semaphore.hpp>
+#include <boost/interprocess/managed_shared_memory.hpp> 
 
 namespace baxter_en {
 extern std::vector<double> grav_cmd;
@@ -68,10 +72,10 @@ class baxter_enable {
    * Method to initialize the default values for all the variables, instantiate the publishers and 	* subscribers
    * @param img_path that refers the path of the image that loads on start up
    */
+baxter_enable(std::vector<std::string> &joint_names, std::vector<double> &grav);
+  baxter_enable(){}
 
-  baxter_enable();
-
-  baxter_enable(int &mut);
+  //baxter_enable(int &mut);
 
   bool init(const std::string &img_path);
 
@@ -83,11 +87,17 @@ class baxter_enable {
   static baxter_core_msgs::DigitalIOState leftIL_nav_light, leftOL_nav_light,
       torso_leftIL_nav_light, torso_leftOL_nav_light, rightIL_nav_light,
       rightOL_nav_light, torso_rightIL_nav_light, torso_rightOL_nav_light;
+  static sensor_msgs::JointState JState_msg;
+//static int initial;
+static int testing, *tessting;
   //static bool mutex;
 
- // arm_kinematics::Kinematics m_kinematicsModel;
+  //arm_kinematics::Kinematics kin;
  private:
-  int *mutex,ini;
+  int *mutex,ini, initial, *in, *i1;
+boost::interprocess::managed_shared_memory managed_shm;
+  std::vector<std::string>* jn_names;
+  std::vector<double>* grav_cmd;
   ros::Subscriber enable_sub_, stop_sub_, reset_sub_, left_grav, right_grav,
       left_laser_sub, right_laser_sub, nav_light_sub;
 
@@ -104,7 +114,7 @@ class baxter_enable {
   sensor_msgs::Range left_ir, right_ir;
   baxter_core_msgs::AnalogIOState left_ir_state, right_ir_state;
   std_msgs::UInt32 left_ir_int, right_ir_int;
-
+//boost::interprocess::mapped_region region;
   ros::Timer timer_;
   /**
    * Method to publish the loading image on baxter's screen and other publishers that were instantiated
@@ -165,6 +175,11 @@ baxter_core_msgs::DigitalIOState baxter_enable::leftIL_nav_light,
     baxter_enable::rightOL_nav_light, baxter_enable::torso_rightIL_nav_light,
     baxter_enable::torso_rightOL_nav_light;
 int baxter_enable::test = 0;
+sensor_msgs::JointState baxter_enable::JState_msg;
+int baxter_enable::testing=0;
+//int* baxter_enable::tessting=0;
+//baxter_enable::tessting=&baxter_enable::testing;
+//int baxter_enable::initial=0;
 //arm_kinematics::Kinematics m_kinematicsModel();
 }  // namespace
 

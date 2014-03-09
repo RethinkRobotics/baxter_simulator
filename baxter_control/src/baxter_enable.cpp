@@ -34,6 +34,13 @@
  */
 
 #include <baxter_control/baxter_enable.h>
+//#include <boost/interprocess/shared_memory_object.hpp>
+//#include <boost/interprocess/mapped_region.hpp>
+//#include <boost/interprocess/sync/interprocess_semaphore.hpp>
+#include <boost/interprocess/sync/interprocess_mutex.hpp>
+#include <boost/interprocess/sync/named_mutex.hpp> 
+#include <boost/interprocess/managed_shared_memory.hpp> 
+//#include "shared.cpp"
 
 namespace baxter_en{
 std::vector<double> grav_cmd;
@@ -82,7 +89,9 @@ static const int DELAY = 35; // Timeout for publishing a single RSDK image on st
  * @param img_path that refers the path of the image that loads on start up
  */
 bool baxter_enable::init(const std::string &img_path) {
-
+initial=0;
+in=&initial;
+std::cout<<"wait for some time-------------------adsd----------------------------------------"<<std::endl;
   //Default values for the assembly state
   assembly_state_.enabled = false;             // true if enabled
   assembly_state_.stopped = false;            // true if stopped -- e-stop asserted
@@ -189,8 +198,47 @@ bool baxter_enable::init(const std::string &img_path) {
   nav_light_sub=n.subscribe(BAXTER_NAV_LIGHT_TOPIC,100,&baxter_enable::nav_light_cb, this);
 
 
+ /* boost::interprocess::shared_memory_object::remove("Highscore"); 
+  boost::interprocess::managed_shared_memory managed_shm(boost::interprocess::open_or_create, "Highscore", 1024); 
+  int *i = managed_shm.construct<int>("Integer")(99); */
+
+/*boost::interprocess::shared_memory_object::remove("Highscore"); 
+boost::interprocess::managed_shared_memory managed_shm(boost::interprocess::open_or_create, "Highscore", 1024);
+int *i = managed_shm.construct<int>("Integer")(99); */
+//baxter_enable::testing=1;
+//std::cout<<"Here iniside init testing is "<<baxter_enable::testing<<std::endl;
+//std::cout<<"The address is of var and ptr is "<<&baxter_enable::testing<<" "<<baxter_enable::tessting<<std::endl;
+boost::interprocess::shared_memory_object::remove("Testt"); 
+//boost::interprocess::shared_memory_object shdmem(boost::interprocess::open_or_create, "Highscore", boost::interprocess::read_write); 
+/*shdmem=boost::interprocess::shared_memory_object(boost::interprocess::open_or_create, "Test", boost::interprocess::read_write); 
+  shdmem.truncate(1024); 
+  boost::interprocess::mapped_region region(shdmem, boost::interprocess::read_write); 
+i1 = static_cast<int*>(region.get_address());
+*i1 = 56;*/
+managed_shm=boost::interprocess::managed_shared_memory(boost::interprocess::open_or_create, "Testt", 1024);
+i1 = managed_shm.construct<int>("Integerr")(54); 
+
+std::cout<<"ibefore- and addr---------------------------------------------------------------------- "<<*i1<<std::endl;
+//while(*in != 1) {
+//std::cout<<"Waiting to be initialized"<<std::endl;
+//}
+std::cout<<"So theis is initialized......................................."<<std::endl;
+//arm_kinematics::Kinematics kin(*jn_names, *grav_cmd);
+
   baxter_enable::publish(n,img_path);
 
+}
+
+baxter_enable::baxter_enable(std::vector<std::string> &joint_names, std::vector<double> &grav) {
+jn_names=&joint_names;
+grav_cmd=&grav;
+//std::cout<<"Before waiting++++++++++++++++++++++++++++******************* "<<*baxter_enable::tessting<<std::endl;
+//std::cout<<"The address is of var and ptr is "<<&baxter_enable::testing<<" "<<baxter_enable::tessting<<std::endl;
+//while(!baxter_enable::testing){
+//}
+//baxter_en::baxter_enable::initial=1;
+*in=1;
+std::cout<<"initialized------------------------------------------------------------------------ "<<*in<<std::endl;
 }
 
 /**
@@ -199,27 +247,33 @@ bool baxter_enable::init(const std::string &img_path) {
  * @param img_path that refers the path of the image that loads on start up
  */
 void baxter_enable::publish(ros::NodeHandle &n,const std::string &img_path) {
-
+std::cout<<"Not yet into the flow-------------------adsd----------------------------------------"<<std::endl;
   ros::Rate loop_rate(100);
   image_transport::ImageTransport it(n);
   //image_transport::Publisher display_pub_ = it.advertise(BAXTER_DISPLAY_TOPIC, 1);
 
   // Read OpenCV Mat image and convert it to ROS message
   cv_bridge::CvImagePtr cv_ptr(new cv_bridge::CvImage);
+std::cout<<"Updated to tils here:::::::::::::::::::::::::::::::::::::::::::::"<<std::endl;
   try
   {
     cv_ptr->image=cv::imread(img_path,CV_LOAD_IMAGE_UNCHANGED);
+    std::cout<<"Ing is read***********************"<<std::endl;
     if (cv_ptr->image.data)
     {
+     std::cout<<"Yes it is loaded$$$$$$$$$$$$$$$$$$$$$$$44"<<std::endl;
       cv_ptr->encoding = sensor_msgs::image_encodings::BGR8;
-      sleep(DELAY); // Wait for the model to load
+      //sleep(DELAY); // Wait for the model to load
      // display_pub_.publish(cv_ptr->toImageMsg());
     }
+   std::cout<<"Outside image pub"<<std::endl;
   }
   catch(std::exception e)
   {
     ROS_WARN("Unable to load the startup picture to display on the display");
   }
+//boost::interprocess::interprocess_mutex *mtx = shdmem.find_or_construct<boost::interprocess::interprocess_mutex>("mtx")(); 
+//boost::interprocess::named_mutex named_mtx(boost::interprocess::open_or_create, "mtx"); 
 std::cout<<"going to publish assembly state&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&77"<<std::endl;
   while (ros::ok())
   {
@@ -228,8 +282,13 @@ std::cout<<"going to publish assembly state&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 	right_grip_st_pub_.publish(right_grip_st);
 	left_grip_prop_pub_.publish(left_grip_prop);
 	right_grip_prop_pub_.publish(right_grip_prop);
+  //kin.getGravityTorques_n(baxter_enable::JState_msg);
+	++(*i1);
       	ros::spinOnce();
       	loop_rate.sleep();
+//named_mtx.lock();
+	//*i1++;
+//named_mtx.unlock();
   }
 
 }
@@ -425,6 +484,8 @@ void baxter_enable::right_grav_cb(const baxter_core_msgs::JointCommand &msg)
 void baxter_enable::update_grav(const sensor_msgs::JointState msg)
 {
   bool isV;
+baxter_enable::JState_msg=msg;
+  //static bool mutex;
  //isV=m_kinematicsModel.getGravityTorques_n(msg);
 	//std::cout<<"update called l and r are "<<baxter_enable::read_l<<" "<<baxter_enable::read_r<<std::endl;
 /*	if(baxter_enable::read_l && baxter_enable::read_r)
@@ -458,20 +519,20 @@ void baxter_enable::update_grav(const sensor_msgs::JointState msg)
 	//std::cout<<"Ingava"<<std::endl;
 	
 }
-baxter_enable::baxter_enable()
+/*baxter_enable::baxter_enable()
 {
  // std::cout<<"her "<<typeid(mutex).name()<<std::endl;
   //int samp;
   mutex=&ini;
   //*mutex=10;
   //std::cout<<"h "<<std::endl;
-}
-baxter_enable::baxter_enable(int &mut)
+}*/
+/*baxter_enable::baxter_enable(int &mut)
 {
   mutex=&mut;
   std::cout<<"Address at init is "<<&mut<<mutex<<std::endl;
   std::cout<<"The values at init is "<<mut<<" "<<*mutex<<std::endl;
-}
+}*/
 /*baxter_enable::baxter_enable(bool *mut)
 {
 *mut=*mutex;
@@ -486,10 +547,15 @@ int main(int argc, char *argv[])
 
   std::string img_path = argc > 1 ? argv[1] : "";
 
+ /* boost::interprocess::shared_memory_object shdmem(boost::interprocess::open_or_create, "Highscore", boost::interprocess::read_write); 
+  shdmem.truncate(1024); 
+  boost::interprocess::mapped_region region(shdmem, boost::interprocess::read_write); 
+  int *i1 = static_cast<int*>(region.get_address());*/
   std::cout<<"hh "<<std::endl;
+std::cout<<"Ok main is init------------------adsd----------------------------------------"<<std::endl;
   baxter_en::baxter_enable enable;
   std::cout<<"vvh "<<std::endl;
-
+std::cout<<"calling the init---------------adsd----------------------------------------"<<std::endl;
   bool result=enable.init(img_path);
 
   return 0;
