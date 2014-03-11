@@ -292,6 +292,7 @@ void baxter_enable::publish(ros::NodeHandle &n, const std::string &img_path) {
     kin.getGravityTorques_n(baxter_enable::JState_msg);
     ros::spinOnce();
     loop_rate.sleep();
+    head_msg.isNodding=false;
   }
 
 }

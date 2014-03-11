@@ -12,6 +12,7 @@
 	output="screen" ns="/robot" args=" joint_state_controller					   
 					   left_joint_position_controller
 					   right_joint_position_controller
+					   head_state_controller
 					   " />
   <!-- load the stopped controllers -->
   <node name="controller_spawner_stopped" pkg="controller_manager" type="spawner" respawn="false"

@@ -46,6 +46,7 @@
 // Baxter
 #include <baxter_core_msgs/JointCommand.h>
 #include <baxter_core_msgs/AssemblyState.h>
+#include <baxter_core_msgs/HeadPanCommand.h>
 
 namespace baxter_gazebo_plugin {
 
@@ -55,6 +56,7 @@ class BaxterGazeboRosControlPlugin :
   ros::Subscriber left_command_mode_sub_;
   ros::Subscriber right_command_mode_sub_;
   ros::Subscriber robot_state_sub_;
+  ros::Subscriber head_state_sub;
 
   // Rate to publish assembly state
   ros::Timer timer_;
@@ -63,11 +65,10 @@ class BaxterGazeboRosControlPlugin :
   baxter_core_msgs::AssemblyState assembly_state_;
 
   // use this as flag to indicate current mode
-  baxter_core_msgs::JointCommand right_command_mode_;
-  baxter_core_msgs::JointCommand left_command_mode_;
+  baxter_core_msgs::JointCommand right_command_mode_,left_command_mode_;
 
   boost::mutex mtx_;  // mutex for re-entrent calls to modeCommandCallback
-  bool enabled, isDisabled;  // enabled tracks the current status of the robot that is being published & isDisabled keeps track of the action taken
+  bool enabled, isDisabled, head_isLoad;  // enabled tracks the current status of the robot that is being published & isDisabled keeps track of the action taken
 
  public:
 
@@ -86,6 +87,9 @@ class BaxterGazeboRosControlPlugin :
     right_command_mode_sub_ =
         nh_.subscribe < baxter_core_msgs::JointCommand
             > ("/robot/limb/right/joint_command", 1, &BaxterGazeboRosControlPlugin::rightModeCommandCallback, this);
+    head_state_sub =
+        nh_.subscribe < baxter_core_msgs::HeadPanCommand
+            > ("/robot/head/command_head_pan", 1, &BaxterGazeboRosControlPlugin::headCommandCallback, this);
 
     //Subscribe to the topic that publishes the robot's state
     robot_state_sub_ =
@@ -96,6 +100,7 @@ class BaxterGazeboRosControlPlugin :
     isDisabled = false;
     right_command_mode_.mode = -1;
     left_command_mode_.mode = -1;
+    head_isLoad=false;
   }
 
   void enableCommandCallback(const baxter_core_msgs::AssemblyState msg) {
@@ -111,6 +116,7 @@ class BaxterGazeboRosControlPlugin :
       stop_controllers.push_back("right_joint_effort_controller");
       stop_controllers.push_back("right_joint_velocity_controller");
       stop_controllers.push_back("right_joint_position_controller");
+      stop_controllers.push_back("head_state_controller");
       isDisabled = true;
       if (!controller_manager_->switchController(
           start_controllers, stop_controllers,
@@ -125,6 +131,25 @@ class BaxterGazeboRosControlPlugin :
     }
   }
 
+  void headCommandCallback(
+      const baxter_core_msgs::HeadPanCommand msg) {
+    if (!head_isLoad && enabled){
+      std::vector < std::string > start_controllers;
+      std::vector < std::string > stop_controllers;
+
+      start_controllers.push_back("head_state_controller");
+      if (!controller_manager_->switchController(
+          start_controllers, stop_controllers,
+          controller_manager_msgs::SwitchController::Request::STRICT)) {
+        ROS_ERROR_STREAM_NAMED("baxter_gazebo_ros_control_plugin",
+                               "Failed to switch controllers");
+      }
+      else
+        head_isLoad=true;
+    }
+    else
+      return;
+  }
   void leftModeCommandCallback(
       const baxter_core_msgs::JointCommandConstPtr& msg) {
 
@@ -169,6 +194,7 @@ class BaxterGazeboRosControlPlugin :
     std::vector < std::string > stop_controllers;
     isDisabled = false;
 
+    start_controllers.push_back("head_state_controller");
     switch (msg->mode) {
       case baxter_core_msgs::JointCommand::POSITION_MODE:
         start_controllers.push_back(side + "_joint_position_controller");

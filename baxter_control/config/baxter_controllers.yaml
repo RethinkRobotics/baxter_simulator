@@ -5,6 +5,14 @@ robot:
     type: joint_state_controller/JointStateController
     publish_rate: 50  
 
+  # Baxter SDK Controllers: Head --------------------------
+  head_state_controller:
+    type: baxter_controllers/BaxterHeadController
+    topic: /robot/head/command_head_pan
+    joints:
+          head_controller:
+            joint: head_pan
+
   # Baxter SDK Controllers: Position --------------------------
   right_joint_position_controller:
     type: baxter_controllers/BaxterPositionController

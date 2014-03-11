@@ -28,7 +28,15 @@
 	 type="baxter_controllers::BaxterEffortController" 
 	 base_class_type="controller_interface::ControllerBase">
     <description>
-      The BaxterEffortController tracks position commands for the Baxter gripper. It expects a EffortJointInterface type of hardware interface.
+      The BaxterEffortController tracks effort commands for the Baxter joints. It expects a EffortJointInterface type of hardware interface.
+    </description>
+  </class>
+  
+    <class name="baxter_controllers/BaxterHeadController" 
+	 type="baxter_controllers::BaxterHeadController" 
+	 base_class_type="controller_interface::ControllerBase">
+    <description>
+      The BaxterHeadController tracks position commands for the Baxter head. It expects a EffortJointInterface type of hardware interface.
     </description>
   </class>
 
