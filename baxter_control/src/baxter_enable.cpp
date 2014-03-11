@@ -77,10 +77,12 @@ static const std::string BAXTER_LEFTIL_TOPIC = "/robot/digital_io/left_itb_light
 static const std::string BAXTER_LEFTOL_TOPIC = "/robot/digital_io/left_itb_light_outer/state";
 static const std::string BAXTER_TORSO_LEFTIL_TOPIC = "/robot/digital_io/torso_left_itb_light_inner/state";
 static const std::string BAXTER_TORSO_LEFTOL_TOPIC = "/robot/digital_io/torso_left_itb_light_outer/state";
-static const std::string BAXTER_rightIL_TOPIC = "/robot/digital_io/right_itb_light_inner/state";
-static const std::string BAXTER_rightOL_TOPIC = "/robot/digital_io/right_itb_light_outer/state";
-static const std::string BAXTER_TORSO_rightIL_TOPIC = "/robot/digital_io/torso_right_itb_light_inner/state";
-static const std::string BAXTER_TORSO_rightOL_TOPIC = "/robot/digital_io/torso_right_itb_light_outer/state";
+static const std::string BAXTER_RIGHTIL_TOPIC = "/robot/digital_io/right_itb_light_inner/state";
+static const std::string BAXTER_RIGHTOL_TOPIC = "/robot/digital_io/right_itb_light_outer/state";
+static const std::string BAXTER_TORSO_RIGHTIL_TOPIC = "/robot/digital_io/torso_right_itb_light_inner/state";
+static const std::string BAXTER_TORSO_RIGHTOL_TOPIC = "/robot/digital_io/torso_right_itb_light_outer/state";
+
+static const std::string BAXTER_HEAD_TOPIC = "/robot/head/state";
 
 static const int DELAY = 35; // Timeout for publishing a single RSDK image on start up
 
@@ -157,6 +159,10 @@ std::cout<<"wait for some time-------------------adsd---------------------------
   baxter_enable::torso_rightIL_nav_light.state=baxter_core_msgs::DigitalIOState::OFF;
   baxter_enable::torso_rightOL_nav_light.state=baxter_core_msgs::DigitalIOState::OFF;
 
+  head_msg.pan=0;
+  head_msg.isPanning=false;
+  head_msg.isNodding=false;
+
   ros::NodeHandle n;
 
   // Inititalize the publishers
@@ -179,12 +185,13 @@ std::cout<<"wait for some time-------------------adsd---------------------------
   torso_left_outerL_pub = n.advertise<baxter_core_msgs::DigitalIOState>
 				(BAXTER_TORSO_LEFTOL_TOPIC,1);
 
-  right_itb_innerL_pub = n.advertise<baxter_core_msgs::DigitalIOState>(BAXTER_rightIL_TOPIC,1);
-  right_itb_outerL_pub = n.advertise<baxter_core_msgs::DigitalIOState>(BAXTER_rightOL_TOPIC,1);
+  right_itb_innerL_pub = n.advertise<baxter_core_msgs::DigitalIOState>(BAXTER_RIGHTIL_TOPIC,1);
+  right_itb_outerL_pub = n.advertise<baxter_core_msgs::DigitalIOState>(BAXTER_RIGHTOL_TOPIC,1);
   torso_right_innerL_pub = n.advertise<baxter_core_msgs::DigitalIOState>
-				(BAXTER_TORSO_rightIL_TOPIC,1);
+				(BAXTER_TORSO_RIGHTIL_TOPIC,1);
   torso_right_outerL_pub = n.advertise<baxter_core_msgs::DigitalIOState>
-				(BAXTER_TORSO_rightOL_TOPIC,1);
+				(BAXTER_TORSO_RIGHTOL_TOPIC,1);
+  head_pub = n.advertise<baxter_core_msgs::HeadState>(BAXTER_HEAD_TOPIC,1);
 
   // Initialize the subscribers
   enable_sub_=n.subscribe(BAXTER_ENABLE_TOPIC,100,&baxter_enable::enable_cb,this);
@@ -266,7 +273,7 @@ std::cout<<"Not yet into the flow-------------------adsd------------------------
   image_transport::ImageTransport it(n);
   //image_transport::Publisher display_pub_ = it.advertise(BAXTER_DISPLAY_TOPIC, 1);
   arm_kinematics::Kinematics kin;
-  kin.init_grav();
+ // kin.init_grav();
   std::cout<<"Came out *^*(&(((((((((((((((((((((((((((((((((((((((&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"<<std::endl;
   // Read OpenCV Mat image and convert it to ROS message
   cv_bridge::CvImagePtr cv_ptr(new cv_bridge::CvImage);
@@ -312,7 +319,8 @@ std::cout<<"going to publish assembly state&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
   right_itb_outerL_pub.publish(rightIL_nav_light);
   torso_right_innerL_pub.publish(torso_rightIL_nav_light);
   torso_right_outerL_pub.publish(torso_rightIL_nav_light);
-  kin.getGravityTorques_n(baxter_enable::JState_msg);
+  head_pub.publish(head_msg);
+ // kin.getGravityTorques_n(baxter_enable::JState_msg);
 	//++(*i1);
       	ros::spinOnce();
       	loop_rate.sleep();
@@ -515,6 +523,11 @@ void baxter_enable::update_grav(const sensor_msgs::JointState msg)
 {
   bool isV;
 baxter_enable::JState_msg=msg;
+for(int i=0;i<msg.name.size();i++) {
+  if (msg.name[i]=="head_pan"){
+    head_msg.pan=msg.position[i];
+  }
+}
   //static bool mutex;
  //isV=m_kinematicsModel.getGravityTorques_n(msg);
 	//std::cout<<"update called l and r are "<<baxter_enable::read_l<<" "<<baxter_enable::read_r<<std::endl;

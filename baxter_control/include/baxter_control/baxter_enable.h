@@ -54,6 +54,7 @@
 #include <baxter_core_msgs/AnalogIOState.h>
 #include <baxter_core_msgs/DigitalOutputCommand.h>
 #include <baxter_core_msgs/DigitalIOState.h>
+#include <baxter_core_msgs/HeadState.h>
 #include <sensor_msgs/JointState.h>
 #include <arm_kinematics.h>
 //#include <boost/interprocess/shared_memory_object.hpp>
@@ -94,6 +95,7 @@ static int testing, *tessting;
 
   //arm_kinematics::Kinematics kin;
  private:
+baxter_core_msgs::HeadState head_msg;
 std::pair<std::string*, std::size_t> pres;
   int *mutex,ini, initial, *in;
   //std::vector<std::string>>* i1;
@@ -108,7 +110,7 @@ boost::interprocess::managed_shared_memory managed_shm;
       left_ir_int_pub, right_ir_int_pub, left_ir_state_pub, right_ir_state_pub,
       left_itb_innerL_pub, right_itb_innerL_pub, torso_left_innerL_pub,
       torso_right_innerL_pub, left_itb_outerL_pub, right_itb_outerL_pub,
-      torso_left_outerL_pub, torso_right_outerL_pub;
+      torso_left_outerL_pub, torso_right_outerL_pub, head_pub;
 
   baxter_core_msgs::AssemblyState assembly_state_;
   baxter_core_msgs::EndEffectorState left_grip_st, right_grip_st;
