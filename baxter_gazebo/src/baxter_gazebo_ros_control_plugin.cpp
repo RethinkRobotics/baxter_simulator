@@ -33,7 +33,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Dave Coleman
+/* Author: Dave Coleman and Hariharasudan Malaichamee
  Desc:   Customized the default gazebo_ros_control_plugin.cpp
  */
 
@@ -111,20 +111,14 @@ class BaxterGazeboRosControlPlugin :
       stop_controllers.push_back("right_joint_effort_controller");
       stop_controllers.push_back("right_joint_velocity_controller");
       stop_controllers.push_back("right_joint_position_controller");
-      //start_controllers.push_back("left_joint_gravity_controller");
-      //start_controllers.push_back("right_joint_gravity_controller");
-     std::cout<<"It is not enabled and is not isDisabled"<<std::endl;
       isDisabled = true;
       if (!controller_manager_->switchController(
-              start_controllers, stop_controllers,
-              controller_manager_msgs::SwitchController::Request::BEST_EFFORT)) {
-            ROS_ERROR_STREAM_NAMED("baxter_gazebo_ros_control_plugin",
-                                   "Failed to switch controllers");
-            std::cout<<"Inside controller manager fail"<<std::endl;
-          }
-      else {
+          start_controllers, stop_controllers,
+          controller_manager_msgs::SwitchController::Request::BEST_EFFORT)) {
+        ROS_ERROR_STREAM_NAMED("baxter_gazebo_ros_control_plugin",
+                               "Failed to switch controllers");
+      } else {
         //Resetting the command modes to the initial configuration
-        std::cout<<"Inside else loop"<<std::endl;
         right_command_mode_.mode = -1;
         left_command_mode_.mode = -1;
       }
@@ -137,14 +131,13 @@ class BaxterGazeboRosControlPlugin :
     //Check if we already received this command for this arm and bug out if so
     if (left_command_mode_.mode == msg->mode) {
       return;
-    } else if (enabled){
+    } else if (enabled) {
       left_command_mode_.mode = msg->mode;  //cache last mode
       modeCommandCallback(msg, "left");
-    }
-    else {
-    ROS_WARN_STREAM_NAMED("baxter_gazebo_ros_control_plugin",
-                          "Enable the robot");
-    return;
+    } else {
+      ROS_WARN_STREAM_NAMED("baxter_gazebo_ros_control_plugin",
+                            "Enable the robot");
+      return;
     }
   }
 
@@ -154,14 +147,13 @@ class BaxterGazeboRosControlPlugin :
     //Check if we already received this command for this arm and bug out if so
     if (right_command_mode_.mode == msg->mode) {
       return;
-    } else if (enabled){
+    } else if (enabled) {
       right_command_mode_.mode = msg->mode;  //cache last mode
       modeCommandCallback(msg, "right");
-    }
-    else {
-    ROS_WARN_STREAM_NAMED("baxter_gazebo_ros_control_plugin",
-                          "Enable the robot");
-    return;
+    } else {
+      ROS_WARN_STREAM_NAMED("baxter_gazebo_ros_control_plugin",
+                            "Enable the robot");
+      return;
     }
   }
 
@@ -177,29 +169,26 @@ class BaxterGazeboRosControlPlugin :
     std::vector < std::string > stop_controllers;
     isDisabled = false;
 
-      switch (msg->mode) {
-        case baxter_core_msgs::JointCommand::POSITION_MODE:
-          start_controllers.push_back(side + "_joint_position_controller");
-          //start_controllers.push_back(side + "_joint_gravity_controller");
-          stop_controllers.push_back(side + "_joint_velocity_controller");
-          stop_controllers.push_back(side + "_joint_effort_controller");
-          break;
-        case baxter_core_msgs::JointCommand::VELOCITY_MODE:
-          start_controllers.push_back(side + "_joint_velocity_controller");
-          //start_controllers.push_back(side + "_joint_gravity_controller");
-          stop_controllers.push_back(side + "_joint_position_controller");
-          stop_controllers.push_back(side + "_joint_effort_controller");
-          break;
-        case baxter_core_msgs::JointCommand::TORQUE_MODE:
-          start_controllers.push_back(side + "_joint_effort_controller");
-          //start_controllers.push_back(side + "_joint_gravity_controller");
-          stop_controllers.push_back(side + "_joint_position_controller");
-          stop_controllers.push_back(side + "_joint_velocity_controller");
-          break;
-        default:
-          ROS_ERROR_STREAM_NAMED("baxter_gazebo_ros_control_plugin",
-                                 "Unknown command mode " << msg->mode);
-          return;
+    switch (msg->mode) {
+      case baxter_core_msgs::JointCommand::POSITION_MODE:
+        start_controllers.push_back(side + "_joint_position_controller");
+        stop_controllers.push_back(side + "_joint_velocity_controller");
+        stop_controllers.push_back(side + "_joint_effort_controller");
+        break;
+      case baxter_core_msgs::JointCommand::VELOCITY_MODE:
+        start_controllers.push_back(side + "_joint_velocity_controller");
+        stop_controllers.push_back(side + "_joint_position_controller");
+        stop_controllers.push_back(side + "_joint_effort_controller");
+        break;
+      case baxter_core_msgs::JointCommand::TORQUE_MODE:
+        start_controllers.push_back(side + "_joint_effort_controller");
+        stop_controllers.push_back(side + "_joint_position_controller");
+        stop_controllers.push_back(side + "_joint_velocity_controller");
+        break;
+      default:
+        ROS_ERROR_STREAM_NAMED("baxter_gazebo_ros_control_plugin",
+                               "Unknown command mode " << msg->mode);
+        return;
     }
     //Checks if we have already disabled the controllers
     /** \brief Switch multiple controllers simultaneously.

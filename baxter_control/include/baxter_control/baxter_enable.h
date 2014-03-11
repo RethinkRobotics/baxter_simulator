@@ -74,7 +74,7 @@ class baxter_enable {
  private:
   bool enable;
   ros::Subscriber enable_sub_, stop_sub_, reset_sub_, left_grav, right_grav,
-      left_laser_sub, right_laser_sub, nav_light_sub;
+      left_laser_sub, right_laser_sub, nav_light_sub, head_nod_sub;
 
   ros::Publisher assembly_state_pub_, left_grip_st_pub_, right_grip_st_pub_,
       left_grip_prop_pub_, right_grip_prop_pub_, left_ir_pub, right_ir_pub,
@@ -131,6 +131,11 @@ class baxter_enable {
    * Callback function to update the navigators' light values
    */
   void nav_light_cb(const baxter_core_msgs::DigitalOutputCommand &msg);
+
+  /**
+   * Callback function to capture if the head is nodding
+   */
+  void head_nod_cb(const std_msgs::Bool &msg);
 
   /**
    * Method that updates the gravity variable

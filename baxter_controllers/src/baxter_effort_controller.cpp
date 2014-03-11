@@ -141,6 +141,7 @@ bool BaxterEffortController::init(
 
 void BaxterEffortController::starting(const ros::Time& time)
 {
+ // std::cout<<"Starting the effort controllers"<<std::endl;
 	for(int i=0; i<n_joints_; i++)
  	  effort_controllers_[i]->starting(time);
 }
@@ -168,11 +169,10 @@ void BaxterEffortController::commandCB(const baxter_core_msgs::JointCommandConst
 //Check if the number of joints and effort values are equal
 if( msg->command.size() != msg->names.size() )
   {
-    ROS_ERROR_STREAM_NAMED("update","List of names does not match list of velocities size, "
+    ROS_ERROR_STREAM_NAMED("update","List of names does not match list of efforts size, "
       << msg->command.size() << " != " << msg->names.size() );
     return;
   }
-
 
 std::map<std::string,std::size_t>::iterator name_it;
   // Map incoming joint names and effort values to the correct internal ordering
@@ -183,10 +183,8 @@ std::map<std::string,std::size_t>::iterator name_it;
 
     if( name_it != joint_to_index_map_.end() )
     {
-	
       // Joint is in the map, so we'll update the joint effort
 	m.data=msg->command[i];
-
       // Publish the joint effort to the corresponding joint controller
       effort_command_pub_[name_it->second].publish( m );
     }

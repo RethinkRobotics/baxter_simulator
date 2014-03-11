@@ -50,7 +50,6 @@ bool QNode::init() {
 	}
 	ros::start(); // explicitly needed since our nodehandle is going out of scope.
 	ros::NodeHandle n;
-	std::cout<<"Into the init "<<std::endl;
 	left_itb = n.advertise<baxter_core_msgs::ITBState>
 			("/robot/itb/left_itb/state", 1);
 	right_itb = n.advertise<baxter_core_msgs::ITBState>
@@ -130,7 +129,7 @@ void QNode::run() {
                         ros::spinOnce();
                         loop_rate.sleep();
 	}
-	std::cout << "Ros shutdown, proceeding to close the gui." << std::endl;
+	ROS_INFO("Ros shutdown, proceeding to close the gui.");
 }
 
 }  // namespace qt_controls

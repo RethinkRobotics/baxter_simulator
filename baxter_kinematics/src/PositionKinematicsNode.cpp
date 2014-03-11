@@ -201,7 +201,6 @@ void quitRequested(int) {
  * command line arguments, then control loop (calling run() on Node)
  */
 int main(int argc, char* argv[]) {
-  std::cout << "Int is called +++++++++++" << std::endl;
   std::string side = argc > 1 ? argv[1] : "";
   if (side != "left" && side != "right") {
     fprintf(stderr, "Usage: %s <left | right>\n", argv[0]);
