@@ -57,14 +57,8 @@
 #include <baxter_core_msgs/HeadState.h>
 #include <sensor_msgs/JointState.h>
 #include <arm_kinematics.h>
-//#include <boost/interprocess/shared_memory_object.hpp>
-//#include <boost/interprocess/mapped_region.hpp>
-//#include <boost/interprocess/sync/interprocess_semaphore.hpp>
-#include <boost/interprocess/managed_shared_memory.hpp> 
 
 namespace baxter_en {
-extern std::vector<double> grav_cmd;
-extern std::vector<std::string> grav_name;
 
 class baxter_enable {
 
@@ -73,35 +67,12 @@ class baxter_enable {
    * Method to initialize the default values for all the variables, instantiate the publishers and 	* subscribers
    * @param img_path that refers the path of the image that loads on start up
    */
-baxter_enable(std::vector<std::string> &joint_names, std::vector<double> &grav);
-  baxter_enable(){}
-
-  //baxter_enable(int &mut);
-
+  baxter_enable() {
+  }
   bool init(const std::string &img_path);
 
-  static int test;
-  static std::vector<double> left_grav_cmd, right_grav_cmd;
-  static std::vector<std::string> left_grav_name, right_grav_name;
-  static bool read_l, read_r;
-  static bool enable;
-  static baxter_core_msgs::DigitalIOState leftIL_nav_light, leftOL_nav_light,
-      torso_leftIL_nav_light, torso_leftOL_nav_light, rightIL_nav_light,
-      rightOL_nav_light, torso_rightIL_nav_light, torso_rightOL_nav_light;
-  static sensor_msgs::JointState JState_msg;
-//static int initial;
-static int testing, *tessting;
-  //static bool mutex;
-
-  //arm_kinematics::Kinematics kin;
  private:
-baxter_core_msgs::HeadState head_msg;
-std::pair<std::string*, std::size_t> pres;
-  int *mutex,ini, initial, *in;
-  //std::vector<std::string>>* i1;
-boost::interprocess::managed_shared_memory managed_shm;
-  std::vector<std::string>* jn_names;
-  std::vector<double>* grav_cmd;
+  bool enable;
   ros::Subscriber enable_sub_, stop_sub_, reset_sub_, left_grav, right_grav,
       left_laser_sub, right_laser_sub, nav_light_sub;
 
@@ -112,21 +83,23 @@ boost::interprocess::managed_shared_memory managed_shm;
       torso_right_innerL_pub, left_itb_outerL_pub, right_itb_outerL_pub,
       torso_left_outerL_pub, torso_right_outerL_pub, head_pub;
 
-  baxter_core_msgs::AssemblyState assembly_state_;
+  baxter_core_msgs::HeadState head_msg;
+  baxter_core_msgs::AssemblyState assembly_state;
   baxter_core_msgs::EndEffectorState left_grip_st, right_grip_st;
   baxter_core_msgs::EndEffectorProperties left_grip_prop, right_grip_prop;
-  sensor_msgs::Range left_ir, right_ir;
   baxter_core_msgs::AnalogIOState left_ir_state, right_ir_state;
+  baxter_core_msgs::DigitalIOState leftIL_nav_light, leftOL_nav_light,
+      torso_leftIL_nav_light, torso_leftOL_nav_light, rightIL_nav_light,
+      rightOL_nav_light, torso_rightIL_nav_light, torso_rightOL_nav_light;
+  sensor_msgs::JointState JState_msg;
+  sensor_msgs::Range left_ir, right_ir;
   std_msgs::UInt32 left_ir_int, right_ir_int;
-//boost::interprocess::mapped_region region;
-  ros::Timer timer_;
 
   /**
-   * Method to publish the loading image on baxter's screen and other publishers that were instantiated
+   * Method to start the publishers
    * @param Nodehandle to initialize the image transport
    * @param img_path that refers the path of the image that loads on start up
    */
-  //baxter_enable(bool *mutex);
   void publish(ros::NodeHandle &n, const std::string &img_path);
 
   /**
@@ -140,52 +113,31 @@ boost::interprocess::managed_shared_memory managed_shm;
   void stop_cb(const std_msgs::Empty &msg);
 
   /**
-   * Callback function to reset all the values to False and 0s
+   * Callback function to reset all the state values to False and 0s
    */
   void reset_cb(const std_msgs::Empty &msg);
 
+  /**
+   * Callback function to update the left laser values
+   */
   void left_laser_cb(const sensor_msgs::LaserScan &msg);
 
+  /**
+   * Callback function to update the right laser values
+   */
   void right_laser_cb(const sensor_msgs::LaserScan &msg);
 
+  /**
+   * Callback function to update the navigators' light values
+   */
   void nav_light_cb(const baxter_core_msgs::DigitalOutputCommand &msg);
 
   /**
-   * Callback function to read the left gravity comp values
-   */
-  void left_grav_cb(const baxter_core_msgs::JointCommand &msg);
-
-  /**
-   * Callback function to read the right gravity comp values
-   */
-  void right_grav_cb(const baxter_core_msgs::JointCommand &msg);
-
-  /**
-   * Method that updates the global gravity variable
+   * Method that updates the gravity variable
    */
   void update_grav(const sensor_msgs::JointState msg);
 
 };
-
-std::vector<double> baxter_enable::left_grav_cmd, baxter_enable::right_grav_cmd;
-std::vector<std::string> baxter_enable::left_grav_name,
-    baxter_enable::right_grav_name;
-bool baxter_enable::read_l = false;
-bool baxter_enable::read_r = false;
-//bool baxter_enable::mutex=true;
-bool baxter_enable::enable = false;
-baxter_core_msgs::DigitalIOState baxter_enable::leftIL_nav_light,
-    baxter_enable::leftOL_nav_light, baxter_enable::torso_leftIL_nav_light,
-    baxter_enable::torso_leftOL_nav_light, baxter_enable::rightIL_nav_light,
-    baxter_enable::rightOL_nav_light, baxter_enable::torso_rightIL_nav_light,
-    baxter_enable::torso_rightOL_nav_light;
-int baxter_enable::test = 0;
-sensor_msgs::JointState baxter_enable::JState_msg;
-int baxter_enable::testing=0;
-//int* baxter_enable::tessting=0;
-//baxter_enable::tessting=&baxter_enable::testing;
-//int baxter_enable::initial=0;
-//arm_kinematics::Kinematics m_kinematicsModel();
 }  // namespace
 
 #endif /* BAXTER_ENABLE_H_ */

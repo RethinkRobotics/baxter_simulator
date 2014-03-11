@@ -34,18 +34,9 @@
  */
 
 #include <baxter_control/baxter_enable.h>
-//#include <boost/interprocess/shared_memory_object.hpp>
-//#include <boost/interprocess/mapped_region.hpp>
-//#include <boost/interprocess/sync/interprocess_semaphore.hpp>
-#include <boost/interprocess/sync/interprocess_mutex.hpp>
-#include <boost/interprocess/sync/named_mutex.hpp> 
-#include <boost/interprocess/managed_shared_memory.hpp> 
-//#include "shared.cpp"
 
 namespace baxter_en{
-std::vector<double> grav_cmd;
-std::vector<std::string> grav_name;
-///bool mutex=true;
+
 //Topics to subscribe and publish
 static const std::string BAXTER_STATE_TOPIC = "/robot/state";
 static const std::string BAXTER_ENABLE_TOPIC = "/robot/set_super_enable";
@@ -91,15 +82,13 @@ static const int DELAY = 35; // Timeout for publishing a single RSDK image on st
  * @param img_path that refers the path of the image that loads on start up
  */
 bool baxter_enable::init(const std::string &img_path) {
-initial=0;
-in=&initial;
-std::cout<<"wait for some time-------------------adsd----------------------------------------"<<std::endl;
-  //Default values for the assembly state
-  assembly_state_.enabled = false;             // true if enabled
-  assembly_state_.stopped = false;            // true if stopped -- e-stop asserted
-  assembly_state_.error = false;              // true if a component of the assembly has an error
-  assembly_state_.estop_button = baxter_core_msgs::AssemblyState::ESTOP_BUTTON_UNPRESSED;      // button status
-  assembly_state_.estop_source = baxter_core_msgs::AssemblyState::ESTOP_SOURCE_NONE;     // If stopped is 										true, the source of the e-stop.
+
+//Default values for the assembly state
+  assembly_state.enabled = false;             // true if enabled
+  assembly_state.stopped = false;            // true if stopped -- e-stop asserted
+  assembly_state.error = false;              // true if a component of the assembly has an error
+  assembly_state.estop_button = baxter_core_msgs::AssemblyState::ESTOP_BUTTON_UNPRESSED;      // button status
+  assembly_state.estop_source = baxter_core_msgs::AssemblyState::ESTOP_SOURCE_NONE;     // If stopped is 										true, the source of the e-stop.
 
   //Default values for the left and right gripper end effector states
   left_grip_st.timestamp.sec=0;
@@ -141,23 +130,23 @@ std::cout<<"wait for some time-------------------adsd---------------------------
 
   right_grip_prop=left_grip_prop; // Sample values recorded on both the grippers to do the spoof
 
-  baxter_enable::leftIL_nav_light.isInputOnly=false;
-  baxter_enable::leftOL_nav_light.isInputOnly=false;
-  baxter_enable::torso_leftIL_nav_light.isInputOnly=false;
-  baxter_enable::torso_leftOL_nav_light.isInputOnly=false;
-  baxter_enable::rightIL_nav_light.isInputOnly=false;
-  baxter_enable::rightOL_nav_light.isInputOnly=false;
-  baxter_enable::torso_rightIL_nav_light.isInputOnly=false;
-  baxter_enable::torso_rightOL_nav_light.isInputOnly=false;
+  leftIL_nav_light.isInputOnly=false;
+  leftOL_nav_light.isInputOnly=false;
+  torso_leftIL_nav_light.isInputOnly=false;
+  torso_leftOL_nav_light.isInputOnly=false;
+  rightIL_nav_light.isInputOnly=false;
+  rightOL_nav_light.isInputOnly=false;
+  torso_rightIL_nav_light.isInputOnly=false;
+  torso_rightOL_nav_light.isInputOnly=false;
 
-  baxter_enable::leftIL_nav_light.state=baxter_core_msgs::DigitalIOState::OFF;
-  baxter_enable::leftOL_nav_light.state=baxter_core_msgs::DigitalIOState::OFF;
-  baxter_enable::torso_leftIL_nav_light.state=baxter_core_msgs::DigitalIOState::OFF;
-  baxter_enable::torso_leftOL_nav_light.state=baxter_core_msgs::DigitalIOState::OFF;
-  baxter_enable::rightIL_nav_light.state=baxter_core_msgs::DigitalIOState::OFF;
-  baxter_enable::rightOL_nav_light.state=baxter_core_msgs::DigitalIOState::OFF;
-  baxter_enable::torso_rightIL_nav_light.state=baxter_core_msgs::DigitalIOState::OFF;
-  baxter_enable::torso_rightOL_nav_light.state=baxter_core_msgs::DigitalIOState::OFF;
+  leftIL_nav_light.state=baxter_core_msgs::DigitalIOState::OFF;
+  leftOL_nav_light.state=baxter_core_msgs::DigitalIOState::OFF;
+  torso_leftIL_nav_light.state=baxter_core_msgs::DigitalIOState::OFF;
+  torso_leftOL_nav_light.state=baxter_core_msgs::DigitalIOState::OFF;
+  rightIL_nav_light.state=baxter_core_msgs::DigitalIOState::OFF;
+  rightOL_nav_light.state=baxter_core_msgs::DigitalIOState::OFF;
+  torso_rightIL_nav_light.state=baxter_core_msgs::DigitalIOState::OFF;
+  torso_rightOL_nav_light.state=baxter_core_msgs::DigitalIOState::OFF;
 
   head_msg.pan=0;
   head_msg.isPanning=false;
@@ -197,69 +186,12 @@ std::cout<<"wait for some time-------------------adsd---------------------------
   enable_sub_=n.subscribe(BAXTER_ENABLE_TOPIC,100,&baxter_enable::enable_cb,this);
   stop_sub_=n.subscribe(BAXTER_STOP_TOPIC,100,&baxter_enable::stop_cb,this);
   reset_sub_=n.subscribe(BAXTER_RESET_TOPIC,100,&baxter_enable::reset_cb,this);
- // left_grav=n.subscribe(BAXTER_LEFT_GRAVITY_TOPIC,100,&baxter_enable::left_grav_cb,this);
- // right_grav=n.subscribe(BAXTER_RIGHT_GRAVITY_TOPIC,100,&baxter_enable::right_grav_cb,this);
   right_grav=n.subscribe(BAXTER_JOINT_TOPIC,100,&baxter_enable::update_grav,this);
   left_laser_sub=n.subscribe(BAXTER_LEFT_LASER_TOPIC,100,&baxter_enable::left_laser_cb,this);
   right_laser_sub=n.subscribe(BAXTER_RIGHT_LASER_TOPIC,100,&baxter_enable::right_laser_cb,this);
   nav_light_sub=n.subscribe(BAXTER_NAV_LIGHT_TOPIC,100,&baxter_enable::nav_light_cb, this);
 
-
- /* boost::interprocess::shared_memory_object::remove("Highscore"); 
-  boost::interprocess::managed_shared_memory managed_shm(boost::interprocess::open_or_create, "Highscore", 1024); 
-  int *i = managed_shm.construct<int>("Integer")(99); */
-
-/*boost::interprocess::shared_memory_object::remove("Highscore"); 
-boost::interprocess::managed_shared_memory managed_shm(boost::interprocess::open_or_create, "Highscore", 1024);
-int *i = managed_shm.construct<int>("Integer")(99); */
-//baxter_enable::testing=1;
-//std::cout<<"Here iniside init testing is "<<baxter_enable::testing<<std::endl;
-//std::cout<<"The address is of var and ptr is "<<&baxter_enable::testing<<" "<<baxter_enable::tessting<<std::endl;
-//boost::interprocess::shared_memory_object::remove("str");
-//boost::interprocess::shared_memory_object shdmem(boost::interprocess::open_or_create, "Highscore", boost::interprocess::read_write); 
-/*shdmem=boost::interprocess::shared_memory_object(boost::interprocess::open_or_create, "Test", boost::interprocess::read_write); 
-  shdmem.truncate(1024); 
-  boost::interprocess::mapped_region region(shdmem, boost::interprocess::read_write); 
-i1 = static_cast<int*>(region.get_address());
-*i1 = 56;*/
-//std::vector<std::string> tst={"samp","text","terr","mean"};
-int ii=50;
-//managed_shm=boost::interprocess::managed_shared_memory(boost::interprocess::open_or_create, "Testt", 1024);
-//i1 = managed_shm.construct<std::vector<std::string>>("Integerr")(ii);
-
-std::cout<<"Write SIM---prob persists------"<<std::endl;
-/*do{
-managed_shm=boost::interprocess::managed_shared_memory(boost::interprocess::open_only, "str");
-pres= managed_shm.find<std::string>("String");
-}
-while(!pres.first);*/
-std::cout<<"After the do while "<<std::endl;
-
-//std::cout<<"Writing Sim __+++++++++++++++++++++++++++++"<<pres.first<<" "<<std::endl;
-std::cout<<"before deleting"<<std::endl;
-//managed_shm.destroy<std::string>("String");
-//std::cout<<"ibefore- and addr---------------------------------------------------------------------- "<<*i1<<std::endl;
-//while(*in != 1) {
-//std::cout<<"Waiting to be initialized"<<std::endl;
-//}
-std::cout<<"So theis is initialized......................................."<<std::endl;
-//kin=arm_kinematics::Kinematics();
-//kin.init_grav();
-
   baxter_enable::publish(n,img_path);
-
-}
-
-baxter_enable::baxter_enable(std::vector<std::string> &joint_names, std::vector<double> &grav) {
-jn_names=&joint_names;
-grav_cmd=&grav;
-//std::cout<<"Before waiting++++++++++++++++++++++++++++******************* "<<*baxter_enable::tessting<<std::endl;
-//std::cout<<"The address is of var and ptr is "<<&baxter_enable::testing<<" "<<baxter_enable::tessting<<std::endl;
-//while(!baxter_enable::testing){
-//}
-//baxter_en::baxter_enable::initial=1;
-*in=1;
-std::cout<<"initialized------------------------------------------------------------------------ "<<*in<<std::endl;
 }
 
 /**
@@ -268,39 +200,29 @@ std::cout<<"initialized---------------------------------------------------------
  * @param img_path that refers the path of the image that loads on start up
  */
 void baxter_enable::publish(ros::NodeHandle &n,const std::string &img_path) {
-std::cout<<"Not yet into the flow-------------------adsd----------------------------------------"<<std::endl;
   ros::Rate loop_rate(100);
   image_transport::ImageTransport it(n);
-  //image_transport::Publisher display_pub_ = it.advertise(BAXTER_DISPLAY_TOPIC, 1);
   arm_kinematics::Kinematics kin;
  kin.init_grav();
-  std::cout<<"Came out *^*(&(((((((((((((((((((((((((((((((((((((((&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"<<std::endl;
-  // Read OpenCV Mat image and convert it to ROS message
+
+ // Read OpenCV Mat image and convert it to ROS message
   cv_bridge::CvImagePtr cv_ptr(new cv_bridge::CvImage);
-std::cout<<"Updated to tils here:::::::::::::::::::::::::::::::::::::::::::::"<<std::endl;
   try
   {
     cv_ptr->image=cv::imread(img_path,CV_LOAD_IMAGE_UNCHANGED);
-    std::cout<<"Ing is read***********************"<<std::endl;
     if (cv_ptr->image.data)
     {
-     std::cout<<"Yes it is loaded$$$$$$$$$$$$$$$$$$$$$$$44"<<std::endl;
       cv_ptr->encoding = sensor_msgs::image_encodings::BGR8;
       //sleep(DELAY); // Wait for the model to load
-     // display_pub_.publish(cv_ptr->toImageMsg());
     }
-   std::cout<<"Outside image pub"<<std::endl;
   }
   catch(std::exception e)
   {
     ROS_WARN("Unable to load the startup picture to display on the display");
   }
-//boost::interprocess::interprocess_mutex *mtx = shdmem.find_or_construct<boost::interprocess::interprocess_mutex>("mtx")(); 
-//boost::interprocess::named_mutex named_mtx(boost::interprocess::open_or_create, "mtx"); 
-std::cout<<"going to publish assembly state&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&77"<<std::endl;
   while (ros::ok())
   {
-	assembly_state_pub_.publish(assembly_state_);
+	assembly_state_pub_.publish(assembly_state);
 	left_grip_st_pub_.publish(left_grip_st);
 	right_grip_st_pub_.publish(right_grip_st);
 	left_grip_prop_pub_.publish(left_grip_prop);
@@ -321,12 +243,8 @@ std::cout<<"going to publish assembly state&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
   torso_right_outerL_pub.publish(torso_rightIL_nav_light);
   head_pub.publish(head_msg);
   kin.getGravityTorques_n(baxter_enable::JState_msg);
-	//++(*i1);
       	ros::spinOnce();
       	loop_rate.sleep();
-//named_mtx.lock();
-	//*i1++;
-//named_mtx.unlock();
   }
 
 }
@@ -337,16 +255,16 @@ void baxter_enable::enable_cb(const std_msgs::Bool &msg)
 {
 
 	if (msg.data){
-	  assembly_state_.enabled=true;
+	  assembly_state.enabled=true;
 	}
 
 	else {
-	  assembly_state_.enabled=false;
+	  assembly_state.enabled=false;
 	}
-	assembly_state_.stopped=false;
-	assembly_state_.estop_button = baxter_core_msgs::AssemblyState::ESTOP_BUTTON_UNPRESSED;
-	assembly_state_.estop_source = baxter_core_msgs::AssemblyState::ESTOP_SOURCE_NONE;
-	baxter_enable::enable=assembly_state_.enabled;
+	assembly_state.stopped=false;
+	assembly_state.estop_button = baxter_core_msgs::AssemblyState::ESTOP_BUTTON_UNPRESSED;
+	assembly_state.estop_source = baxter_core_msgs::AssemblyState::ESTOP_SOURCE_NONE;
+	enable=assembly_state.enabled;
 }
 
 /**
@@ -354,11 +272,11 @@ void baxter_enable::enable_cb(const std_msgs::Bool &msg)
  */
 void baxter_enable::stop_cb(const std_msgs::Empty &msg)
 {
-	assembly_state_.enabled=false;
-	assembly_state_.stopped=true;
-	assembly_state_.estop_button = baxter_core_msgs::AssemblyState::ESTOP_BUTTON_UNPRESSED;
-	assembly_state_.estop_source = baxter_core_msgs::AssemblyState::ESTOP_SOURCE_BRAIN;
-	baxter_enable::enable=false;
+	assembly_state.enabled=false;
+	assembly_state.stopped=true;
+	assembly_state.estop_button = baxter_core_msgs::AssemblyState::ESTOP_BUTTON_UNPRESSED;
+	assembly_state.estop_source = baxter_core_msgs::AssemblyState::ESTOP_SOURCE_BRAIN;
+	enable=false;
 }
 
 /**
@@ -366,11 +284,11 @@ void baxter_enable::stop_cb(const std_msgs::Empty &msg)
  */
 void baxter_enable::reset_cb(const std_msgs::Empty &msg)
 {
-	assembly_state_.enabled=false;
-	assembly_state_.stopped=false;
-	assembly_state_.estop_button = baxter_core_msgs::AssemblyState::ESTOP_BUTTON_UNPRESSED;
-	assembly_state_.estop_source = baxter_core_msgs::AssemblyState::ESTOP_SOURCE_NONE;
-	baxter_enable::enable=false;
+	assembly_state.enabled=false;
+	assembly_state.stopped=false;
+	assembly_state.estop_button = baxter_core_msgs::AssemblyState::ESTOP_BUTTON_UNPRESSED;
+	assembly_state.estop_source = baxter_core_msgs::AssemblyState::ESTOP_SOURCE_NONE;
+	enable=false;
 }
 
 /**
@@ -390,16 +308,6 @@ void baxter_enable::left_laser_cb(const sensor_msgs::LaserScan &msg)
 	left_ir_state.value=left_ir.range/1000;
 	left_ir_state.isInputOnly=true;
 	left_ir_int.data=left_ir.range;
-	//if (baxter_enable::enable)
-		//{
-/*		left_ir_pub.publish(left_ir);
-		left_ir_state_pub.publish(left_ir_state);
-		left_ir_int_pub.publish(left_ir_int);
-		left_itb_innerL_pub.publish(leftIL_nav_light);
-		left_itb_outerL_pub.publish(rightIL_nav_light);
-		torso_left_innerL_pub.publish(torso_leftIL_nav_light);
-		torso_left_outerL_pub.publish(torso_rightIL_nav_light);*/
-		//}
 }
 
 /**
@@ -419,16 +327,6 @@ void baxter_enable::right_laser_cb(const sensor_msgs::LaserScan &msg)
 	right_ir_state.value=right_ir.range/1000;
 	right_ir_state.isInputOnly=true;
 	right_ir_int.data=right_ir.range;
-	//if (baxter_enable::enable)
-	//	{
-	/*	right_ir_pub.publish(right_ir);
-		right_ir_state_pub.publish(right_ir_state);
-		right_ir_int_pub.publish(right_ir_int);
-		right_itb_innerL_pub.publish(rightIL_nav_light);
-		right_itb_outerL_pub.publish(rightIL_nav_light);
-		torso_right_innerL_pub.publish(torso_rightIL_nav_light);
-		torso_right_outerL_pub.publish(torso_rightIL_nav_light);*/
-	//	}
 }
 
 
@@ -486,101 +384,17 @@ void baxter_enable::nav_light_cb(const baxter_core_msgs::DigitalOutputCommand &m
 		ROS_ERROR("Not a valid componenet id");
 	
 }
-void baxter_enable::left_grav_cb(const baxter_core_msgs::JointCommand &msg)
-{
-//std::cout<<"left "<<read_l<<std::endl;
-	if(!baxter_enable::read_l)
-	{
-		//std::cout<<"intoread_le"<<std::endl;
-	left_grav_cmd.resize(msg.command.size());
-	left_grav_name.resize(msg.names.size());
-	left_grav_cmd=msg.command;
-	left_grav_name=msg.names;
-	read_l=true;
-		//std::cout<<"last_l"<<std::endl;
-	//baxter_enable::update_grav();
-	}
-}
-
-void baxter_enable::right_grav_cb(const baxter_core_msgs::JointCommand &msg)
-{
-//std::cout<<"right "<<read_r<<std::endl;
-	if(!baxter_enable::read_r)
-	{
-		//std::cout<<"intoread_r"<<std::endl;
-	right_grav_cmd.resize(msg.command.size());
-	right_grav_name.resize(msg.names.size());
-	right_grav_cmd=msg.command;
-	right_grav_name=msg.names;
-	read_r=true;
-		//std::cout<<"last_r"<<std::endl;
-	//baxter_enable::update_grav();
-	}
-	
-}
 
 void baxter_enable::update_grav(const sensor_msgs::JointState msg)
 {
   bool isV;
-baxter_enable::JState_msg=msg;
+JState_msg=msg;
 for(int i=0;i<msg.name.size();i++) {
   if (msg.name[i]=="head_pan"){
     head_msg.pan=msg.position[i];
   }
 }
-  //static bool mutex;
- //isV=m_kinematicsModel.getGravityTorques_n(msg);
-	//std::cout<<"update called l and r are "<<baxter_enable::read_l<<" "<<baxter_enable::read_r<<std::endl;
-/*	if(baxter_enable::read_l && baxter_enable::read_r)
-	{
-	    std::cout<<"OOOOOOOOd------------------------------------"<<std::endl;
-
-	    //int samp=0;
-	    *mutex =10233;
-			//mutex=&samp;
-			grav_cmd.clear();
-			grav_name.clear();
-			grav_cmd.reserve(baxter_enable::left_grav_cmd.size()+baxter_enable::right_grav_cmd.size());
-			grav_cmd.insert(grav_cmd.end(),baxter_enable::left_grav_cmd.begin(),baxter_enable::left_grav_cmd.end());
-			grav_cmd.insert(grav_cmd.end(),baxter_enable::right_grav_cmd.begin(),baxter_enable::right_grav_cmd.end());
-			grav_name.reserve(baxter_enable::left_grav_name.size()+baxter_enable::right_grav_name.size());
-			grav_name.insert(grav_name.end(),baxter_enable::left_grav_name.begin(),baxter_enable::left_grav_name.end());
-			grav_name.insert(grav_name.end(),baxter_enable::right_grav_name.begin(),baxter_enable::right_grav_name.end());
-			//mutex=true;
-			baxter_enable::read_l=false;
-			baxter_enable::read_r=false;
-			std::cout<<"Address is "<<mutex<<" and value is "<<*mutex<<std::endl;
-			std::cout<<"the address of ini is "<<&ini<<std::endl;
-			//mutex =true;
-			//*mutex=samp;
-			//std::cout<<"After "<<*mutex<<std::endl;
-			//baxter_enable::test=1;
-//std::cout<<"for left and right "<<baxter_en::grav_name[0]<<" "<<baxter_en::grav_name[7]<<"-------------------------------------------------------------------------------"<<std::endl;
-	}*/
-	//if (baxter_enable::test==1)
-
-	//std::cout<<"Ingava"<<std::endl;
-	
 }
-/*baxter_enable::baxter_enable()
-{
- // std::cout<<"her "<<typeid(mutex).name()<<std::endl;
-  //int samp;
-  mutex=&ini;
-  //*mutex=10;
-  //std::cout<<"h "<<std::endl;
-}*/
-/*baxter_enable::baxter_enable(int &mut)
-{
-  mutex=&mut;
-  std::cout<<"Address at init is "<<&mut<<mutex<<std::endl;
-  std::cout<<"The values at init is "<<mut<<" "<<*mutex<<std::endl;
-}*/
-/*baxter_enable::baxter_enable(bool *mut)
-{
-*mut=*mutex;
-}*/
-
 
 }//namespace
 
@@ -589,16 +403,7 @@ int main(int argc, char *argv[])
   ros::init(argc, argv, "baxter_enable");
 
   std::string img_path = argc > 1 ? argv[1] : "";
-
- /* boost::interprocess::shared_memory_object shdmem(boost::interprocess::open_or_create, "Highscore", boost::interprocess::read_write); 
-  shdmem.truncate(1024); 
-  boost::interprocess::mapped_region region(shdmem, boost::interprocess::read_write); 
-  int *i1 = static_cast<int*>(region.get_address());*/
-  std::cout<<"hh "<<std::endl;
-std::cout<<"Ok main is init------------------adsd----------------------------------------"<<std::endl;
-  baxter_en::baxter_enable enable;
-  std::cout<<"vvh "<<std::endl;
-std::cout<<"calling the init---------------adsd----------------------------------------"<<std::endl;
+ baxter_en::baxter_enable enable;
   bool result=enable.init(img_path);
 
   return 0;
