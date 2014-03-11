@@ -94,7 +94,9 @@ static int testing, *tessting;
 
   //arm_kinematics::Kinematics kin;
  private:
-  int *mutex,ini, initial, *in, *i1;
+std::pair<std::string*, std::size_t> pres;
+  int *mutex,ini, initial, *in;
+  //std::vector<std::string>>* i1;
 boost::interprocess::managed_shared_memory managed_shm;
   std::vector<std::string>* jn_names;
   std::vector<double>* grav_cmd;
@@ -116,6 +118,7 @@ boost::interprocess::managed_shared_memory managed_shm;
   std_msgs::UInt32 left_ir_int, right_ir_int;
 //boost::interprocess::mapped_region region;
   ros::Timer timer_;
+
   /**
    * Method to publish the loading image on baxter's screen and other publishers that were instantiated
    * @param Nodehandle to initialize the image transport

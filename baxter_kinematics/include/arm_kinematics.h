@@ -48,6 +48,13 @@
 #include <urdf/model.h>
 #include <sensor_msgs/JointState.h>
 #include <std_msgs/Bool.h>
+#include <boost/interprocess/managed_shared_memory.hpp>
+#include <boost/interprocess/sync/interprocess_mutex.hpp>
+#include <boost/interprocess/containers/vector.hpp>
+#include <boost/interprocess/containers/string.hpp>
+#include <boost/interprocess/allocators/allocator.hpp>
+#include <boost/interprocess/sync/interprocess_mutex.hpp>
+#include <boost/interprocess/sync/named_mutex.hpp>
 
 namespace arm_kinematics {
 
@@ -64,7 +71,7 @@ typedef struct fkr{
 class Kinematics {
     public:
         Kinematics();
-        Kinematics(std::vector<std::string> &joint_names,std::vector<double> &gravity);
+        bool init_grav();
 	
 	/* Initializes the solvers and the other variables required
 	*  @returns true is successful
@@ -119,6 +126,8 @@ class Kinematics {
         tf::TransformListener tf_listener;
         std::vector<double> *torquesOut;
         int indd[];
+        std::vector<std::string> left_joint,right_joint;
+//std::string[] left_joint;
 	
 	//arm_kinematics::KinematicSolverInfo info;
 KinematicSolverInfo info,grav_info_l,grav_info_r;
@@ -142,6 +151,19 @@ KinematicSolverInfo info,grav_info_l,grav_info_r;
 	*  @returns the index of the segment
 	*/
         int getKDLSegmentIndex(const std::string &name);
+
+        typedef boost::interprocess::allocator<char, boost::interprocess::managed_shared_memory::segment_manager>
+            CharAllocator;
+         typedef boost::interprocess::allocator<double, boost::interprocess::managed_shared_memory::segment_manager>
+            DoubleAllocator;
+         typedef boost::interprocess::basic_string<char, std::char_traits<char>, CharAllocator>
+            MyShmString;
+         typedef boost::interprocess::allocator<MyShmString, boost::interprocess::managed_shared_memory::segment_manager>
+            StringAllocator;
+         typedef boost::interprocess::vector<MyShmString, StringAllocator>
+            MyShmStringVector;
+         typedef boost::interprocess::vector<double, DoubleAllocator>
+            MyDoubleVector;
 };
 
 }

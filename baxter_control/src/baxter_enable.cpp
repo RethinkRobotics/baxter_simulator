@@ -208,22 +208,36 @@ int *i = managed_shm.construct<int>("Integer")(99); */
 //baxter_enable::testing=1;
 //std::cout<<"Here iniside init testing is "<<baxter_enable::testing<<std::endl;
 //std::cout<<"The address is of var and ptr is "<<&baxter_enable::testing<<" "<<baxter_enable::tessting<<std::endl;
-boost::interprocess::shared_memory_object::remove("Testt"); 
+//boost::interprocess::shared_memory_object::remove("str");
 //boost::interprocess::shared_memory_object shdmem(boost::interprocess::open_or_create, "Highscore", boost::interprocess::read_write); 
 /*shdmem=boost::interprocess::shared_memory_object(boost::interprocess::open_or_create, "Test", boost::interprocess::read_write); 
   shdmem.truncate(1024); 
   boost::interprocess::mapped_region region(shdmem, boost::interprocess::read_write); 
 i1 = static_cast<int*>(region.get_address());
 *i1 = 56;*/
-managed_shm=boost::interprocess::managed_shared_memory(boost::interprocess::open_or_create, "Testt", 1024);
-i1 = managed_shm.construct<int>("Integerr")(54); 
+//std::vector<std::string> tst={"samp","text","terr","mean"};
+int ii=50;
+//managed_shm=boost::interprocess::managed_shared_memory(boost::interprocess::open_or_create, "Testt", 1024);
+//i1 = managed_shm.construct<std::vector<std::string>>("Integerr")(ii);
 
-std::cout<<"ibefore- and addr---------------------------------------------------------------------- "<<*i1<<std::endl;
+std::cout<<"Write SIM---prob persists------"<<std::endl;
+/*do{
+managed_shm=boost::interprocess::managed_shared_memory(boost::interprocess::open_only, "str");
+pres= managed_shm.find<std::string>("String");
+}
+while(!pres.first);*/
+std::cout<<"After the do while "<<std::endl;
+
+//std::cout<<"Writing Sim __+++++++++++++++++++++++++++++"<<pres.first<<" "<<std::endl;
+std::cout<<"before deleting"<<std::endl;
+//managed_shm.destroy<std::string>("String");
+//std::cout<<"ibefore- and addr---------------------------------------------------------------------- "<<*i1<<std::endl;
 //while(*in != 1) {
 //std::cout<<"Waiting to be initialized"<<std::endl;
 //}
 std::cout<<"So theis is initialized......................................."<<std::endl;
-//arm_kinematics::Kinematics kin(*jn_names, *grav_cmd);
+//kin=arm_kinematics::Kinematics();
+//kin.init_grav();
 
   baxter_enable::publish(n,img_path);
 
@@ -251,7 +265,9 @@ std::cout<<"Not yet into the flow-------------------adsd------------------------
   ros::Rate loop_rate(100);
   image_transport::ImageTransport it(n);
   //image_transport::Publisher display_pub_ = it.advertise(BAXTER_DISPLAY_TOPIC, 1);
-
+  arm_kinematics::Kinematics kin;
+  kin.init_grav();
+  std::cout<<"Came out *^*(&(((((((((((((((((((((((((((((((((((((((&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"<<std::endl;
   // Read OpenCV Mat image and convert it to ROS message
   cv_bridge::CvImagePtr cv_ptr(new cv_bridge::CvImage);
 std::cout<<"Updated to tils here:::::::::::::::::::::::::::::::::::::::::::::"<<std::endl;
@@ -282,8 +298,22 @@ std::cout<<"going to publish assembly state&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 	right_grip_st_pub_.publish(right_grip_st);
 	left_grip_prop_pub_.publish(left_grip_prop);
 	right_grip_prop_pub_.publish(right_grip_prop);
-  //kin.getGravityTorques_n(baxter_enable::JState_msg);
-	++(*i1);
+  left_ir_pub.publish(left_ir);
+  left_ir_state_pub.publish(left_ir_state);
+  left_ir_int_pub.publish(left_ir_int);
+  left_itb_innerL_pub.publish(leftIL_nav_light);
+  left_itb_outerL_pub.publish(rightIL_nav_light);
+  torso_left_innerL_pub.publish(torso_leftIL_nav_light);
+  torso_left_outerL_pub.publish(torso_rightIL_nav_light);
+  right_ir_pub.publish(right_ir);
+  right_ir_state_pub.publish(right_ir_state);
+  right_ir_int_pub.publish(right_ir_int);
+  right_itb_innerL_pub.publish(rightIL_nav_light);
+  right_itb_outerL_pub.publish(rightIL_nav_light);
+  torso_right_innerL_pub.publish(torso_rightIL_nav_light);
+  torso_right_outerL_pub.publish(torso_rightIL_nav_light);
+  kin.getGravityTorques_n(baxter_enable::JState_msg);
+	//++(*i1);
       	ros::spinOnce();
       	loop_rate.sleep();
 //named_mtx.lock();
@@ -354,13 +384,13 @@ void baxter_enable::left_laser_cb(const sensor_msgs::LaserScan &msg)
 	left_ir_int.data=left_ir.range;
 	//if (baxter_enable::enable)
 		//{
-		left_ir_pub.publish(left_ir);
+/*		left_ir_pub.publish(left_ir);
 		left_ir_state_pub.publish(left_ir_state);
 		left_ir_int_pub.publish(left_ir_int);
 		left_itb_innerL_pub.publish(leftIL_nav_light);
 		left_itb_outerL_pub.publish(rightIL_nav_light);
 		torso_left_innerL_pub.publish(torso_leftIL_nav_light);
-		torso_left_outerL_pub.publish(torso_rightIL_nav_light);
+		torso_left_outerL_pub.publish(torso_rightIL_nav_light);*/
 		//}
 }
 
@@ -383,13 +413,13 @@ void baxter_enable::right_laser_cb(const sensor_msgs::LaserScan &msg)
 	right_ir_int.data=right_ir.range;
 	//if (baxter_enable::enable)
 	//	{
-		right_ir_pub.publish(right_ir);
+	/*	right_ir_pub.publish(right_ir);
 		right_ir_state_pub.publish(right_ir_state);
 		right_ir_int_pub.publish(right_ir_int);
 		right_itb_innerL_pub.publish(rightIL_nav_light);
 		right_itb_outerL_pub.publish(rightIL_nav_light);
 		torso_right_innerL_pub.publish(torso_rightIL_nav_light);
-		torso_right_outerL_pub.publish(torso_rightIL_nav_light);
+		torso_right_outerL_pub.publish(torso_rightIL_nav_light);*/
 	//	}
 }
 
