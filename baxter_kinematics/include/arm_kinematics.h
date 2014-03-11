@@ -125,7 +125,7 @@ class Kinematics {
 
         tf::TransformListener tf_listener;
         std::vector<double> *torquesOut;
-        int indd[];
+        std::vector<int> indd;
         std::vector<std::string> left_joint,right_joint;
 //std::string[] left_joint;
 	

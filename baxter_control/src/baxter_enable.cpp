@@ -273,7 +273,7 @@ std::cout<<"Not yet into the flow-------------------adsd------------------------
   image_transport::ImageTransport it(n);
   //image_transport::Publisher display_pub_ = it.advertise(BAXTER_DISPLAY_TOPIC, 1);
   arm_kinematics::Kinematics kin;
- // kin.init_grav();
+ kin.init_grav();
   std::cout<<"Came out *^*(&(((((((((((((((((((((((((((((((((((((((&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"<<std::endl;
   // Read OpenCV Mat image and convert it to ROS message
   cv_bridge::CvImagePtr cv_ptr(new cv_bridge::CvImage);
@@ -320,7 +320,7 @@ std::cout<<"going to publish assembly state&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
   torso_right_innerL_pub.publish(torso_rightIL_nav_light);
   torso_right_outerL_pub.publish(torso_rightIL_nav_light);
   head_pub.publish(head_msg);
- // kin.getGravityTorques_n(baxter_enable::JState_msg);
+  kin.getGravityTorques_n(baxter_enable::JState_msg);
 	//++(*i1);
       	ros::spinOnce();
       	loop_rate.sleep();

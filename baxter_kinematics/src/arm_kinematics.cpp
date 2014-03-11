@@ -42,77 +42,50 @@ Kinematics::Kinematics(): nh_private ("~") {
 
 bool Kinematics::init_grav()
 {
-  std::cout<<"Befpre remove"<<std::endl;
-  boost::interprocess::shared_memory_object::remove("MySharedMemory");
-  std::cout<<"could not delete the memory"<<std::endl;
+//Inititalize the shared memory object and remove any existing ones
+boost::interprocess::shared_memory_object::remove("MySharedMemory");
 boost::interprocess::managed_shared_memory shm(boost::interprocess::open_or_create, "MySharedMemory",10000);
-std::cout<<"could not open this since it does exit"<<std::endl;
-
 StringAllocator stringallocator(shm.get_segment_manager());
-
 std::pair<MyShmStringVector*,std::size_t> myshmvector = shm.find<MyShmStringVector>("joint_vector");
 
-//std::pair<MyShmStringVector*,std::size_t> myshmvector = shm.find<MyShmStringVector>("myshmvector");
-//std::pair<MyShmStringVector*,std::size_t> myshmvector = shm.find<MyShmStringVector>("myshmvector");
-std::cout<<"Before the while loop*****************************"<<std::endl;
-//boost::interprocess::named_mutex named_mtx(boost::interprocess::open_or_create, "mutex");
-//boost::interprocess::interprocess_mutex mutex;
+//Create a mutex object to establish synchronization between the shared memory access
 boost::interprocess::named_mutex::remove("mtx");
 boost::interprocess::named_mutex mutex(boost::interprocess::open_or_create, "mtx");
+
+//Wait to check for the shared memroy object to be created by the other process
 while(true)
 {
- // boost::interprocess::shared_memory_object::remove("MySharedMemory");
   boost::interprocess::managed_shared_memory shm(boost::interprocess::open_or_create, "MySharedMemory",10000);
-
   std::pair<MyShmStringVector*,std::size_t> myshmvector = shm.find<MyShmStringVector>("joint_vector");
-  //std::cout<<"The vector val is "<<myshmvector.first<<std::endl;
   if (myshmvector.first)
       break;
   }
+
+//Acquire the lock to read the joint_names once the other process updates it
 boost::interprocess::scoped_lock<boost::interprocess::named_mutex> lock(mutex);
-
-std::cout<<"After the while loop _______________________________________________________"<<std::endl;
-//named_mtx.lock();
-
-MyShmStringVector* myshmvecto = shm.find_or_construct<MyShmStringVector>("joint_vector")(stringallocator);
-//boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lock(myshmvecto->mutex);
-std::cout<<"after the wait&&&&&&&"<<std::endl;
-//std::cout<<myshmvecto.first<<std::endl;
-std::cout<<myshmvecto->at(3)<<std::endl;
 MyShmStringVector* joint_names = shm.find_or_construct<MyShmStringVector>("joint_vector")(stringallocator);
 
-
-//torquesOut->resize(gravity.size());
- //torquesOut=&gravity;
-
  std::string urdf_xml, full_urdf_xml;
-     //tip_name=tip;
      nh.param("urdf_xml",urdf_xml,std::string("robot_description"));
      nh.searchParam(urdf_xml,full_urdf_xml);
      ROS_DEBUG("Reading xml file from parameter server");
      std::string result;
      if (!nh.getParam(full_urdf_xml, result)) {
          ROS_FATAL("Could not load the xml from parameter server: %s", urdf_xml.c_str());
-         //return false;
+         return false;
      }
 
-    /* if (!nh.getParam("grav_root_name", root_name)) {
-         ROS_FATAL("GenericIK: No root name for gravity found on parameter server");
-        // return false;
-     }*/
      if (!nh.getParam("grav_left_name", tip_name)) {
          ROS_FATAL("GenericIK: No tip name for gravity found on parameter server");
-        // return false;
+        return false;
      }
      if (!nh.getParam("grav_right_name", root_name)) {
          ROS_FATAL("GenericIK: No tip name for gravity found on parameter server");
-        // return false;
+         return false;
      }
-     root_name="torso";
-
      tip_name="right_wrist";
-     std::cout<<"the root name is "<<root_name<<std::endl;
-     std::cout<<"the tip name is "<<tip_name<<std::endl;
+     //std::cout<<"the root name is "<<root_name<<std::endl;
+     //std::cout<<"the tip name is "<<tip_name<<std::endl;
 
      if (!loadModel(result)) {
          ROS_FATAL("Could not load models!");
@@ -121,34 +94,34 @@ MyShmStringVector* joint_names = shm.find_or_construct<MyShmStringVector>("joint
      grav_chain_r=chain;
      grav_info_r=info;
      right_joint.clear();
-
      right_joint.reserve(num_joints);
      for (int i=0;i<info.joint_names.size();i++)
      {
        right_joint.push_back(info.joint_names[i]);
-       std::cout<<"Testing at right joint "<<right_joint[i]<<std::endl;
+       std::cout<<"Testing at right joint "<<right_joint.at(i)<<std::endl;
      }
 gravity_solver_r = new KDL::ChainIdSolver_RNE(grav_chain_r,KDL::Vector(0.0,0.0,-9.8));
      //tip_name=left_name;
      tip_name="left_wrist";
-     std::cout<<"the root1 name is "<<root_name<<std::endl;
-     std::cout<<"the tip1 name is "<<tip_name<<std::endl;
+     //std::cout<<"the root1 name is "<<root_name<<std::endl;
+     //std::cout<<"the tip1 name is "<<tip_name<<std::endl;
      if (!loadModel(result)) {
          ROS_FATAL("Could not load models!");
        //  return false;
      }
      grav_chain_l=chain;
      //grav_info_l=info;
-    left_joint.clear();
+     left_joint.clear();
      left_joint.reserve(num_joints);
 
+     //std::cout <<" First left joint size = " << left_joint.size() << std::endl;
      for (int i=0;i<info.joint_names.size();i++)
      {
        left_joint.push_back(info.joint_names[i]);
-       std::cout<<"Testing at left joint "<<left_joint[i]<<std::endl;
-
+       std::cout<<"Testing at left joint "<<left_joint.at(i)<<std::endl;
      }
-gravity_solver_l = new KDL::ChainIdSolver_RNE(grav_chain_l,KDL::Vector(0.0,0.0,-9.8));
+     //std::cout <<" Second left joint size = " << left_joint.size() << std::endl;
+     gravity_solver_l = new KDL::ChainIdSolver_RNE(grav_chain_l,KDL::Vector(0.0,0.0,-9.8));
      //root_name="torso";
 
      //num_joints=chain.getNrOfJoints();
@@ -156,33 +129,54 @@ gravity_solver_l = new KDL::ChainIdSolver_RNE(grav_chain_l,KDL::Vector(0.0,0.0,-
      std::cout<<"LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL"<<std::endl;
      std::cout<<"So the joint_names-> size is -----------------------"<<joint_names->size()<<std::endl;
      //sleep(5);
-     std::cout<<"The left grav is "<<left_joint[1]<<std::endl;
-     std::cout<<"The right grav is "<<right_joint[1]<<std::endl;
+     //std::cout<<"The left grav is "<<left_joint.at(1)<<std::endl;
+     //std::cout<<"The right grav is "<<right_joint.at(1)<<std::endl;
     //try{
+     indd.reserve(joint_names->size());
      for(int k=0;k<joint_names->size();k++)
-     {
+     { int flag=0;
        std::cout<<" the joints are************************************* "<<joint_names->at(k).c_str()<<std::endl;
        for(int kk=0;kk<num_joints;kk++){
-         std::cout<<" the joints are "<<right_joint[kk]<<" "<<left_joint[kk]<<std::endl;
-         if(joint_names->at(k).c_str()==left_joint[kk]){
-           indd[k]=kk;
-           std::cout<<"inside left and so breaking with indd[k] as "<<indd[k]<<std::endl;
-           break;
-         }
-         else if(joint_names->at(k).c_str()==right_joint[kk]){
-           indd[k]=kk+num_joints;
-           std::cout<<"inside right and so breaking with indd[k] as "<<indd[k]<<std::endl;
+         /*std::cout <<" num_joints = " << num_joints << std::endl;
+         std::cout<<" kk Value is = " << kk << std::endl;
+         std::cout<<" right joint size = " << right_joint.size() << std::endl;
+         std::cout<<" left joint size = " << left_joint.size() << std::endl;
+         std::cout<<" the right joint is "<<right_joint.at(kk)<<std::endl;
+         std::cout<<" the left joint is "<<left_joint.at(kk)<<std::endl;
+         std::cout<<" **left joint size = " << left_joint.size() << std::endl;
+         std::cout<<"the address right "<<&right_joint<<std::endl;
+         std::cout<<"the address left "<<&left_joint<<std::endl;
+         std::cout<<"the address num_joints "<<&num_joints<<std::endl;
+         std::cout<<"the address indd "<<&indd<<std::endl;
+         std::cout<<"the address joint_names "<<joint_names<<std::endl;*/
 
+         if(joint_names->at(k).c_str()==left_joint.at(kk)){
+           //indd[k]=kk+num_joints;
+           indd.push_back(kk);
+           std::cout<<"inside left and so breaking with indd[k] as "<<indd[k]<<std::endl;
+           flag=1;
            break;
          }
-         //else
-           //indd[k]=-1;
+         else if(joint_names->at(k).c_str()==right_joint.at(kk)){
+          // std::cout<<"***left joint size = " << left_joint.size() << std::endl;
+          // std::cout<<"index value before = " << indd[k] << std::endl;
+           //indd[k]=kk;
+           indd.push_back(kk+num_joints);
+           std::cout<<"inside right and so breaking with indd[k] as "<<indd[k]<<std::endl;
+          // std::cout << "In right joint access - left joint size = " << left_joint.size() << std::endl;
+           flag=1;
+           break;
+         }
 
        }
-       std::cout<<"The summary is for k is "<<k<<" the match is at "<<indd[k]<<std::endl;
+     //  std::cout <<"Broke out to here 1 - "<< left_joint.size() << std::endl;
+       if (flag==0)
+          indd.push_back(-1);
+       std::cout<<"The summary is for joint at k="<<"k"<<" the match (indd[k]) is at "<<indd[k]<<std::endl;
 
      }
-for (unsigned int j=0; j < joint_names->size(); j++) {
+    // std::cout <<"Broke out to here 2 - " << left_joint.size() << std::endl;
+/*for (unsigned int j=0; j < joint_names->size(); j++) {
   std::cout<<"The joint names from the def file is ---------"<<joint_names->at(j).c_str()<<std::endl;
      for (unsigned int i=0; i < num_joints; i++) { 
        std::cout<<"Into the second loop whrere num joints and i is"<<num_joints<<" "<<i<<std::endl;
@@ -213,7 +207,7 @@ for (unsigned int j=0; j < joint_names->size(); j++) {
 	}
      }
    //  std::cout<<"for j indd[j] is "<<j<<" "<<indd[j]<<std::endl;
-     }
+     }*/
      //}
 
 //named_mtx.unlock();
@@ -437,7 +431,7 @@ bool arm_kinematics::Kinematics::getGravityTorques_n(const sensor_msgs::JointSta
   DoubleAllocator dblallocator (shm.get_segment_manager());
   MyDoubleVector* gravity_cmd = shm.find_or_construct<MyDoubleVector>("grav_vector")(dblallocator);
   boost::interprocess::named_mutex named_mtx(boost::interprocess::open_or_create, "mtx");
-  std::cout<<"The problem is in gravity and joint config size is "<<joint_configuration.name.size()<<std::endl;
+ // std::cout<<"The problem is in gravity and joint config size is "<<joint_configuration.name.size()<<std::endl;
 
 bool res;
   KDL::JntArray torques_l,torques_r;
@@ -460,23 +454,29 @@ bool res;
   for (unsigned int j=0; j < joint_configuration.name.size(); j++) {
  // int tmp_index = getJointIndex(joint_configuration.name[i]);
      //   if (tmp_index >=0)
-    std::cout<<"For joint config name ---------------------"<<joint_configuration.name[j]<<std::endl;
+ std::cout<<"For j="<<j<<" joint config name ---------------------"<<joint_configuration.name[j]<<std::endl;
 	for (unsigned int i=0; i < num_joints; i++) { 
-    std::cout<<"the grav l and grav r are ---------------------"<<left_joint[i]<<" "<<grav_info_r.joint_names[i]<<std::endl;
+ std::cout<<"For i="<<i<<" the grav l and grav r are ---------------------"<<left_joint.at(i)<<" "<<right_joint.at(i)<<std::endl;
 
-	 if (joint_configuration.name[j]==left_joint[i]){
+	 if (joint_configuration.name[j]==left_joint.at(i)){
 jntPosIn_l(i) = joint_configuration.position[j];
+std::cout<<"Inside left and so jnt posln is "<<jntPosIn_l(i)<<std::endl;
    break;
 }
-else if (joint_configuration.name[j]==grav_info_r.joint_names[i]){
+else if (joint_configuration.name[j]==right_joint.at(i)){
 jntPosIn_r(i) = joint_configuration.position[j];
+std::cout<<"Inside right and so jnt posln is "<<jntPosIn_r(i)<<std::endl;
+
    break;
 }
+	 std::cout<<"Did not break "<<std::endl;
     //jntPosIn(tmp_index) = joint_configuration.position[i];
     //ind[i]=tmp_index;
 }
+  std::cout<<"Broke out "<<std::endl;
+
     }
-  std::cout<<"Check point 2" <<std::endl;
+//  std::cout<<"Check point 2" <<std::endl;
 
 /*for (unsigned int j=0; j < joint_names.size(); j++) {
      for (unsigned int i=0; i < num_joints; i++) { 
@@ -499,46 +499,50 @@ jntPosIn_r(i) = joint_configuration.position[j];
   int code_l = gravity_solver_l->CartToJnt(jntPosIn_l, jntArrayNull, jntArrayNull, wrenchNull_l, torques_l);
   KDL::Wrenches wrenchNull_r(grav_chain_r.getNrOfSegments(), KDL::Wrench::Zero());
   int code_r = gravity_solver_r->CartToJnt(jntPosIn_r, jntArrayNull, jntArrayNull, wrenchNull_r, torques_r);
-  std::cout<<"The size is $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$444"<<gravity_cmd->size()<<std::endl;
+ // std::cout<<"The size is $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$444"<<gravity_cmd->size()<<std::endl;
   boost::interprocess::named_mutex mutex(boost::interprocess::open_or_create, "mutx");
-
+std::cout<<"The num joints are "<<num_joints<<std::endl;
+std::cout<<"The size of left vector is "<<left_joint.size()<<std::endl;
   if (code_l >= 0 && code_r >= 0)
-  {  std::cout<<"Check point 3" <<std::endl;
+  { // std::cout<<"Check point 3" <<std::endl;
 
    // named_mtx.lock();
     // copy torques into result
-    std::cout<<"Check point 4" <<std::endl;
+//    std::cout<<"Check point 4" <<std::endl;
 
     for (unsigned int i = 0; i < gravity_cmd->size(); i++)
     {
-      std::cout<<"Check point 5" <<std::endl;
+ //     std::cout<<"Check point 5" <<std::endl;
 
-      std::cout<<"The error is for "<<indd[i]<<std::endl;
+ //     std::cout<<"The error is for "<<indd[i]<<std::endl;
       if (indd[i]!=-1){
         boost::interprocess::scoped_lock<boost::interprocess::named_mutex> lock(mutex);
 	if (indd[i]<num_joints) {
   //(*torquesOut)[indd[i]]=torques_l(i);
-	   std::cout<<"Check point 6 "<<indd[i]<<std::endl;
 
 	  gravity_cmd->at(indd[i])=torques_l(i);
-    std::cout<<"The torque and gravity cmd is " <<torques_l(i)<<" "<< gravity_cmd->at(indd[i])<<std::endl;
+	  std::cout<<"inside left updates for i="<<i<<" the ind is "<<indd[i]<<std::endl;
+
+  // std::cout<<"The torque and gravity cmd is " <<torques_l(i)<<" "<< gravity_cmd->at(indd[i])<<std::endl;
 }
 	else {
-	   std::cout<<"Check point 2 at ind " <<indd[i]<<std::endl;
+	 //  std::cout<<"Check point 2 at ind " <<indd[i]<<std::endl;
   //(*torquesOut)[indd[i]]=torques_r(i);
-	   std::cout<<indd[i]<<std::endl;
+	  // std::cout<<indd[i]<<std::endl;
     gravity_cmd->at(indd[i])=torques_r(i);
-    std::cout<<"The torque and gravity cmd is " <<torques_l(i)<<" "<< gravity_cmd->at(indd[i])<<std::endl;
+   // std::cout<<"The torque and gravity cmd is " <<torques_l(i)<<" "<< gravity_cmd->at(indd[i])<<std::endl;
+    std::cout<<"inside right updates for i="<<i<<" the ind is "<<indd[i]<<std::endl;
+
 
 	}
-	std::cout<<"Summary:::::::::::::::::::::::::::::::: for index "<<i<<" indd[i] "<<indd[i]<<" the gravity_cmd->at(indd[i]) was "<<gravity_cmd->at(indd[i])<<std::endl;
+	//std::cout<<"Summary:::::::::::::::::::::::::::::::: for index "<<i<<" indd[i] "<<indd[i]<<" the gravity_cmd->at(indd[i]) was "<<gravity_cmd->at(indd[i])<<std::endl;
     }
       //else
       //  gravity_cmd->at(indd[i])=0;
 
     }
   //  named_mtx.unlock();
-    std::cout<<"After the updates ------------------------------------------------------------------------------------"<<gravity_cmd->at(3)<<std::endl;
+   // std::cout<<"After the updates -------------------------------------------------------------------------------------------------------------------------------------------"<<gravity_cmd->at(3)<<std::endl;
 
     return true;
   }
