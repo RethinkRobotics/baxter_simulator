@@ -5,8 +5,6 @@
   <param name="urdf"
 	 command="cat '$(find baxter_description)/urdf/baxter.urdf'" />
   <param name="root_name" value="torso" />
-  <!-- param name="tip_name" value="left_wrist" / -->
-  <param name="root_name" value="torso" />
   <param name="grav_right_name" value="right_wrist" />
   <param name="grav_left_name" value="left_wrist" />
   <node name="baxter_kinematics_left" pkg="baxter_kinematics" type="kinematics" respawn="false" output="screen" args="left">
