@@ -57,6 +57,7 @@
 #include <baxter_core_msgs/HeadState.h>
 #include <sensor_msgs/JointState.h>
 #include <arm_kinematics.h>
+#include <cmath>
 
 namespace baxter_en {
 
@@ -76,12 +77,15 @@ class baxter_enable {
   ros::Subscriber enable_sub_, stop_sub_, reset_sub_, left_grav, right_grav,
       left_laser_sub, right_laser_sub, nav_light_sub, head_nod_sub;
 
-  ros::Publisher assembly_state_pub_, left_grip_st_pub_, right_grip_st_pub_,
+  ros::Publisher assembly_state_pub_, left_grip_st_pub_, right_grip_st_pub_,//Group them based on types
       left_grip_prop_pub_, right_grip_prop_pub_, left_ir_pub, right_ir_pub,
       left_ir_int_pub, right_ir_int_pub, left_ir_state_pub, right_ir_state_pub,
       left_itb_innerL_pub, right_itb_innerL_pub, torso_left_innerL_pub,
       torso_right_innerL_pub, left_itb_outerL_pub, right_itb_outerL_pub,
       torso_left_outerL_pub, torso_right_outerL_pub, head_pub;
+
+  ros::NodeHandle n;
+  ros::Timer timer;
 
   baxter_core_msgs::HeadState head_msg;
   baxter_core_msgs::AssemblyState assembly_state;
@@ -100,7 +104,7 @@ class baxter_enable {
    * @param Nodehandle to initialize the image transport
    * @param img_path that refers the path of the image that loads on start up
    */
-  void publish(ros::NodeHandle &n, const std::string &img_path);
+  void publish(const std::string &img_path);
 
   /**
    * Callback function to enable the robot
@@ -140,7 +144,9 @@ class baxter_enable {
   /**
    * Method that updates the gravity variable
    */
-  void update_grav(const sensor_msgs::JointState msg);
+  void update_JntSt(const sensor_msgs::JointState msg);
+
+  void reset_head_nod(const ros::TimerEvent &t);
 
 };
 }  // namespace

@@ -5,7 +5,6 @@ find_package(catkin
   REQUIRED COMPONENTS
   roscpp
   baxter_core_msgs
-  motor_control_msgs
   sensor_msgs
   tf
   tf_conversions
@@ -20,7 +19,6 @@ catkin_package(
   CATKIN_DEPENDS
   std_msgs
   baxter_core_msgs
-  motor_control_msgs
   sensor_msgs
   LIBRARIES ${PROJECT_NAME}
 )

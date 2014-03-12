@@ -175,7 +175,7 @@ bool baxter_enable::init(const std::string &img_path) {
   head_msg.isPanning = false;
   head_msg.isNodding = false;
 
-  ros::NodeHandle n;
+
 
   // Inititalize the publishers
   assembly_state_pub_ = n.advertise < baxter_core_msgs::AssemblyState
@@ -237,8 +237,10 @@ bool baxter_enable::init(const std::string &img_path) {
                               &baxter_enable::nav_light_cb, this);
   head_nod_sub = n.subscribe(BAXTER_HEAD_NOD_CMD_TOPIC, 100,
                              &baxter_enable::head_nod_cb, this);
+ timer = n.createTimer(ros::Duration(1), &baxter_enable::reset_head_nod,this, true, false);
 
-  baxter_enable::publish(n, img_path);
+
+  baxter_enable::publish(img_path);
 }
 
 /**
@@ -246,13 +248,13 @@ bool baxter_enable::init(const std::string &img_path) {
  * @param Nodehandle to initialize the image transport
  * @param img_path that refers the path of the image that loads on start up
  */
-void baxter_enable::publish(ros::NodeHandle &n, const std::string &img_path) {
+void baxter_enable::publish(const std::string &img_path) {
   ros::Rate loop_rate(100);
 
   arm_kinematics::Kinematics kin;
   kin.init_grav();
 
-  image_transport::ImageTransport it(n);\
+  image_transport::ImageTransport it(n);
   image_transport::Publisher display_pub = it.advertise(BAXTER_DISPLAY_TOPIC,
                                                         1);
 
@@ -294,7 +296,7 @@ void baxter_enable::publish(ros::NodeHandle &n, const std::string &img_path) {
     kin.getGravityTorques_n(baxter_enable::JState_msg);
     ros::spinOnce();
     loop_rate.sleep();
-    head_msg.isNodding=false;
+    //head_msg.isNodding=false;
   }
 
 }
@@ -382,8 +384,6 @@ void baxter_enable::right_laser_cb(const sensor_msgs::LaserScan &msg) {
 
 void baxter_enable::nav_light_cb(
     const baxter_core_msgs::DigitalOutputCommand &msg) {
-  std::cout<<"Inside this "<<std::endl;
-  std::cout<<"Inside this name is "<<msg.name<<std::endl;
 
   if (msg.name == "left_itb_light_inner") {
     if (msg.value)
@@ -431,15 +431,29 @@ void baxter_enable::nav_light_cb(
 }
 
 void baxter_enable::head_nod_cb(const std_msgs::Bool &msg) {
-  head_msg.isNodding = msg.data;
-
+  if(msg.data){
+  head_msg.isNodding = true;
+  if(!timer.hasPending()){
+  timer.setPeriod(ros::Duration(0.1));
+  timer.start();
+  }
+  }
 }
 
-void baxter_enable::update_grav(const sensor_msgs::JointState msg) {
+void baxter_enable::reset_head_nod(const ros::TimerEvent &t) {
+  head_msg.isNodding = false;
+}
+
+void baxter_enable::update_JntSt(const sensor_msgs::JointState msg) {
   bool isV;
   JState_msg = msg;
+  float threshold=0.0009;
   for (int i = 0; i < msg.name.size(); i++) {
     if (msg.name[i] == "head_pan") {
+      if(fabs(float(head_msg.pan)-float(msg.position[i])) > threshold )
+        head_msg.isPanning=true;
+      else
+        head_msg.isPanning=false;
       head_msg.pan = msg.position[i];
     }
   }

@@ -12,6 +12,7 @@ robot:
     joints:
           head_controller:
             joint: head_pan
+            pid: {p: 10.0, i: 0.01, d: 5.0}
 
   # Baxter SDK Controllers: Position --------------------------
   right_joint_position_controller:

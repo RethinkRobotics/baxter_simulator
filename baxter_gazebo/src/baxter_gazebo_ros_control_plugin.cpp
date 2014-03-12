@@ -127,6 +127,7 @@ class BaxterGazeboRosControlPlugin :
         //Resetting the command modes to the initial configuration
         right_command_mode_.mode = -1;
         left_command_mode_.mode = -1;
+        head_isLoad=false;
       }
     }
   }

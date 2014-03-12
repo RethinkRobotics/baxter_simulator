@@ -27,20 +27,14 @@
 # POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/**
- *  \author Hariharasudan Malaichamee
- *  \desc   Multiple joint effort controller for Baxter SDK
- */
-
 #include <baxter_controllers/baxter_head_controller.h>
 #include <pluginlib/class_list_macros.h>
-
 
 namespace baxter_controllers {
 
 BaxterHeadController::BaxterHeadController()
-  : new_command(true)
-    //update_counter_(0)
+  : new_command(true),
+    update_counter(0)
 {}
 
 BaxterHeadController::~BaxterHeadController()
@@ -70,13 +64,13 @@ bool BaxterHeadController::init(
   }
 
   // Get number of joints
-  n_joints_ = xml_struct.size();
-  ROS_INFO_STREAM("Initializing BaxterEffortController with "<<n_joints_<<" joints.");
+  n_joints = xml_struct.size();
+  ROS_INFO_STREAM("Initializing BaxterHeadController with "<<n_joints<<" joints.");
 
-  head_controllers.resize(n_joints_);
+  head_controllers.resize(n_joints);
 
   int i = 0; // track the joint id
-  for(XmlRpc::XmlRpcValue::iterator joint_it = xml_struct.begin(); 
+  for(XmlRpc::XmlRpcValue::iterator joint_it = xml_struct.begin();
       joint_it != xml_struct.end(); ++joint_it)
   {
     // Get joint controller
@@ -85,34 +79,28 @@ bool BaxterHeadController::init(
       ROS_ERROR("The 'joints/joint_controller' parameter is not a struct (namespace '%s')",nh_.getNamespace().c_str());
       return false;
     }
-	
-    // Get joint names from the parameter server
-     std::string joint_name[n_joints_];
+
     // Get joint controller name
     std::string joint_controller_name = joint_it->first;
-   
+
     // Get the joint-namespace nodehandle
     {
       ros::NodeHandle joint_nh(nh_, "joints/"+joint_controller_name);
-      ROS_INFO_STREAM_NAMED("init","Loading sub-controller '" << joint_controller_name 
+      ROS_INFO_STREAM_NAMED("init","Loading sub-controller '" << joint_controller_name
         << "', Namespace: " << joint_nh.getNamespace());
 
-      head_controllers[i].reset(new effort_controllers::JointEffortController());
+      head_controllers[i].reset(new effort_controllers::JointPositionController());
       head_controllers[i]->init(robot, joint_nh);
-      
-      if( !joint_nh.getParam("joint",joint_name[i]))
-      {
-    	ROS_ERROR("No 'joints' parameter in controller (namespace '%s')", joint_nh.getNamespace().c_str());
-    	return false;
-      }
-	// Create a publisher for every joint controller that publishes to the command topic under that controller
-	head_command_pub[i]=joint_nh.advertise<std_msgs::Float64>("command",1);
-                                                                    
+
+      // DEBUG
+      //position_controllers_[i]->printDebug();
+
     } // end of joint-namespaces
 
     // Add joint name to map (allows unordered list to quickly be mapped to the ordered index)
-    joint_to_index_map_.insert(std::pair<std::string,std::size_t>
-      (joint_name[i],i));
+    joint_to_index_map.insert(std::pair<std::string,std::size_t>
+      (head_controllers[i]->getJointName(),i));
+
     // increment joint i
     ++i;
   }
@@ -123,13 +111,13 @@ bool BaxterHeadController::init(
     // Get a node handle that is relative to the base path
     ros::NodeHandle nh_base("~");
 
-    // Create command subscriber custom to baxter  
+    // Create command subscriber custom to baxter
     head_command_sub = nh_base.subscribe<baxter_core_msgs::HeadPanCommand>
       (topic_name, 1, &BaxterHeadController::commandCB, this);
   }
   else // default "command" topic
   {
-    // Create command subscriber custom to baxter  
+    // Create command subscriber custom to baxter
     head_command_sub = nh_.subscribe<baxter_core_msgs::HeadPanCommand>
       ("command", 1, &BaxterHeadController::commandCB, this);
   }
@@ -141,9 +129,16 @@ bool BaxterHeadController::init(
 
 void BaxterHeadController::starting(const ros::Time& time)
 {
- // std::cout<<"Starting the effort controllers"<<std::endl;
-	for(int i=0; i<n_joints_; i++)
- 	  head_controllers[i]->starting(time);
+  baxter_core_msgs::HeadPanCommand initial_command;
+
+  // Fill in the initial command
+  for(int i=0; i<n_joints; i++)
+  {
+    //initial_command.names.push_back( head_controllers[i]->getJointName());
+    initial_command.target=head_controllers[i]->getPosition();
+  }
+  head_command_buffer.initRT(initial_command);
+  new_command = true;
 }
 
 void BaxterHeadController::stopping(const ros::Time& time)
@@ -153,43 +148,65 @@ void BaxterHeadController::stopping(const ros::Time& time)
 
 void BaxterHeadController::update(const ros::Time& time, const ros::Duration& period)
 {
-  // Check if there are commands to be updated
- if(!new_command)
-	return;
- new_command=false;
-  for(size_t i=0; i<n_joints_; i++)
+  // Debug info
+  verbose = false;
+  update_counter ++;
+  if( update_counter % 100 == 0 )
+    verbose = true;
+
+  updateCommands();
+
+  // Apply joint commands
+  for(size_t i=0; i<n_joints; i++)
   {
     // Update the individual joint controllers
     head_controllers[i]->update(time, period);
   }
 }
 
-void BaxterHeadController::commandCB(const baxter_core_msgs::HeadPanCommandConstPtr& msg)
+void BaxterHeadController::updateCommands()
 {
-//Check if the number of joints and effort values are equal
-/*if( msg->command.size() != msg->names.size() )
+  // Check if we have a new command to publish
+  if( !new_command )
+    return;
+
+  // Go ahead and assume we have proccessed the current message
+  new_command = false;
+
+  // Get latest command
+  const baxter_core_msgs::HeadPanCommand &command = *(head_command_buffer.readFromRT());
+
+  // Error check message data
+ /* if( command.command.size() != command.names.size() )
   {
-    ROS_ERROR_STREAM_NAMED("update","List of names does not match list of efforts size, "
-      << msg->command.size() << " != " << msg->names.size() );
+    ROS_ERROR_STREAM_NAMED("update","List of names does not match list of angles size, "
+      << command.command.size() << " != " << command.names.size() );
     return;
   }*/
 
-//std::map<std::string,std::size_t>::iterator name_it;
-  // Map incoming joint names and effort values to the correct internal ordering
-  //for(size_t i=0; i<msg->target.size(); i++)
- // {
-    // Check if the joint name is in our map
- //   name_it = joint_to_index_map_.find(msg->target[i]);
+  //std::map<std::string,std::size_t>::iterator name_it;
 
- //   if( name_it != joint_to_index_map_.end() )
- //   {
-      // Joint is in the map, so we'll update the joint effort
-	m.data=msg->target;
-      // Publish the joint effort to the corresponding joint controller
-      head_command_pub[0].publish( m );
+  // Map incoming joint names and angles to the correct internal ordering
+  //for(size_t i=0; i<command.names.size(); i++)
+  //{
+    // Check if the joint name is in our map
+  //  name_it = joint_to_index_map.find(command.names[i]);
+
+   // if( name_it != joint_to_index_map.end() )
+    //{
+      // Joint is in the map, so we'll update the joint position
+      head_controllers[0]->setCommand( command.target);
     //}
   //}
-// Update that new effort values are waiting to be sent to the joints
+}
+
+void BaxterHeadController::commandCB(const baxter_core_msgs::HeadPanCommandConstPtr& msg)
+{
+  // the writeFromNonRT can be used in RT, if you have the guarantee that
+  //  * no non-rt thread is calling the same function (we're not subscribing to ros callbacks)
+  //  * there is only one single rt thread
+  head_command_buffer.writeFromNonRT(*msg);
+
   new_command = true;
 }
 
@@ -197,3 +214,8 @@ void BaxterHeadController::commandCB(const baxter_core_msgs::HeadPanCommandConst
 } // namespace
 
 PLUGINLIB_EXPORT_CLASS( baxter_controllers::BaxterHeadController,controller_interface::ControllerBase)
+
+
+
+
+
