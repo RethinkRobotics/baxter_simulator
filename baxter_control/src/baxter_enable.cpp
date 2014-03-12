@@ -268,7 +268,9 @@ void baxter_enable::publish(ros::NodeHandle &n, const std::string &img_path) {
   } catch (std::exception e) {
     ROS_WARN("Unable to load the startup picture to display on the display");
   }
+  ROS_INFO("Simulator is loaded and started successfully");
   while (ros::ok()) {
+
     assembly_state_pub_.publish(assembly_state);
     left_grip_st_pub_.publish(left_grip_st);
     right_grip_st_pub_.publish(right_grip_st);
@@ -278,16 +280,16 @@ void baxter_enable::publish(ros::NodeHandle &n, const std::string &img_path) {
     left_ir_state_pub.publish(left_ir_state);
     left_ir_int_pub.publish(left_ir_int);
     left_itb_innerL_pub.publish(leftIL_nav_light);
-    left_itb_outerL_pub.publish(rightIL_nav_light);
+    left_itb_outerL_pub.publish(leftOL_nav_light);
     torso_left_innerL_pub.publish(torso_leftIL_nav_light);
-    torso_left_outerL_pub.publish(torso_rightIL_nav_light);
+    torso_left_outerL_pub.publish(torso_leftOL_nav_light);
     right_ir_pub.publish(right_ir);
     right_ir_state_pub.publish(right_ir_state);
     right_ir_int_pub.publish(right_ir_int);
     right_itb_innerL_pub.publish(rightIL_nav_light);
-    right_itb_outerL_pub.publish(rightIL_nav_light);
+    right_itb_outerL_pub.publish(rightOL_nav_light);
     torso_right_innerL_pub.publish(torso_rightIL_nav_light);
-    torso_right_outerL_pub.publish(torso_rightIL_nav_light);
+    torso_right_outerL_pub.publish(torso_rightOL_nav_light);
     head_pub.publish(head_msg);
     kin.getGravityTorques_n(baxter_enable::JState_msg);
     ros::spinOnce();
@@ -380,6 +382,9 @@ void baxter_enable::right_laser_cb(const sensor_msgs::LaserScan &msg) {
 
 void baxter_enable::nav_light_cb(
     const baxter_core_msgs::DigitalOutputCommand &msg) {
+  std::cout<<"Inside this "<<std::endl;
+  std::cout<<"Inside this name is "<<msg.name<<std::endl;
+
   if (msg.name == "left_itb_light_inner") {
     if (msg.value)
       leftIL_nav_light.state = baxter_core_msgs::DigitalIOState::ON;
@@ -427,6 +432,7 @@ void baxter_enable::nav_light_cb(
 
 void baxter_enable::head_nod_cb(const std_msgs::Bool &msg) {
   head_msg.isNodding = msg.data;
+
 }
 
 void baxter_enable::update_grav(const sensor_msgs::JointState msg) {
