@@ -9,19 +9,20 @@
 
   <!-- load the default controllers -->
   <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
-	output="screen" ns="/robot" args=" joint_state_controller					   
-					   left_joint_position_controller
-					   right_joint_position_controller
-					   head_state_controller
-					   " />
+	output="screen" ns="/robot" args="joint_state_controller" />
+
   <!-- load the stopped controllers -->
   <node name="controller_spawner_stopped" pkg="controller_manager" type="spawner" respawn="false"
 	output="screen" ns="/robot" args=" --stopped
+					   left_joint_position_controller
+					   right_joint_position_controller
+					   head_state_controller
 					   left_joint_velocity_controller
 					   right_joint_velocity_controller
 					   left_joint_effort_controller
 					   right_joint_effort_controller
 					   " />  
+
   <!-- convert joint states to TF transforms -->
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
 	respawn="false" output="screen">

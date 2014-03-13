@@ -227,7 +227,7 @@ bool baxter_enable::init(const std::string &img_path) {
                           this);
   reset_sub_ = n.subscribe(BAXTER_RESET_TOPIC, 100, &baxter_enable::reset_cb,
                            this);
-  right_grav = n.subscribe(BAXTER_JOINT_TOPIC, 100, &baxter_enable::update_grav,
+  right_grav = n.subscribe(BAXTER_JOINT_TOPIC, 100, &baxter_enable::update_JntSt,
                            this);
   left_laser_sub = n.subscribe(BAXTER_LEFT_LASER_TOPIC, 100,
                                &baxter_enable::left_laser_cb, this);

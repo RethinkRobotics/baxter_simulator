@@ -40,22 +40,28 @@
 #include <std_msgs/Bool.h>
 #include <std_msgs/Empty.h>
 #include <std_msgs/UInt32.h>
-#include "baxter_core_msgs/AssemblyState.h"
-#include "baxter_core_msgs/EndEffectorState.h"
-#include "baxter_core_msgs/EndEffectorProperties.h"
-#include "baxter_core_msgs/JointCommand.h"
-#include <image_transport/image_transport.h>
-#include <opencv/cvwimage.h>
-#include <opencv/highgui.h>
-#include <cv_bridge/cv_bridge.h>
-#include <sensor_msgs/image_encodings.h>
-#include <sensor_msgs/Range.h>
-#include <sensor_msgs/LaserScan.h>
+
+//Baxter Specific Messages
+#include <baxter_core_msgs/AssemblyState.h>
+#include <baxter_core_msgs/EndEffectorState.h>
+#include <baxter_core_msgs/EndEffectorProperties.h>
+#include <baxter_core_msgs/JointCommand.h>
 #include <baxter_core_msgs/AnalogIOState.h>
 #include <baxter_core_msgs/DigitalOutputCommand.h>
 #include <baxter_core_msgs/DigitalIOState.h>
 #include <baxter_core_msgs/HeadState.h>
 #include <sensor_msgs/JointState.h>
+
+//ROS-Opencv Headers
+#include <image_transport/image_transport.h>
+#include <opencv/cvwimage.h>
+#include <opencv/highgui.h>
+#include <cv_bridge/cv_bridge.h>
+
+#include <sensor_msgs/image_encodings.h>
+#include <sensor_msgs/Range.h>
+#include <sensor_msgs/LaserScan.h>
+
 #include <arm_kinematics.h>
 #include <cmath>
 

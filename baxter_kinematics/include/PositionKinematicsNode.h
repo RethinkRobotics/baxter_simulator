@@ -142,6 +142,8 @@ class PositionKinematicsNode {
   ros::Subscriber joint_states_sub, robot_state_sub;
   ros::Publisher end_pointstate_pub, gravity_pub;
   sensor_msgs::JointState joint;
+  ros::NodeHandle handle;
+  std::string left_tip_name, right_tip_name;
 
 };
 

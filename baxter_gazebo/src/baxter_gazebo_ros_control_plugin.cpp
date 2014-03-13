@@ -117,7 +117,7 @@ class BaxterGazeboRosControlPlugin :
       stop_controllers.push_back("right_joint_velocity_controller");
       stop_controllers.push_back("right_joint_position_controller");
       stop_controllers.push_back("head_state_controller");
-      isDisabled = true;
+
       if (!controller_manager_->switchController(
           start_controllers, stop_controllers,
           controller_manager_msgs::SwitchController::Request::BEST_EFFORT)) {
@@ -125,9 +125,11 @@ class BaxterGazeboRosControlPlugin :
                                "Failed to switch controllers");
       } else {
         //Resetting the command modes to the initial configuration
+	ROS_INFO("All the controllers were successfully stopped");
         right_command_mode_.mode = -1;
         left_command_mode_.mode = -1;
         head_isLoad=false;
+        isDisabled = true;
       }
     }
   }
@@ -145,8 +147,11 @@ class BaxterGazeboRosControlPlugin :
         ROS_ERROR_STREAM_NAMED("baxter_gazebo_ros_control_plugin",
                                "Failed to switch controllers");
       }
-      else
+      else {
+        ROS_INFO("Head controller was succesfully started");
         head_isLoad=true;
+	isDisabled=false;
+      }
     }
     else
       return;
@@ -193,24 +198,29 @@ class BaxterGazeboRosControlPlugin :
 
     std::vector < std::string > start_controllers;
     std::vector < std::string > stop_controllers;
-    isDisabled = false;
+    std::string start,stop;
 
-    start_controllers.push_back("head_state_controller");
     switch (msg->mode) {
       case baxter_core_msgs::JointCommand::POSITION_MODE:
         start_controllers.push_back(side + "_joint_position_controller");
         stop_controllers.push_back(side + "_joint_velocity_controller");
         stop_controllers.push_back(side + "_joint_effort_controller");
+        start=side+"_joint_position_controller";
+	stop=side+"_joint_velocity_controller and "+side+"_joint_effort_controller";
         break;
       case baxter_core_msgs::JointCommand::VELOCITY_MODE:
         start_controllers.push_back(side + "_joint_velocity_controller");
         stop_controllers.push_back(side + "_joint_position_controller");
         stop_controllers.push_back(side + "_joint_effort_controller");
+        start=side+"_joint_velocity_controller";
+	stop=side+"_joint_position_controller and "+side+"_joint_effort_controller";
         break;
       case baxter_core_msgs::JointCommand::TORQUE_MODE:
         start_controllers.push_back(side + "_joint_effort_controller");
         stop_controllers.push_back(side + "_joint_position_controller");
         stop_controllers.push_back(side + "_joint_velocity_controller");
+        start=side+"_joint_position_controller";
+	stop=side+"_joint_velocity_controller and "+side+"_joint_velocity_controller";
         break;
       default:
         ROS_ERROR_STREAM_NAMED("baxter_gazebo_ros_control_plugin",
@@ -233,6 +243,10 @@ class BaxterGazeboRosControlPlugin :
         controller_manager_msgs::SwitchController::Request::STRICT)) {
       ROS_ERROR_STREAM_NAMED("baxter_gazebo_ros_control_plugin",
                              "Failed to switch controllers");
+    }
+    else {
+       isDisabled=false;
+       ROS_INFO_STREAM(start<<" was started and "<<stop<<" were stopped succesfully");  
     }
   }
 

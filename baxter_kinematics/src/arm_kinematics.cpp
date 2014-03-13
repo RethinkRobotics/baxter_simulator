@@ -56,14 +56,8 @@ bool Kinematics::init_grav() {
                                          "mtx");
 
 //Wait to check for the shared memroy object to be created by the other process
-  while (true) { //timeout.
-    boost::interprocess::managed_shared_memory shm(
-        boost::interprocess::open_or_create, "MySharedMemory", 10000);
-    std::pair<MyShmStringVector*, std::size_t> myshmvector = shm.find
-        < MyShmStringVector > ("joint_vector");
-    if (myshmvector.first)
-      break;
-  }
+  while (!myshmvector.first)
+	myshmvector = shm.find< MyShmStringVector > ("joint_vector");
 
 //Acquire the lock to read the joint_names once the other process updates it
   boost::interprocess::scoped_lock < boost::interprocess::named_mutex

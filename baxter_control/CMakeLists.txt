@@ -35,11 +35,4 @@ include_directories(include
 add_executable(baxter_enable src/baxter_enable.cpp)
 target_link_libraries(baxter_enable ${catkin_LIBRARIES})
 
-add_library(${PROJECT_NAME} src/baxter_enable.cpp)
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
-
-add_dependencies(baxter_enable
-  ${catkin_EXPORTED_TARGETS}
-  baxter_core_msgs_gencpp
-  )
-
+add_dependencies(baxter_enable ${catkin_EXPORTED_TARGETS})

@@ -39,8 +39,6 @@
 
 namespace kinematics {
 
-static const std::string left_tip_name = "left_wrist";
-static const std::string right_tip_name = "right_wrist";
 static const int no_jts = 7;
 static const std::string ref_frame_id = "base";
 static const std::string topic1 = "/robot/joint_states";
@@ -61,9 +59,7 @@ bool PositionKinematicsNode::init(std::string side) {
   std::string node_path = "/ExternalTools/" + m_limbName
       + "/PositionKinematicsNode";
   ros::NodeHandle handle1(node_path);
-
-  //setup a private handle
-  ros::NodeHandle handle;
+  
 
   static const std::string topic2 = "/robot/limb/" + side + "/endpoint_state";
   static const std::string topic3 = "/robot/limb/" + side + "/gravity_command";
@@ -89,7 +85,7 @@ bool PositionKinematicsNode::init(std::string side) {
     ROS_FATAL("GenericIK: No tip name for Right arm found on parameter server");
     return false;
   }
-  if (!handle.getParam("left_tip_name", right_tip_name)) {
+  if (!handle.getParam("left_tip_name", left_tip_name)) {
     ROS_FATAL("GenericIK: No tip name for Right arm found on parameter server");
     return false;
   }
