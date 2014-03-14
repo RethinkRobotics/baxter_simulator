@@ -91,7 +91,7 @@ class baxter_enable {
       torso_left_outerL_pub, torso_right_outerL_pub, head_pub;
 
   ros::NodeHandle n;
-  ros::Timer timer;
+  ros::Timer head_nod_timer;
 
   baxter_core_msgs::HeadState head_msg;
   baxter_core_msgs::AssemblyState assembly_state;

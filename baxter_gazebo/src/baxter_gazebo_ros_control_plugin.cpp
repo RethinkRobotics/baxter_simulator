@@ -125,7 +125,7 @@ class BaxterGazeboRosControlPlugin :
                                "Failed to switch controllers");
       } else {
         //Resetting the command modes to the initial configuration
-	ROS_INFO("All the controllers were successfully stopped");
+	ROS_INFO("Robot is disabled and the gravity is turned off");
         right_command_mode_.mode = -1;
         left_command_mode_.mode = -1;
         head_isLoad=false;

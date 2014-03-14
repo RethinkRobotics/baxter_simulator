@@ -103,7 +103,7 @@ class Kinematics {
    */
   //bool getGravityTorques(const sensor_msgs::JointState &joint_configuration,
   //std::vector<double> &torquesOut);
-  bool getGravityTorques_n(const sensor_msgs::JointState joint_configuration);
+  bool getGravityTorques(const sensor_msgs::JointState joint_configuration, bool isEnabled);
 
  private:
   ros::NodeHandle nh, nh_private;
