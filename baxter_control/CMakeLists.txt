@@ -7,9 +7,9 @@ find_package(catkin
   baxter_core_msgs
   cv_bridge
   image_transport
-baxter_kinematics
-  )
-  
+  baxter_kinematics
+)
+
 find_package(Boost REQUIRED COMPONENTS system)
 find_package(Eigen REQUIRED)
 catkin_package(
@@ -20,7 +20,7 @@ catkin_package(
   baxter_core_msgs
   cv_bridge
   image_transport
-baxter_kinematics
+  baxter_kinematics
   LIBRARIES ${PROJECT_NAME}
 )
 
@@ -30,7 +30,6 @@ include_directories(include
   ${QT_USE_FILE}
   ${EIGEN_INCLUDE_DIRS}
 )
-
 
 add_executable(baxter_enable src/baxter_enable.cpp)
 target_link_libraries(baxter_enable ${catkin_LIBRARIES})
