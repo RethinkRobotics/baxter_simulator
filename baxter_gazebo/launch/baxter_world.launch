@@ -41,9 +41,6 @@
 	      -J baxter::left_w2 -0.0124707" />
 
   <!-- ros_control baxter launch file -->
-  <include file="$(find baxter_control)/launch/baxter_sdk_control.launch" />
-  
-  <!-- baxter_kinematics launch file to do the Forward/Inverse Kinematics -->
-  <include file="$(find baxter_kinematics)/launch/baxter_kinematics.launch" />
+  <include file="$(find baxter_sim_hardware)/launch/baxter_sdk_control.launch" />
 
 </launch>

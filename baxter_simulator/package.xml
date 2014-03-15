@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<package>
+  <name>baxter_simulator</name>
+  <version>0.7.0</version>
+  <description>
+    Simulator for the Baxter research Robot
+  </description>
+
+  <maintainer email="rsdk.support@rethinkrobotics.com">
+    Rethink Robotics Inc.
+  </maintainer>
+  <license>BSD</license>
+  <url type="website">http://www.rethinkrobotics.com/sdk</url>
+  <url type="repository">
+    https://github.com/RethinkRobotics/baxter_common
+  </url>
+  <url type="bugtracker">
+    https://github.com/RethinkRobotics/baxter_common/issues
+  </url>
+  <author>Rethink Robotics Inc.</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <run_depend>baxter_description</run_depend>
+  <run_depend>baxter_core_msgs</run_depend>
+
+  <export>
+    <metapackage/>
+  </export>
+
+</package>

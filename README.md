@@ -97,11 +97,11 @@ You should build xacro from source using the hydro branch:
    Make sure you are in the right joint command mode when using these:
 
    ```
-   $ roslaunch baxter_control baxter_sdk_position_rqt.launch
+   $ roslaunch baxter_sim_hardware baxter_sdk_position_rqt.launch
    ```
    or
    ```
-   $ roslaunch baxter_control baxter_sdk_velocity_rqt.launch 
+   $ roslaunch baxter_sim_hardware baxter_sdk_velocity_rqt.launch 
    ```
 
 ## Run SDK Examples

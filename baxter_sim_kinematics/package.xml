@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <package>
-  <name>baxter_gazebo</name>
+  <name>baxter_sim_kinematics</name>
   <version>0.2.0</version>
   <description>
-    Baxter Gazebo plugins and launch files
+    Baxter Kinematics for the FK and Ik calculations
   </description>
 
   <maintainer email="rsdk.support@rethinkrobotics.com">
@@ -18,25 +18,29 @@
     https://github.com/RethinkRobotics/baxter_simulator/issues
   </url>
   <author>Rethink Robotics Inc.</author>
-  <author>Dave Coleman</author>
+  <author>Hariharasudan Malaichamee</author>
 
   <buildtool_depend>catkin</buildtool_depend>
-
-  <build_depend>roscpp</build_depend>
   <build_depend>baxter_core_msgs</build_depend>
-  <build_depend>gazebo_ros_control</build_depend>
-  <build_depend>controller_manager_msgs</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>kdl_parser</build_depend>
+  <build_depend>tf</build_depend>
+  <build_depend>tf_conversions</build_depend>
 
+  <run_depend>moveit_ros_planning_interface</run_depend>
+  <run_depend>std_msgs</run_depend>
   <run_depend>roscpp</run_depend>
-  <run_depend>baxter_core_msgs</run_depend>
-  <run_depend>gazebo_ros_control</run_depend>
-  <run_depend>controller_manager_msgs</run_depend>
-  <run_depend>baxter_sim_hardware</run_depend>
-  <run_depend>gazebo_ros</run_depend>
-  <run_depend>baxter_description</run_depend>
 
-  <export>
-    <gazebo plugin_path="${prefix}/lib" gazebo_media_path="${prefix}" />
-  </export>
+  <run_depend>baxter_core_msgs</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+
+  <run_depend>tf</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>tf_conversions</run_depend>
+
+  <run_depend>kdl_parser</run_depend>
+<!--  <run_depend>kinematics_msgs</run_depend> -->
 
 </package>
+
+
