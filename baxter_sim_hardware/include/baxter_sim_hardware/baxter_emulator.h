@@ -29,7 +29,7 @@
 
 /**
  *  \author Hariharasudan Malaichamee
- *  \desc   Node that lies on the top and controls the robot based on the enable, disable, stop and reset  
+ *  \desc   Node that lies on the top and publishes the necessary messages that emulates the hardware
  *		commands
  */
 
@@ -76,19 +76,33 @@ class baxter_emulator {
    */
   baxter_emulator() {
   }
-  bool init(const std::string &img_path);
+  bool init();
+
+  /**
+   * Method to start the publishers
+   * @param Nodehandle to initialize the image transport
+   * @param img_path that refers the path of the image that loads on start up
+   */
+  void publish(const std::string &img_path);
 
  private:
   bool enable;
-  ros::Subscriber enable_sub_, stop_sub_, reset_sub_, left_grav, right_grav,
-      left_laser_sub, right_laser_sub, nav_light_sub, head_nod_sub;
+  //Subscribers
+  ros::Subscriber enable_sub, stop_sub, reset_sub, left_laser_sub,
+      right_laser_sub, nav_light_sub, head_nod_sub, grav;
 
-  ros::Publisher assembly_state_pub_, left_grip_st_pub_, right_grip_st_pub_,//Group them based on types
-      left_grip_prop_pub_, right_grip_prop_pub_, left_ir_pub, right_ir_pub,
-      left_ir_int_pub, right_ir_int_pub, left_ir_state_pub, right_ir_state_pub,
-      left_itb_innerL_pub, right_itb_innerL_pub, torso_left_innerL_pub,
-      torso_right_innerL_pub, left_itb_outerL_pub, right_itb_outerL_pub,
-      torso_left_outerL_pub, torso_right_outerL_pub, head_pub;
+  // Gripper Publishers
+  ros::Publisher left_grip_st_pub, right_grip_st_pub, left_grip_prop_pub,
+      right_grip_prop_pub;
+  // Infrared publishers
+  ros::Publisher left_ir_pub, right_ir_pub, left_ir_int_pub, right_ir_int_pub,
+      left_ir_state_pub, right_ir_state_pub;
+  // ITB publishers
+  ros::Publisher left_itb_innerL_pub, right_itb_innerL_pub,
+      torso_left_innerL_pub, torso_right_innerL_pub, left_itb_outerL_pub,
+      right_itb_outerL_pub, torso_left_outerL_pub, torso_right_outerL_pub;
+  // General state publishers
+  ros::Publisher assembly_state_pub, head_pub;
 
   ros::NodeHandle n;
   ros::Timer head_nod_timer;
@@ -101,16 +115,11 @@ class baxter_emulator {
   baxter_core_msgs::DigitalIOState leftIL_nav_light, leftOL_nav_light,
       torso_leftIL_nav_light, torso_leftOL_nav_light, rightIL_nav_light,
       rightOL_nav_light, torso_rightIL_nav_light, torso_rightOL_nav_light;
-  sensor_msgs::JointState JState_msg;
+  sensor_msgs::JointState jstate_msg;
   sensor_msgs::Range left_ir, right_ir;
   std_msgs::UInt32 left_ir_int, right_ir_int;
 
-  /**
-   * Method to start the publishers
-   * @param Nodehandle to initialize the image transport
-   * @param img_path that refers the path of the image that loads on start up
-   */
-  void publish(const std::string &img_path);
+  bool isStopped;
 
   /**
    * Callback function to enable the robot
@@ -150,7 +159,7 @@ class baxter_emulator {
   /**
    * Method that updates the gravity variable
    */
-  void update_JntSt(const sensor_msgs::JointState msg);
+  void update_jnt_st(const sensor_msgs::JointState &msg);
 
   void reset_head_nod(const ros::TimerEvent &t);
 

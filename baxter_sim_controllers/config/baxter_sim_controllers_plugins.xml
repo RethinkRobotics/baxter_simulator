@@ -1,4 +1,4 @@
-<library path="lib/libbaxter_controllers">
+<library path="lib/libbaxter_sim_controllers">
 
   <class name="baxter_sim_controllers/BaxterPositionController" 
 	 type="baxter_sim_controllers::BaxterPositionController" 

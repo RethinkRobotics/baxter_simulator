@@ -23,7 +23,7 @@
 	 command="cat '$(find baxter_description)/urdf/baxter.urdf'" />
 
   <!-- Run a python script to the send a service call to gazebo_ros to spawn a URDF robot -->
-   <node name="urdf_spawner1" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
+   <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
 	args="-file $(find baxter_description)/urdf/baxter.urdf -urdf -z 0.93 -model baxter
 	      -J baxter::right_s0 -0.272659
 	      -J baxter::right_s1 1.04701

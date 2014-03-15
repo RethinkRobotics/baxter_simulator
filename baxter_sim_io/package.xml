@@ -2,17 +2,12 @@
 <package>
   <name>baxter_sim_io</name>
   <version>0.1.0</version>
-  <description>
-
-     baxter_sim_io
-
+  <description> 
+  The ITB buttons for the Baxter Research Robot are simulated, and their states are captured and published on the corresponding rostopics  
   </description>
   <maintainer email="rsdk.support@rethinkrobotics.com">Rethink Robotics Inc.</maintainer>
   <author>Hariharasudan Malaichamee</author>
   <license>BSD</license>
-  <!-- <url type="bugtracker">https://github.com/stonier/qt_ros/issues</url> -->
-  <!-- <url type="repository">https://github.com/stonier/qt_ros</url> -->
-
 
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>qt_build</build_depend>

@@ -125,7 +125,8 @@ class BaxterGazeboRosControlPlugin :
                                "Failed to switch controllers");
       } else {
         //Resetting the command modes to the initial configuration
-	ROS_INFO("Robot is disabled and the gravity is turned off");
+	ROS_INFO("Robot is disabled");
+	ROS_INFO("Gravity compensation was turned off");
         right_command_mode_.mode = -1;
         left_command_mode_.mode = -1;
         head_isLoad=false;
@@ -148,7 +149,8 @@ class BaxterGazeboRosControlPlugin :
                                "Failed to switch controllers");
       }
       else {
-        ROS_INFO("Head controller was succesfully started");
+        ROS_INFO("Head controller was successfully started");
+        ROS_INFO("Gravity compensation was turned on");
         head_isLoad=true;
 	isDisabled=false;
       }
@@ -246,7 +248,8 @@ class BaxterGazeboRosControlPlugin :
     }
     else {
        isDisabled=false;
-       ROS_INFO_STREAM(start<<" was started and "<<stop<<" were stopped succesfully");  
+       ROS_INFO_STREAM(start<<" was started and "<<stop<<" were stopped succesfully");
+       ROS_INFO("Gravity compensation was turned on");
     }
   }
 

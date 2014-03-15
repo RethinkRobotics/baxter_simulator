@@ -29,7 +29,7 @@
 
 /**
  *  \author Hariharasudan Malaichamee
- *  \desc   Node that lies on the top and controls the robot based on the enable, disable, stop and reset  
+ *  \desc   Node that lies on the top and publishes the necessary messages that emulates the hardware
  *		commands
  */
 
@@ -96,13 +96,13 @@ static const std::string BAXTER_HEAD_STATE_TOPIC = "/robot/head/head_state";
 static const std::string BAXTER_HEAD_NOD_CMD_TOPIC =
     "/robot/head/command_head_nod";
 
-static const int DELAY = 35;  // Timeout for publishing a single RSDK image on start up
+static const int IMG_LOAD_ON_STARTUP_DELAY = 35;  // Timeout for publishing a single RSDK image on start up
 
 /**
  * Method to initialize the default values for all the variables, instantiate the publishers and subscribers
  * @param img_path that refers the path of the image that loads on start up
  */
-bool baxter_emulator::init(const std::string &img_path) {
+bool baxter_emulator::init() {
 
 //Default values for the assembly state
   assembly_state.enabled = false;             // true if enabled
@@ -175,58 +175,59 @@ bool baxter_emulator::init(const std::string &img_path) {
   head_msg.isPanning = false;
   head_msg.isNodding = false;
 
+  isStopped = false;
+
   // Inititalize the publishers
-  assembly_state_pub_ = n.advertise < baxter_core_msgs::AssemblyState
-      > (BAXTER_STATE_TOPIC, 1);
-  left_grip_st_pub_ = n.advertise < baxter_core_msgs::EndEffectorState
-      > (BAXTER_LEFT_GRIPPER_ST, 1);
-  right_grip_st_pub_ = n.advertise < baxter_core_msgs::EndEffectorState
-      > (BAXTER_RIGHT_GRIPPER_ST, 1);
-  left_grip_prop_pub_ = n.advertise < baxter_core_msgs::EndEffectorProperties
-      > (BAXTER_LEFT_GRIPPER_PROP, 1);
-  right_grip_prop_pub_ = n.advertise < baxter_core_msgs::EndEffectorProperties
-      > (BAXTER_RIGHT_GRIPPER_PROP, 1);
-  left_ir_pub = n.advertise < sensor_msgs::Range > (BAXTER_LEFT_IR_TOPIC, 1);
-  right_ir_pub = n.advertise < sensor_msgs::Range > (BAXTER_RIGHT_IR_TOPIC, 1);
-  left_ir_state_pub = n.advertise < baxter_core_msgs::AnalogIOState
-      > (BAXTER_LEFT_IR_STATE_TOPIC, 1);
-  right_ir_state_pub = n.advertise < baxter_core_msgs::AnalogIOState
-      > (BAXTER_RIGHT_IR_STATE_TOPIC, 1);
-  left_ir_int_pub = n.advertise < std_msgs::UInt32
-      > (BAXTER_LEFT_IR_INT_TOPIC, 1);
-  right_ir_int_pub = n.advertise < std_msgs::UInt32
-      > (BAXTER_RIGHT_IR_INT_TOPIC, 1);
+  assembly_state_pub = n.advertise<baxter_core_msgs::AssemblyState>(
+      BAXTER_STATE_TOPIC, 1);
+  left_grip_st_pub = n.advertise<baxter_core_msgs::EndEffectorState>(
+      BAXTER_LEFT_GRIPPER_ST, 1);
+  right_grip_st_pub = n.advertise<baxter_core_msgs::EndEffectorState>(
+      BAXTER_RIGHT_GRIPPER_ST, 1);
+  left_grip_prop_pub = n.advertise<baxter_core_msgs::EndEffectorProperties>(
+      BAXTER_LEFT_GRIPPER_PROP, 1);
+  right_grip_prop_pub = n.advertise<baxter_core_msgs::EndEffectorProperties>(
+      BAXTER_RIGHT_GRIPPER_PROP, 1);
+  left_ir_pub = n.advertise<sensor_msgs::Range>(BAXTER_LEFT_IR_TOPIC, 1);
+  right_ir_pub = n.advertise<sensor_msgs::Range>(BAXTER_RIGHT_IR_TOPIC, 1);
+  left_ir_state_pub = n.advertise<baxter_core_msgs::AnalogIOState>(
+      BAXTER_LEFT_IR_STATE_TOPIC, 1);
+  right_ir_state_pub = n.advertise<baxter_core_msgs::AnalogIOState>(
+      BAXTER_RIGHT_IR_STATE_TOPIC, 1);
+  left_ir_int_pub = n.advertise<std_msgs::UInt32>(BAXTER_LEFT_IR_INT_TOPIC, 1);
+  right_ir_int_pub = n.advertise<std_msgs::UInt32>(BAXTER_RIGHT_IR_INT_TOPIC,
+                                                   1);
 
-  left_itb_innerL_pub = n.advertise < baxter_core_msgs::DigitalIOState
-      > (BAXTER_LEFTIL_TOPIC, 1);
-  left_itb_outerL_pub = n.advertise < baxter_core_msgs::DigitalIOState
-      > (BAXTER_LEFTOL_TOPIC, 1);
-  torso_left_innerL_pub = n.advertise < baxter_core_msgs::DigitalIOState
-      > (BAXTER_TORSO_LEFTIL_TOPIC, 1);
-  torso_left_outerL_pub = n.advertise < baxter_core_msgs::DigitalIOState
-      > (BAXTER_TORSO_LEFTOL_TOPIC, 1);
+  left_itb_innerL_pub = n.advertise<baxter_core_msgs::DigitalIOState>(
+      BAXTER_LEFTIL_TOPIC, 1);
+  left_itb_outerL_pub = n.advertise<baxter_core_msgs::DigitalIOState>(
+      BAXTER_LEFTOL_TOPIC, 1);
+  torso_left_innerL_pub = n.advertise<baxter_core_msgs::DigitalIOState>(
+      BAXTER_TORSO_LEFTIL_TOPIC, 1);
+  torso_left_outerL_pub = n.advertise<baxter_core_msgs::DigitalIOState>(
+      BAXTER_TORSO_LEFTOL_TOPIC, 1);
 
-  right_itb_innerL_pub = n.advertise < baxter_core_msgs::DigitalIOState
-      > (BAXTER_RIGHTIL_TOPIC, 1);
-  right_itb_outerL_pub = n.advertise < baxter_core_msgs::DigitalIOState
-      > (BAXTER_RIGHTOL_TOPIC, 1);
-  torso_right_innerL_pub = n.advertise < baxter_core_msgs::DigitalIOState
-      > (BAXTER_TORSO_RIGHTIL_TOPIC, 1);
-  torso_right_outerL_pub = n.advertise < baxter_core_msgs::DigitalIOState
-      > (BAXTER_TORSO_RIGHTOL_TOPIC, 1);
+  right_itb_innerL_pub = n.advertise<baxter_core_msgs::DigitalIOState>(
+      BAXTER_RIGHTIL_TOPIC, 1);
+  right_itb_outerL_pub = n.advertise<baxter_core_msgs::DigitalIOState>(
+      BAXTER_RIGHTOL_TOPIC, 1);
+  torso_right_innerL_pub = n.advertise<baxter_core_msgs::DigitalIOState>(
+      BAXTER_TORSO_RIGHTIL_TOPIC, 1);
+  torso_right_outerL_pub = n.advertise<baxter_core_msgs::DigitalIOState>(
+      BAXTER_TORSO_RIGHTOL_TOPIC, 1);
 
-  head_pub = n.advertise < baxter_core_msgs::HeadState
-      > (BAXTER_HEAD_STATE_TOPIC, 1);
+  head_pub = n.advertise<baxter_core_msgs::HeadState>(BAXTER_HEAD_STATE_TOPIC,
+                                                      1);
 
   // Initialize the subscribers
-  enable_sub_ = n.subscribe(baxter_emulator_TOPIC, 100, &baxter_emulator::enable_cb,
-                            this);
-  stop_sub_ = n.subscribe(BAXTER_STOP_TOPIC, 100, &baxter_emulator::stop_cb,
+  enable_sub = n.subscribe(baxter_emulator_TOPIC, 100,
+                           &baxter_emulator::enable_cb, this);
+  stop_sub = n.subscribe(BAXTER_STOP_TOPIC, 100, &baxter_emulator::stop_cb,
+                         this);
+  reset_sub = n.subscribe(BAXTER_RESET_TOPIC, 100, &baxter_emulator::reset_cb,
                           this);
-  reset_sub_ = n.subscribe(BAXTER_RESET_TOPIC, 100, &baxter_emulator::reset_cb,
-                           this);
-  right_grav = n.subscribe(BAXTER_JOINT_TOPIC, 100,
-                           &baxter_emulator::update_JntSt, this);
+  grav = n.subscribe(BAXTER_JOINT_TOPIC, 100, &baxter_emulator::update_jnt_st,
+                     this);
   left_laser_sub = n.subscribe(BAXTER_LEFT_LASER_TOPIC, 100,
                                &baxter_emulator::left_laser_cb, this);
   right_laser_sub = n.subscribe(BAXTER_RIGHT_LASER_TOPIC, 100,
@@ -238,8 +239,6 @@ bool baxter_emulator::init(const std::string &img_path) {
   head_nod_timer = n.createTimer(ros::Duration(1),
                                  &baxter_emulator::reset_head_nod, this, true,
                                  false);
-
-  baxter_emulator::publish(img_path);
 }
 
 /**
@@ -263,20 +262,20 @@ void baxter_emulator::publish(const std::string &img_path) {
     cv_ptr->image = cv::imread(img_path, CV_LOAD_IMAGE_UNCHANGED);
     if (cv_ptr->image.data) {
       cv_ptr->encoding = sensor_msgs::image_encodings::BGR8;
-      sleep(DELAY);  // Wait for the model to load
+      sleep(IMG_LOAD_ON_STARTUP_DELAY);  // Wait for the model to load
       display_pub.publish(cv_ptr->toImageMsg());
     }
-  } catch (std::exception e) {
+  } catch (std::exception &e) {
     ROS_WARN("Unable to load the startup picture to display on the display");
   }
   ROS_INFO("Simulator is loaded and started successfully");
   while (ros::ok()) {
 
-    assembly_state_pub_.publish(assembly_state);
-    left_grip_st_pub_.publish(left_grip_st);
-    right_grip_st_pub_.publish(right_grip_st);
-    left_grip_prop_pub_.publish(left_grip_prop);
-    right_grip_prop_pub_.publish(right_grip_prop);
+    assembly_state_pub.publish(assembly_state);
+    left_grip_st_pub.publish(left_grip_st);
+    right_grip_st_pub.publish(right_grip_st);
+    left_grip_prop_pub.publish(left_grip_prop);
+    right_grip_prop_pub.publish(right_grip_prop);
     left_ir_pub.publish(left_ir);
     left_ir_state_pub.publish(left_ir_state);
     left_ir_int_pub.publish(left_ir_int);
@@ -292,7 +291,7 @@ void baxter_emulator::publish(const std::string &img_path) {
     torso_right_innerL_pub.publish(torso_rightIL_nav_light);
     torso_right_outerL_pub.publish(torso_rightOL_nav_light);
     head_pub.publish(head_msg);
-    kin.getGravityTorques(baxter_emulator::JState_msg, assembly_state.enabled);
+    kin.getGravityTorques(baxter_emulator::jstate_msg, assembly_state.enabled);
     ros::spinOnce();
     loop_rate.sleep();
     //head_msg.isNodding=false;
@@ -304,7 +303,7 @@ void baxter_emulator::publish(const std::string &img_path) {
  */
 void baxter_emulator::enable_cb(const std_msgs::Bool &msg) {
 
-  if (msg.data) {
+  if (msg.data && !isStopped) {
     assembly_state.enabled = true;
   }
 
@@ -330,6 +329,7 @@ void baxter_emulator::stop_cb(const std_msgs::Empty &msg) {
   assembly_state.estop_source =
       baxter_core_msgs::AssemblyState::ESTOP_SOURCE_BRAIN;
   enable = false;
+  isStopped = true;
 }
 
 /**
@@ -343,6 +343,7 @@ void baxter_emulator::reset_cb(const std_msgs::Empty &msg) {
   assembly_state.estop_source =
       baxter_core_msgs::AssemblyState::ESTOP_SOURCE_NONE;
   enable = false;
+  isStopped = false;
 }
 
 /**
@@ -383,48 +384,28 @@ void baxter_emulator::right_laser_cb(const sensor_msgs::LaserScan &msg) {
 
 void baxter_emulator::nav_light_cb(
     const baxter_core_msgs::DigitalOutputCommand &msg) {
-
-  if (msg.name == "left_itb_light_inner") {
-    if (msg.value)
-      leftIL_nav_light.state = baxter_core_msgs::DigitalIOState::ON;
-    else
-      leftIL_nav_light.state = baxter_core_msgs::DigitalIOState::OFF;
-  } else if (msg.name == "right_itb_light_inner") {
-    if (msg.value)
-      rightIL_nav_light.state = baxter_core_msgs::DigitalIOState::ON;
-    else
-      rightIL_nav_light.state = baxter_core_msgs::DigitalIOState::OFF;
-  } else if (msg.name == "torso_left_itb_light_inner") {
-    if (msg.value)
-      torso_leftIL_nav_light.state = baxter_core_msgs::DigitalIOState::ON;
-    else
-      torso_leftIL_nav_light.state = baxter_core_msgs::DigitalIOState::OFF;
-  } else if (msg.name == "torso_right_itb_light_inner") {
-    if (msg.value)
-      torso_rightIL_nav_light.state = baxter_core_msgs::DigitalIOState::ON;
-    else
-      torso_rightIL_nav_light.state = baxter_core_msgs::DigitalIOState::OFF;
-  } else if (msg.name == "left_itb_light_outer") {
-    if (msg.value)
-      leftOL_nav_light.state = baxter_core_msgs::DigitalIOState::ON;
-    else
-      leftOL_nav_light.state = baxter_core_msgs::DigitalIOState::OFF;
-  } else if (msg.name == "right_itb_light_outer") {
-    if (msg.value)
-      rightOL_nav_light.state = baxter_core_msgs::DigitalIOState::ON;
-    else
-      rightOL_nav_light.state = baxter_core_msgs::DigitalIOState::OFF;
-  } else if (msg.name == "torso_left_itb_light_outer") {
-    if (msg.value)
-      torso_leftOL_nav_light.state = baxter_core_msgs::DigitalIOState::ON;
-    else
-      torso_leftOL_nav_light.state = baxter_core_msgs::DigitalIOState::OFF;
-  } else if (msg.name == "torso_right_itb_light_outer") {
-    if (msg.value)
-      torso_rightOL_nav_light.state = baxter_core_msgs::DigitalIOState::ON;
-    else
-      torso_rightOL_nav_light.state = baxter_core_msgs::DigitalIOState::OFF;
-  } else
+  int res;
+  if (msg.value)
+    res = baxter_core_msgs::DigitalIOState::ON;
+  else
+    res = baxter_core_msgs::DigitalIOState::OFF;
+  if (msg.name == "left_itb_light_inner")
+    leftIL_nav_light.state = res;
+  else if (msg.name == "right_itb_light_inner")
+    rightIL_nav_light.state = res;
+  else if (msg.name == "torso_left_itb_light_inner")
+    torso_leftIL_nav_light.state = res;
+  else if (msg.name == "torso_right_itb_light_inner")
+    torso_rightIL_nav_light.state = res;
+  else if (msg.name == "left_itb_light_outer")
+    leftOL_nav_light.state = res;
+  else if (msg.name == "right_itb_light_outer")
+    rightOL_nav_light.state = res;
+  else if (msg.name == "torso_left_itb_light_outer")
+    torso_leftOL_nav_light.state = res;
+  else if (msg.name == "torso_right_itb_light_outer")
+    torso_rightOL_nav_light.state = res;
+  else
     ROS_ERROR("Not a valid component id");
 
 }
@@ -433,7 +414,7 @@ void baxter_emulator::head_nod_cb(const std_msgs::Bool &msg) {
   if (msg.data) {
     head_msg.isNodding = true;
     if (!head_nod_timer.hasPending()) {
-      head_nod_timer.setPeriod(ros::Duration(0.1));
+      head_nod_timer.setPeriod(ros::Duration(1));
       head_nod_timer.start();
     }
   }
@@ -443,9 +424,9 @@ void baxter_emulator::reset_head_nod(const ros::TimerEvent &t) {
   head_msg.isNodding = false;
 }
 
-void baxter_emulator::update_JntSt(const sensor_msgs::JointState msg) {
+void baxter_emulator::update_jnt_st(const sensor_msgs::JointState &msg) {
   bool isV;
-  JState_msg = msg;
+  jstate_msg = msg;
   float threshold = 0.0009;
   for (int i = 0; i < msg.name.size(); i++) {
     if (msg.name[i] == "head_pan") {
@@ -464,8 +445,9 @@ int main(int argc, char *argv[]) {
   ros::init(argc, argv, "baxter_emulator");
 
   std::string img_path = argc > 1 ? argv[1] : "";
-  baxter_en::baxter_emulator enable;
-  bool result = enable.init(img_path);
+  baxter_en::baxter_emulator emulate;
+  bool result = emulate.init();
+  emulate.publish(img_path);
 
   return 0;
 }
