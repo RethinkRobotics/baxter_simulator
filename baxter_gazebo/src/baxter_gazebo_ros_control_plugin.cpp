@@ -33,7 +33,8 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Dave Coleman and Hariharasudan Malaichamee
+/* Author: Hariharasudan Malaichamee
+ * Author: Dave Coleman
  Desc:   Customized the default gazebo_ros_control_plugin.cpp
  */
 
@@ -68,7 +69,7 @@ class BaxterGazeboRosControlPlugin :
   baxter_core_msgs::JointCommand right_command_mode_,left_command_mode_;
 
   boost::mutex mtx_;  // mutex for re-entrent calls to modeCommandCallback
-  bool enabled, isDisabled, head_isLoad;  // enabled tracks the current status of the robot that is being published & isDisabled keeps track of the action taken
+  bool enable_cmd, is_disabled, head_is_started;  // enabled tracks the current status of the robot that is being published & is_disabled keeps track of the action taken
 
  public:
 
@@ -96,27 +97,27 @@ class BaxterGazeboRosControlPlugin :
         nh_.subscribe < baxter_core_msgs::AssemblyState
             > ("/robot/state", 1, &BaxterGazeboRosControlPlugin::enableCommandCallback, this);
 
-    enabled = false;
-    isDisabled = false;
+    enable_cmd = false;
+    is_disabled = false;
     right_command_mode_.mode = -1;
     left_command_mode_.mode = -1;
-    head_isLoad=false;
+    head_is_started=false;
   }
 
   void enableCommandCallback(const baxter_core_msgs::AssemblyState msg) {
-    enabled = msg.enabled;
+    enable_cmd = msg.enabled;
     std::vector < std::string > start_controllers;
     std::vector < std::string > stop_controllers;
 
     // Check if we got disable signal and if the controllers are not already disabled
-    if (!enabled && !isDisabled) {
+    if (!enable_cmd && !is_disabled) {
       stop_controllers.push_back("left_joint_effort_controller");
       stop_controllers.push_back("left_joint_velocity_controller");
       stop_controllers.push_back("left_joint_position_controller");
       stop_controllers.push_back("right_joint_effort_controller");
       stop_controllers.push_back("right_joint_velocity_controller");
       stop_controllers.push_back("right_joint_position_controller");
-      stop_controllers.push_back("head_state_controller");
+      stop_controllers.push_back("head_position_controller");
 
       if (!controller_manager_->switchController(
           start_controllers, stop_controllers,
@@ -129,19 +130,19 @@ class BaxterGazeboRosControlPlugin :
 	ROS_INFO("Gravity compensation was turned off");
         right_command_mode_.mode = -1;
         left_command_mode_.mode = -1;
-        head_isLoad=false;
-        isDisabled = true;
+        head_is_started=false;
+        is_disabled = true;
       }
     }
   }
 
   void headCommandCallback(
       const baxter_core_msgs::HeadPanCommand msg) {
-    if (!head_isLoad && enabled){
+    if (!head_is_started && enable_cmd){
       std::vector < std::string > start_controllers;
       std::vector < std::string > stop_controllers;
 
-      start_controllers.push_back("head_state_controller");
+      start_controllers.push_back("head_position_controller");
       if (!controller_manager_->switchController(
           start_controllers, stop_controllers,
           controller_manager_msgs::SwitchController::Request::STRICT)) {
@@ -151,8 +152,8 @@ class BaxterGazeboRosControlPlugin :
       else {
         ROS_INFO("Head controller was successfully started");
         ROS_INFO("Gravity compensation was turned on");
-        head_isLoad=true;
-	isDisabled=false;
+        head_is_started=true;
+	is_disabled=false;
       }
     }
     else
@@ -164,7 +165,7 @@ class BaxterGazeboRosControlPlugin :
     //Check if we already received this command for this arm and bug out if so
     if (left_command_mode_.mode == msg->mode) {
       return;
-    } else if (enabled) {
+    } else if (enable_cmd) {
       left_command_mode_.mode = msg->mode;  //cache last mode
       modeCommandCallback(msg, "left");
     } else {
@@ -180,7 +181,7 @@ class BaxterGazeboRosControlPlugin :
     //Check if we already received this command for this arm and bug out if so
     if (right_command_mode_.mode == msg->mode) {
       return;
-    } else if (enabled) {
+    } else if (enable_cmd) {
       right_command_mode_.mode = msg->mode;  //cache last mode
       modeCommandCallback(msg, "right");
     } else {
@@ -247,7 +248,7 @@ class BaxterGazeboRosControlPlugin :
                              "Failed to switch controllers");
     }
     else {
-       isDisabled=false;
+       is_disabled=false;
        ROS_INFO_STREAM(start<<" was started and "<<stop<<" were stopped succesfully");
        ROS_INFO("Gravity compensation was turned on");
     }

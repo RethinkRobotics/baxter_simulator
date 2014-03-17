@@ -29,7 +29,7 @@
 
 /**
  *  \author Hariharasudan Malaichamee
- *  \desc   Node that lies on the top and publishes the necessary messages that emulates the hardware
+ *  \desc   Node emulating the Baxter hardware interfaces for simulation
  *		commands
  */
 
@@ -64,6 +64,7 @@
 
 #include <arm_kinematics.h>
 #include <cmath>
+#include <map>
 
 namespace baxter_en {
 

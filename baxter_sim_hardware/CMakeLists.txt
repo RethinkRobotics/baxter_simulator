@@ -11,6 +11,7 @@ find_package(catkin
 )
 
 find_package(Boost REQUIRED COMPONENTS system)
+find_package(Eigen REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
   CATKIN_DEPENDS

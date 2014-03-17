@@ -1,7 +1,7 @@
 baxter_simulator
 ==============
 
-URDF, meshes, and custom messages describing the Baxter Research Robot from Rethink Robotics
+Gazebo simulation with emulated interfaces for the Baxter Research Robot
 
 Code & Tickets
 --------------
@@ -9,31 +9,45 @@ Code & Tickets
 +-----------------+----------------------------------------------------------------+
 | Documentation   | https://github.com/RethinkRobotics/sdk-docs/wiki               |
 +-----------------+----------------------------------------------------------------+
-| Issues          | https://github.com/RethinkRobotics/baxter_common/issues        |
+| Issues          | https://github.com/RethinkRobotics/baxter_simulator/issues     |
 +-----------------+----------------------------------------------------------------+
 | Contributions   | https://github.com/RethinkRobotics/sdk-docs/wiki/Contributions |
 +-----------------+----------------------------------------------------------------+
 
-baxter_common Repository Overview
----------------------------------
+baxter_simulator Repository Overview
+------------------------------------
 
 ::
 
      .
      |
-     +-- baxter_common/           baxter_common metapackage
+     +-- baxter_simulator/        baxter_simulator metapackage
      |
-     +-- baxter_description/      urdf and meshes describing baxter
-     |   +-- urdf/
-     |   +-- meshes/
+     +-- baxter_gazebo/           Gazebo interface for the Baxter that loads the models into simulation
+     |   +-- src/
+     |   +-- launch/
+     |   +-- worlds/
      |
-     +-- baxter_core_msgs/        messages and services for communication with baxter
-     |   +-- msgs/
-     |   +-- srvs/
+     +-- baxter_sim_controllers/  Controller plugins for Baxter
+     |   +-- src/
+     |   +-- include/
+     |   +-- config/
      |
-     +-- baxter_maintenance_msgs/ messages and services for baxter maintenance routines
-     |   +-- msgs/
-     |   +-- srvs/
+     +-- baxter_sim_hardware/     This emulates the hardware interfaces of Baxter 
+     |   +-- src/
+     |   +-- include/
+     |   +-- config/
+     |
+     +-- baxter_sim_io/           QT based navigator plugins for baxter
+     |   +-- src/
+     |   +-- include/
+     |   +-- ui/
+     |
+     +-- baxter_sim_hardware/     Implementation of IK, FK and gravity compensation for baxter 
+     |   +-- src/
+     |   +-- include/
+     |   +-- launch/
+
 
 
 Other Baxter Repositories
@@ -47,6 +61,8 @@ Other Baxter Repositories
 | baxter_tools     | https://github.com/RethinkRobotics/baxter_tools     |
 +------------------+-----------------------------------------------------+
 | baxter_examples  | https://github.com/RethinkRobotics/baxter_examples  |
++------------------+-----------------------------------------------------+
+| baxter_common    | https://github.com/RethinkRobotics/baxter_common    |
 +------------------+-----------------------------------------------------+
 
 Latest Release Information

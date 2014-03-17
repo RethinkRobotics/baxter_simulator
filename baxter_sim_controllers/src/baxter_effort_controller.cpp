@@ -141,7 +141,6 @@ bool BaxterEffortController::init(
 
 void BaxterEffortController::starting(const ros::Time& time)
 {
- // std::cout<<"Starting the effort controllers"<<std::endl;
 	for(int i=0; i<n_joints_; i++)
  	  effort_controllers_[i]->starting(time);
 }

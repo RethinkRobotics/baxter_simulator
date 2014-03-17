@@ -72,7 +72,6 @@ namespace baxter_sim_controllers
 
     std::map<std::string,std::size_t> joint_to_index_map; // allows incoming messages to be quickly ordered
 
-    bool verbose;
     bool new_command; // true when an unproccessed new command is in the realtime buffer
     size_t update_counter;
 

@@ -128,7 +128,6 @@ void BaxterHeadController::starting(const ros::Time& time) {
 
   // Fill in the initial command
   for (int i = 0; i < n_joints; i++) {
-    //initial_command.names.push_back( head_controllers[i]->getJointName());
     initial_command.target = head_controllers[i]->getPosition();
   }
   head_command_buffer.initRT(initial_command);
@@ -142,10 +141,8 @@ void BaxterHeadController::stopping(const ros::Time& time) {
 void BaxterHeadController::update(const ros::Time& time,
                                   const ros::Duration& period) {
   // Debug info
-  verbose = false;
   update_counter++;
   if (update_counter % 100 == 0)
-    verbose = true;
 
   updateCommands();
 

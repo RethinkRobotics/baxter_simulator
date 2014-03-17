@@ -19,7 +19,7 @@
 	output="screen" ns="/robot" args=" --stopped
 					   left_joint_position_controller
 					   right_joint_position_controller
-					   head_state_controller
+					   head_position_controller
 					   left_joint_velocity_controller
 					   right_joint_velocity_controller
 					   left_joint_effort_controller
@@ -33,6 +33,6 @@
   </node>
 
   <node name="baxter_sim_io" pkg="baxter_sim_io" type="baxter_sim_io"
-	respawn="false" output="screen">
+	respawn="false" required="true" output="screen">
   </node>
 </launch>

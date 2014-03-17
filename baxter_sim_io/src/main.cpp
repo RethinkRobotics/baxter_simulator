@@ -29,12 +29,13 @@
 
 /**
  *  \author Hariharasudan Malaichamee
- *  \desc   main file that initializes the Ros node and the qt display
  */
 #include <QtGui>
 #include <QApplication>
-#include "../include/baxter_sim_io/main_window.hpp"
-#include "../include/baxter_sim_io/qnode.hpp"
+#include <baxter_sim_io/main_window.hpp>
+#include <baxter_sim_io/qnode.hpp>
+
+
 
 int main(int argc, char **argv) {
 

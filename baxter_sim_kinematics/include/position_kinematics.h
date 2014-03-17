@@ -29,7 +29,7 @@
 
 /**
  *  \author Hariharasudan Malaichamee
- *  \desc   Node to wrap/unwrap the messages and calculate the kinematics for the Simulated Baxter
+ *  \desc   Node to wrap/unwrap the messages and calculate the kinematics for the simulated Baxter
  */
 
 #ifndef POSITION_KINEMATICS_H_
@@ -57,7 +57,7 @@ class position_kinematics {
  public:
 
   //! return types of create() and createOnStack()
-  typedef boost::shared_ptr<position_kinematics> Ptr;
+  typedef boost::shared_ptr<position_kinematics> poskin_ptr;
 
   /**
    * Factory method that creates a new instance of position_kinematics(),
@@ -68,12 +68,12 @@ class position_kinematics {
    *
    * @return boost::shared_ptr
    */
-  static Ptr create(std::string side) {
-    Ptr pposition_kinematics = Ptr(new position_kinematics());
-    if (pposition_kinematics->init(side)) {
-      return pposition_kinematics;
+  static poskin_ptr create(std::string side) {
+    poskin_ptr pk_ptr = poskin_ptr(new position_kinematics());
+    if (pk_ptr->init(side)) {
+      return pk_ptr;
     }
-    return Ptr();
+    return poskin_ptr();
   }
 
   /**
@@ -81,8 +81,6 @@ class position_kinematics {
    * and only returns after exit or ros::shutdown is called.
    */
   void run() {
-    ROS_INFO("Node entering Run loop");
-
     //just do spin here (blocks until shutdown), remove while loop
     ros::spin();
 
@@ -135,12 +133,12 @@ class position_kinematics {
   void FilterJointState(const sensor_msgs::JointState *msg,
                         sensor_msgs::JointState &res);
 
-  bool isEnabled;
+  bool is_enabled;
   std::string m_limbName;
   ros::ServiceServer m_ikService;
   arm_kinematics::Kinematics::Ptr m_kinematicsModel;
   ros::Subscriber joint_states_sub, robot_state_sub;
-  ros::Publisher end_pointstate_pub, gravity_pub;
+  ros::Publisher end_pointstate_pub;
   sensor_msgs::JointState joint;
   ros::NodeHandle handle;
   std::string left_tip_name, right_tip_name;

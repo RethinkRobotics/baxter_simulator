@@ -6,7 +6,7 @@ robot:
     publish_rate: 50  
 
   # Baxter SDK Controllers: Head --------------------------
-  head_state_controller:
+  head_position_controller:
     type: baxter_sim_controllers/BaxterHeadController
     topic: /robot/head/command_head_pan
     joints:

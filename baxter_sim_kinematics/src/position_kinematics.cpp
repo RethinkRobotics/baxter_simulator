@@ -41,8 +41,8 @@ namespace kinematics {
 
 static const int no_jts = 7;
 static const std::string ref_frame_id = "base";
-static const std::string topic1 = "/robot/joint_states";
-static const std::string topic4 = "/robot/state";
+static const std::string JOINT_STATES = "/robot/joint_states";
+static const std::string ROBOT_STATE = "/robot/state";
 
 /**
  * Method to initialize the publishing and subscribing topics, services and to acquire the resources required
@@ -50,7 +50,7 @@ static const std::string topic4 = "/robot/state";
  */
 bool position_kinematics::init(std::string side) {
   //Robot would be disabled initially
-  isEnabled = false;
+  is_enabled = false;
 
   // capture the side we are working on
   m_limbName = side;
@@ -59,10 +59,8 @@ bool position_kinematics::init(std::string side) {
   std::string node_path = "/ExternalTools/" + m_limbName
       + "/position_kinematics";
   ros::NodeHandle handle1(node_path);
-  
 
-  static const std::string topic2 = "/robot/limb/" + side + "/endpoint_state";
-  static const std::string topic3 = "/robot/limb/" + side + "/gravity_command";
+  static const std::string LIMB_ENDPOINT = "/robot/limb/" + side + "/endpoint_state";
 
   //setup the service server for the Inverse Kinematics
   m_ikService = handle1.advertiseService("IKService",
@@ -71,15 +69,13 @@ bool position_kinematics::init(std::string side) {
 
   //Subscribe and advertise the subscribers and publishers accordingly for the Forward Kinematics
   joint_states_sub = handle.subscribe < sensor_msgs::JointState
-      > (topic1, 100, &position_kinematics::FKCallback, this);
+      > (JOINT_STATES, 100, &position_kinematics::FKCallback, this);
   end_pointstate_pub = handle.advertise < baxter_core_msgs::EndpointState
-      > (topic2, 100);
-  gravity_pub = handle.advertise < baxter_core_msgs::JointCommand
-      > (topic3, 100);
+      > (LIMB_ENDPOINT, 100);
 
   //Subscribe to the robot state
   robot_state_sub = handle.subscribe < baxter_core_msgs::AssemblyState
-      > (topic4, 100, &position_kinematics::stateCB, this);
+      > (ROBOT_STATE, 100, &position_kinematics::stateCB, this);
 
   if (!handle.getParam("right_tip_name", right_tip_name)) {
     ROS_FATAL("GenericIK: No tip name for Right arm found on parameter server");
@@ -106,9 +102,9 @@ bool position_kinematics::init(std::string side) {
 void position_kinematics::stateCB(
     const baxter_core_msgs::AssemblyState msg) {
   if (msg.enabled)
-    isEnabled = true;
+    is_enabled = true;
   else
-    isEnabled = false;
+    is_enabled = false;
 }
 
 /**
@@ -190,7 +186,7 @@ bool position_kinematics::IKCallback(
 /***************************************************************************************************/
 
 //! global pointer to Node
-kinematics::position_kinematics::Ptr g_pNode;
+kinematics::position_kinematics::poskin_ptr g_pNode;
 
 //! Helper function for
 void quitRequested(int) {

@@ -47,8 +47,8 @@ bool Kinematics::init_grav() {
   boost::interprocess::managed_shared_memory shm(
       boost::interprocess::open_or_create, "MySharedMemory", 10000);
   StringAllocator stringallocator(shm.get_segment_manager());
-  std::pair<MyShmStringVector*, std::size_t> myshmvector = shm.find
-      < MyShmStringVector > ("joint_vector");
+  std::pair<MyShmStringVector*, std::size_t> myshmvector = shm
+      .find<MyShmStringVector>("joint_vector");
 
 //Create a mutex object to establish synchronization between the shared memory access
   boost::interprocess::named_mutex::remove("mtx");
@@ -57,13 +57,13 @@ bool Kinematics::init_grav() {
 
 //Wait to check for the shared memroy object to be created by the other process
   while (!myshmvector.first)
-	myshmvector = shm.find< MyShmStringVector > ("joint_vector");
+    myshmvector = shm.find<MyShmStringVector>("joint_vector");
 
 //Acquire the lock to read the joint_names once the other process updates it
-  boost::interprocess::scoped_lock < boost::interprocess::named_mutex
-      > lock(mutex);
-  MyShmStringVector* joint_names = shm.find_or_construct < MyShmStringVector
-      > ("joint_vector")(stringallocator);
+  boost::interprocess::scoped_lock<boost::interprocess::named_mutex> lock(
+      mutex);
+  MyShmStringVector* joint_names = shm.find_or_construct<MyShmStringVector>(
+      "joint_vector")(stringallocator);
 
   std::string urdf_xml, full_urdf_xml;
   nh.param("urdf_xml", urdf_xml, std::string("robot_description"));
@@ -128,10 +128,7 @@ bool Kinematics::init_grav() {
   indd.reserve(joint_names->size());
   for (int k = 0; k < joint_names->size(); k++) {
     int flag = 0;
-   // std::cout<<"the joint name from shared loc is "<<joint_names->at(k).c_str()<<std::endl;
     for (int kk = 0; kk < num_joints; kk++) {
-    //std::cout<<"the left joint name from local loc is "<<left_joint.at(kk)<<std::endl;
-   //std::cout<<"the right joint name from local loc is "<<right_joint.at(kk)<<std::endl;
       if (joint_names->at(k).c_str() == left_joint.at(kk)) {
         indd.push_back(kk);
         flag = 1;
@@ -144,7 +141,6 @@ bool Kinematics::init_grav() {
     }
     if (flag == 0)
       indd.push_back(-1);
-   // std::cout<<"So at k="<<k<<" the indd[k] is "<<indd[k]<<std::endl;
   }
   return true;
 }
@@ -232,7 +228,6 @@ bool Kinematics::readJoints(urdf::Model &robot_model) {
   for (int i = 0; i < chain.getNrOfSegments(); i++)
     while (link && link->name != root_name) {
       if (!(link->parent_joint)) {
-        ROS_ERROR("Finally caught");
         break;
       }
       joint = robot_model.getJoint(link->parent_joint->name);
@@ -288,81 +283,79 @@ bool Kinematics::readJoints(urdf::Model &robot_model) {
  *  @returns true is successful
  */
 bool arm_kinematics::Kinematics::getGravityTorques(
-    const sensor_msgs::JointState joint_configuration,bool isEnabled) {
+    const sensor_msgs::JointState joint_configuration, bool isEnabled) {
   //Initialize the shared memory for the gravity commands
   boost::interprocess::managed_shared_memory shm(
       boost::interprocess::open_or_create, "MySharedMemory", 10000);
   DoubleAllocator dblallocator(shm.get_segment_manager());
-  MyDoubleVector* gravity_cmd = shm.find_or_construct < MyDoubleVector
-      > ("grav_vector")(dblallocator);
+  MyDoubleVector* gravity_cmd = shm.find_or_construct<MyDoubleVector>(
+      "grav_vector")(dblallocator);
   boost::interprocess::named_mutex named_mtx(
       boost::interprocess::open_or_create, "mutx");
 
   bool res;
   KDL::JntArray torques_l, torques_r;
   KDL::JntArray jntPosIn_l, jntPosIn_r;
-if(isEnabled) {
-  torques_l.resize(num_joints);
-  torques_r.resize(num_joints);
-  jntPosIn_l.resize(num_joints);
-  jntPosIn_r.resize(num_joints);
+  if (isEnabled) {
+    torques_l.resize(num_joints);
+    torques_r.resize(num_joints);
+    jntPosIn_l.resize(num_joints);
+    jntPosIn_r.resize(num_joints);
 
-  // Copying the positions of the joints relative to its index in the KDL chain
-  for (unsigned int j = 0; j < joint_configuration.name.size(); j++) {
-    for (unsigned int i = 0; i < num_joints; i++) {
-      if (joint_configuration.name[j] == left_joint.at(i)) {
-	//std::cout << left_joint[i] << " = " << joint_configuration.name[j] << " -- Setting to = " << joint_configuration.position[j] << std::endl;
-        jntPosIn_l(i) = joint_configuration.position[j];
-        break;
-      } else if (joint_configuration.name[j] == right_joint.at(i)) {
-	//std::cout << right_joint[i] << " = " << joint_configuration.name[j] << " -- Setting to = " << joint_configuration.position[j] << std::endl;
-        jntPosIn_r(i) = joint_configuration.position[j];
-        break;
-      }
-    }
-  }
-
-  KDL::JntArray jntArrayNull(num_joints);
-  KDL::Wrenches wrenchNull_l(grav_chain_l.getNrOfSegments(),
-                             KDL::Wrench::Zero());
-  int code_l = gravity_solver_l->CartToJnt(jntPosIn_l, jntArrayNull,
-                                           jntArrayNull, wrenchNull_l,
-                                           torques_l);
-  KDL::Wrenches wrenchNull_r(grav_chain_r.getNrOfSegments(),
-                             KDL::Wrench::Zero());
-  int code_r = gravity_solver_r->CartToJnt(jntPosIn_r, jntArrayNull,
-                                           jntArrayNull, wrenchNull_r,
-                                           torques_r);
-
-  //Check if the gravity was succesfully calculated by both the solvers
-  if (code_l >= 0 && code_r >= 0) {
-
-        //Lock before updating the joint values
- boost::interprocess::scoped_lock < boost::interprocess::named_mutex> lock(named_mtx);
-    for (unsigned int i = 0; i < gravity_cmd->size(); i++) {
-      if (indd[i] != -1) {
-        if (indd[i] < num_joints) {
-          gravity_cmd->at(i) = torques_l(indd[i]);
-        } else {
-          gravity_cmd->at(i) = torques_r(indd[i]-num_joints);
+    // Copying the positions of the joints relative to its index in the KDL chain
+    for (unsigned int j = 0; j < joint_configuration.name.size(); j++) {
+      for (unsigned int i = 0; i < num_joints; i++) {
+        if (joint_configuration.name[j] == left_joint.at(i)) {
+          jntPosIn_l(i) = joint_configuration.position[j];
+          break;
+        } else if (joint_configuration.name[j] == right_joint.at(i)) {
+          jntPosIn_r(i) = joint_configuration.position[j];
+          break;
         }
       }
     }
-    return true;
+
+    KDL::JntArray jntArrayNull(num_joints);
+    KDL::Wrenches wrenchNull_l(grav_chain_l.getNrOfSegments(),
+                               KDL::Wrench::Zero());
+    int code_l = gravity_solver_l->CartToJnt(jntPosIn_l, jntArrayNull,
+                                             jntArrayNull, wrenchNull_l,
+                                             torques_l);
+    KDL::Wrenches wrenchNull_r(grav_chain_r.getNrOfSegments(),
+                               KDL::Wrench::Zero());
+    int code_r = gravity_solver_r->CartToJnt(jntPosIn_r, jntArrayNull,
+                                             jntArrayNull, wrenchNull_r,
+                                             torques_r);
+
+    //Check if the gravity was succesfully calculated by both the solvers
+    if (code_l >= 0 && code_r >= 0) {
+
+      //Lock before updating the joint values
+      boost::interprocess::scoped_lock<boost::interprocess::named_mutex> lock(
+          named_mtx);
+      for (unsigned int i = 0; i < gravity_cmd->size(); i++) {
+        if (indd[i] != -1) {
+          if (indd[i] < num_joints) {
+            gravity_cmd->at(i) = torques_l(indd[i]);
+          } else {
+            gravity_cmd->at(i) = torques_r(indd[i] - num_joints);
+          }
+        }
+      }
+      return true;
+    } else {
+      ROS_ERROR_THROTTLE(
+          1.0,
+          "KT: Failed to compute gravity torques from KDL return code for left and right arms %d %d",
+          code_l, code_r);
+      return false;
+    }
   } else {
-    ROS_ERROR_THROTTLE(
-        1.0,
-        "KT: Failed to compute gravity torques from KDL return code for left and right arms %d %d",
-        code_l, code_r);
-    return false;
+    for (unsigned int i = 0; i < gravity_cmd->size(); i++) {
+      gravity_cmd->at(i) = 0;
+    }
   }
-}
-else {
- for (unsigned int i = 0; i < gravity_cmd->size(); i++) {
-gravity_cmd->at(i)=0;
-}
-}
-return true;
+  return true;
 }
 
 /* Method to calculate the Joint index of a particular joint from the KDL chain
@@ -398,8 +391,8 @@ bool arm_kinematics::Kinematics::getPositionIK(
     const sensor_msgs::JointState &seed, sensor_msgs::JointState *result) {
 
   geometry_msgs::PoseStamped pose_msg_in = pose_stamp;
-  tf::Stamped < tf::Pose > transform;
-  tf::Stamped < tf::Pose > transform_root;
+  tf::Stamped<tf::Pose> transform;
+  tf::Stamped<tf::Pose> transform_root;
   tf::poseStampedMsgToTF(pose_msg_in, transform);
 
   //Do the IK
@@ -454,7 +447,7 @@ bool arm_kinematics::Kinematics::getPositionFK(
   KDL::Frame p_out;
   KDL::JntArray jnt_pos_in;
   geometry_msgs::PoseStamped pose;
-  tf::Stamped < tf::Pose > tf_pose;
+  tf::Stamped<tf::Pose> tf_pose;
 
   // Copying the positions of the joints relative to its index in the KDL chain
   jnt_pos_in.resize(num_joints);

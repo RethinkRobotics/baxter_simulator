@@ -29,7 +29,7 @@
 
 /**
  *  \author Hariharasudan Malaichamee
- *  \desc   Node that lies on the top and publishes the necessary messages that emulates the hardware
+ *  \desc   Node emulating the Baxter hardware interfaces for simulation
  *		commands
  */
 
@@ -39,7 +39,7 @@ namespace baxter_en {
 
 // Topics to subscribe and publish
 static const std::string BAXTER_STATE_TOPIC = "/robot/state";
-static const std::string baxter_emulator_TOPIC = "/robot/set_super_enable";
+static const std::string BAXTER_EMULATOR_TOPIC = "/robot/set_super_enable";
 static const std::string BAXTER_STOP_TOPIC = "/robot/set_super_stop";
 static const std::string BAXTER_RESET_TOPIC = "/robot/set_super_reset";
 static const std::string BAXTER_DISPLAY_TOPIC = "/robot/xdisplay";
@@ -98,6 +98,18 @@ static const std::string BAXTER_HEAD_NOD_CMD_TOPIC =
 
 static const int IMG_LOAD_ON_STARTUP_DELAY = 35;  // Timeout for publishing a single RSDK image on start up
 
+enum nav_light_enum {
+  left_itb_light_inner,
+  right_itb_light_inner,
+  torso_left_itb_light_inner,
+  torso_right_itb_light_inner,
+  left_itb_light_outer,
+  right_itb_light_outer,
+  torso_left_itb_light_outer,
+  torso_right_itb_light_outer
+};
+
+std::map<std::string, nav_light_enum> nav_light;
 /**
  * Method to initialize the default values for all the variables, instantiate the publishers and subscribers
  * @param img_path that refers the path of the image that loads on start up
@@ -177,7 +189,17 @@ bool baxter_emulator::init() {
 
   isStopped = false;
 
-  // Inititalize the publishers
+// Initialize the map that would be used in the nav_light_cb
+  nav_light["left_itb_light_inner"] =left_itb_light_inner;
+  nav_light["right_itb_light_inner"] =right_itb_light_inner;
+  nav_light["torso_left_itb_light_inner"] =torso_left_itb_light_inner;
+  nav_light["torso_right_itb_light_inner"] =torso_right_itb_light_inner;
+  nav_light["left_itb_light_outer"] =left_itb_light_outer;
+  nav_light["right_itb_light_outer"] =right_itb_light_outer;
+  nav_light["torso_left_itb_light_outer"] =torso_left_itb_light_outer;
+  nav_light["torso_right_itb_light_outer"] =torso_right_itb_light_outer;
+
+  // Initialize the publishers
   assembly_state_pub = n.advertise<baxter_core_msgs::AssemblyState>(
       BAXTER_STATE_TOPIC, 1);
   left_grip_st_pub = n.advertise<baxter_core_msgs::EndEffectorState>(
@@ -220,7 +242,7 @@ bool baxter_emulator::init() {
                                                       1);
 
   // Initialize the subscribers
-  enable_sub = n.subscribe(baxter_emulator_TOPIC, 100,
+  enable_sub = n.subscribe(BAXTER_EMULATOR_TOPIC, 100,
                            &baxter_emulator::enable_cb, this);
   stop_sub = n.subscribe(BAXTER_STOP_TOPIC, 100, &baxter_emulator::stop_cb,
                          this);
@@ -242,8 +264,7 @@ bool baxter_emulator::init() {
 }
 
 /**
- * Method to publish the loading image on baxter's screen and other publishers that were instantiated
- * @param Nodehandle to initialize the image transport
+ * Method that publishes the emulated interfaces' states and data at 100 Hz
  * @param img_path that refers the path of the image that loads on start up
  */
 void baxter_emulator::publish(const std::string &img_path) {
@@ -266,7 +287,7 @@ void baxter_emulator::publish(const std::string &img_path) {
       display_pub.publish(cv_ptr->toImageMsg());
     }
   } catch (std::exception &e) {
-    ROS_WARN("Unable to load the startup picture to display on the display");
+    ROS_WARN("Unable to load the Startup picture on Baxter's display screen ",e.what());
   }
   ROS_INFO("Simulator is loaded and started successfully");
   while (ros::ok()) {
@@ -294,7 +315,6 @@ void baxter_emulator::publish(const std::string &img_path) {
     kin.getGravityTorques(baxter_emulator::jstate_msg, assembly_state.enabled);
     ros::spinOnce();
     loop_rate.sleep();
-    //head_msg.isNodding=false;
   }
 
 }
@@ -389,25 +409,35 @@ void baxter_emulator::nav_light_cb(
     res = baxter_core_msgs::DigitalIOState::ON;
   else
     res = baxter_core_msgs::DigitalIOState::OFF;
-  if (msg.name == "left_itb_light_inner")
+  switch (nav_light.find(msg.name)->second) {
+    case left_itb_light_inner:
     leftIL_nav_light.state = res;
-  else if (msg.name == "right_itb_light_inner")
+    break;
+    case right_itb_light_inner:
     rightIL_nav_light.state = res;
-  else if (msg.name == "torso_left_itb_light_inner")
+    break;
+    case torso_left_itb_light_inner:
     torso_leftIL_nav_light.state = res;
-  else if (msg.name == "torso_right_itb_light_inner")
+    break;
+    case torso_right_itb_light_inner:
     torso_rightIL_nav_light.state = res;
-  else if (msg.name == "left_itb_light_outer")
+    break;
+    case left_itb_light_outer:
     leftOL_nav_light.state = res;
-  else if (msg.name == "right_itb_light_outer")
+    break;
+    case right_itb_light_outer:
     rightOL_nav_light.state = res;
-  else if (msg.name == "torso_left_itb_light_outer")
+    break;
+    case torso_left_itb_light_outer:
     torso_leftOL_nav_light.state = res;
-  else if (msg.name == "torso_right_itb_light_outer")
+    break;
+    case torso_right_itb_light_outer:
     torso_rightOL_nav_light.state = res;
-  else
+    break;
+    default:
     ROS_ERROR("Not a valid component id");
-
+    break;
+  }
 }
 
 void baxter_emulator::head_nod_cb(const std_msgs::Bool &msg) {
@@ -425,7 +455,6 @@ void baxter_emulator::reset_head_nod(const ros::TimerEvent &t) {
 }
 
 void baxter_emulator::update_jnt_st(const sensor_msgs::JointState &msg) {
-  bool isV;
   jstate_msg = msg;
   float threshold = 0.0009;
   for (int i = 0; i < msg.name.size(); i++) {

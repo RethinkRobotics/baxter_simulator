@@ -36,7 +36,8 @@
 #include <string>
 #include <std_msgs/String.h>
 #include <sstream>
-#include "../include/baxter_sim_io/qnode.hpp"
+#include <baxter_sim_io/qnode.hpp>
+#include <signal.h>
 
 namespace baxter_sim_io {
 
@@ -52,6 +53,12 @@ QNode::~QNode() {
     ros::waitForShutdown();
   }
   wait();
+}
+
+void quit(int sig)
+{
+ros::shutdown();
+exit(0);
 }
 
 bool QNode::init() {

@@ -95,7 +95,6 @@ Q_OBJECT
   void on_right_shoulder_released();
 
  private:
-  //Ui::MainWindowDesign *ui;
   Ui::MainWindow *ui;
   QNode qnode;
 };

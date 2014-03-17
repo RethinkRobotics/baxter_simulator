@@ -121,7 +121,6 @@ class Kinematics {
   ros::ServiceServer fk_service, fk_solver_info_service;
 
   tf::TransformListener tf_listener;
-  // std::vector<double> *torquesOut;
   std::vector<int> indd;
   std::vector<std::string> left_joint, right_joint;
   KinematicSolverInfo info, grav_info_l, grav_info_r;
