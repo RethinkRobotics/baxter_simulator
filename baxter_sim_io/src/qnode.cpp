@@ -112,19 +112,27 @@ bool QNode::init() {
   QNode::left_shoulder_nav.wheel = 0;
   QNode::right_shoulder_nav.wheel = 0;
   QNode::left_cuff_squeeze.state = baxter_core_msgs::DigitalIOState::UNPRESSED;
+  QNode::left_cuff_squeeze.isInputOnly = true;
   QNode::right_cuff_squeeze.state = baxter_core_msgs::DigitalIOState::UNPRESSED;
+  QNode::right_cuff_squeeze.isInputOnly = true;
   QNode::left_cuff_ok.state = baxter_core_msgs::DigitalIOState::UNPRESSED;
+  QNode::left_cuff_ok.isInputOnly = true;
   QNode::right_cuff_ok.state = baxter_core_msgs::DigitalIOState::UNPRESSED;
+  QNode::right_cuff_ok.isInputOnly = true;
   QNode::left_cuff_grasp.state = baxter_core_msgs::DigitalIOState::UNPRESSED;
+  QNode::left_cuff_grasp.isInputOnly = true;
   QNode::right_cuff_grasp.state = baxter_core_msgs::DigitalIOState::UNPRESSED;
+  QNode::right_cuff_grasp.isInputOnly = true;
   QNode::left_shoulder.state = baxter_core_msgs::DigitalIOState::UNPRESSED;
+  QNode::left_shoulder.isInputOnly = true;
   QNode::right_shoulder.state = baxter_core_msgs::DigitalIOState::UNPRESSED;
+  QNode::right_shoulder.isInputOnly = true;
   start();
   return true;
 }
 
 void QNode::run() {
-  ros::Rate loop_rate(10);
+  ros::Rate loop_rate(100);
   while (ros::ok()) {
 
     left_itb.publish(QNode::left_arm_nav);
