@@ -35,7 +35,7 @@
 #include <QtGui>
 #include <QMessageBox>
 #include <iostream>
-#include "../include/baxter_sim_io/main_window.hpp"
+#include <baxter_sim_io/main_window.hpp>
 
 namespace baxter_sim_io {
 
