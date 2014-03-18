@@ -1,0 +1,38 @@
+<launch>
+
+  <!-- baxter_sim_kinematics launch file to do the Forward/Inverse Kinematics -->
+  <include file="$(find baxter_sim_kinematics)/launch/baxter_sim_kinematics.launch" />
+
+  <!-- Load joint controller configurations from YAML file to parameter server -->
+  <rosparam file="$(find baxter_sim_hardware)/config/baxter_sim_controllers.yaml" command="load"/>
+
+  <!-- load the baxter_sim_hardware node -->
+  <node name="baxter_emulator" pkg="baxter_sim_hardware" type="baxter_emulator" respawn="false"
+	output="screen" args="$(find baxter_sim_hardware)/images/researchsdk.png"/>
+
+  <!-- load the default controllers -->
+  <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
+	output="screen" ns="/robot" args="joint_state_controller" />
+
+  <!-- load the stopped controllers -->
+  <node name="controller_spawner_stopped" pkg="controller_manager" type="spawner" respawn="false"
+	output="screen" ns="/robot" args=" --stopped
+					   left_joint_position_controller
+					   right_joint_position_controller
+					   head_position_controller
+					   left_joint_velocity_controller
+					   right_joint_velocity_controller
+					   left_joint_effort_controller
+					   right_joint_effort_controller
+					   " />  
+
+  <!-- convert joint states to TF transforms -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
+	respawn="false" output="screen">
+    <remap from="/joint_states" to="/robot/joint_states" />
+  </node>
+
+  <node name="baxter_sim_io" pkg="baxter_sim_io" type="baxter_sim_io"
+	respawn="false" required="true" output="screen">
+  </node>
+</launch>
