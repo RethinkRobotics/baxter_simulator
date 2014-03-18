@@ -47,8 +47,7 @@ bool Kinematics::init_grav() {
   boost::interprocess::managed_shared_memory shm(
       boost::interprocess::open_or_create, "MySharedMemory", 10000);
   StringAllocator stringallocator(shm.get_segment_manager());
-  std::pair<MyShmStringVector*, std::size_t> myshmvector = shm
-      .find<MyShmStringVector>("joint_vector");
+  std::pair<MyShmStringVector*, std::size_t> myshmvector = shm.find<MyShmStringVector>("joint_vector");
 
 //Create a mutex object to establish synchronization between the shared memory access
   boost::interprocess::named_mutex::remove("mtx");
@@ -148,7 +147,7 @@ bool Kinematics::init_grav() {
 /* Initializes the solvers and the other variables required
  *  @returns true is successful
  */
-bool Kinematics::init(std::string tip) {
+bool Kinematics::init(std::string tip, int &no_jts) {
   // Get URDF XML
   std::string urdf_xml, full_urdf_xml;
   tip_name = tip;
@@ -188,7 +187,7 @@ bool Kinematics::init(std::string tip) {
   ik_solver_pos = new KDL::ChainIkSolverPos_NR_JL(chain, joint_min, joint_max,
                                                   *fk_solver, *ik_solver_vel,
                                                   maxIterations, epsilon);
-  //gravity_solver = new KDL::ChainIdSolver_RNE(chain,KDL::Vector(0.0,0.0,-9.8));
+  no_jts=num_joints;
   return true;
 }
 

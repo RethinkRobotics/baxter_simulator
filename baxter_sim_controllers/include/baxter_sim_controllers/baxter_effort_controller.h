@@ -32,8 +32,8 @@
  *  \desc   Multiple joint effort controller for Baxter SDK
  */
 
-#ifndef BAXTER_SIM_CONTROLLERS__BAXTER_EFFORT_CONTROLLER_H
-#define BAXTER_SIM_CONTROLLERS__BAXTER_EFFORT_CONTROLLER_H
+#ifndef BAXTER_EFFORT_CONTROLLER_H
+#define BAXTER_EFFORT_CONTROLLER_H
 
 #include <ros/node_handle.h>
 

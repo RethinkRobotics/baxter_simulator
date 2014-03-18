@@ -37,13 +37,14 @@ baxter_simulator Repository Overview
      |   +-- src/
      |   +-- include/
      |   +-- config/
+     |   +-- launch/
      |
      +-- baxter_sim_io/           QT based navigator plugins for baxter
      |   +-- src/
      |   +-- include/
      |   +-- ui/
      |
-     +-- baxter_sim_hardware/     Implementation of IK, FK and gravity compensation for baxter 
+     +-- baxter_sim_kinematics/     Implementation of IK, FK and gravity compensation for baxter 
      |   +-- src/
      |   +-- include/
      |   +-- launch/

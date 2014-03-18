@@ -38,63 +38,57 @@
 namespace baxter_en {
 
 // Topics to subscribe and publish
-static const std::string BAXTER_STATE_TOPIC = "/robot/state";
-static const std::string BAXTER_EMULATOR_TOPIC = "/robot/set_super_enable";
-static const std::string BAXTER_STOP_TOPIC = "/robot/set_super_stop";
-static const std::string BAXTER_RESET_TOPIC = "/robot/set_super_reset";
-static const std::string BAXTER_DISPLAY_TOPIC = "/robot/xdisplay";
+static const std::string BAXTER_STATE_TOPIC = "robot/state";
+static const std::string BAXTER_ENABLE_TOPIC = "robot/set_super_enable";
+static const std::string BAXTER_STOP_TOPIC = "robot/set_super_stop";
+static const std::string BAXTER_RESET_TOPIC = "robot/set_super_reset";
+static const std::string BAXTER_DISPLAY_TOPIC = "robot/xdisplay";
 
 static const std::string BAXTER_LEFT_GRIPPER_ST =
-    "/robot/end_effector/left_gripper/state";
+    "robot/end_effector/left_gripper/state";
 static const std::string BAXTER_RIGHT_GRIPPER_ST =
-    "/robot/end_effector/right_gripper/state";
+    "robot/end_effector/right_gripper/state";
 static const std::string BAXTER_LEFT_GRIPPER_PROP =
-    "/robot/end_effector/left_gripper/properties";
+    "robot/end_effector/left_gripper/properties";
 static const std::string BAXTER_RIGHT_GRIPPER_PROP =
-    "/robot/end_effector/right_gripper/properties";
-
-static const std::string BAXTER_LEFT_GRAVITY_TOPIC =
-    "/robot/limb/left/gravity_command";
-static const std::string BAXTER_RIGHT_GRAVITY_TOPIC =
-    "/robot/limb/right/gravity_command";
-static const std::string BAXTER_JOINT_TOPIC = "/robot/joint_states";
-
+    "robot/end_effector/right_gripper/properties";
+static const std::string BAXTER_JOINT_TOPIC = "robot/joint_states";
 static const std::string BAXTER_LEFT_LASER_TOPIC =
-    "/robot/laserscan/left_hand_range/state";
+    "robot/laserscan/left_hand_range/state";
 static const std::string BAXTER_RIGHT_LASER_TOPIC =
-    "/robot/laserscan/right_hand_range/state";
-static const std::string BAXTER_LEFT_IR_TOPIC = "/robot/range/left_hand_range";
-static const std::string BAXTER_RIGHT_IR_TOPIC = "/robot/range/right_hand_range";
+    "robot/laserscan/right_hand_range/state";
+static const std::string BAXTER_LEFT_IR_TOPIC = "robot/range/left_hand_range";
+static const std::string BAXTER_RIGHT_IR_TOPIC = "robot/range/right_hand_range";
 static const std::string BAXTER_LEFT_IR_STATE_TOPIC =
-    "/robot/analog_io/left_hand_range/state";
+    "robot/analog_io/left_hand_range/state";
 static const std::string BAXTER_RIGHT_IR_STATE_TOPIC =
-    "/robot/analog_io/right_hand_range/state";
+    "robot/analog_io/right_hand_range/state";
 static const std::string BAXTER_LEFT_IR_INT_TOPIC =
-    "/robot/analog_io/left_hand_range/value_uint32";
+    "robot/analog_io/left_hand_range/value_uint32";
 static const std::string BAXTER_RIGHT_IR_INT_TOPIC =
-    "/robot/analog_io/right_hand_range/value_uint32";
+    "robot/analog_io/right_hand_range/value_uint32";
 
-static const std::string BAXTER_NAV_LIGHT_TOPIC = "/robot/digital_io/command";
+static const std::string BAXTER_NAV_LIGHT_TOPIC = "robot/digital_io/command";
 static const std::string BAXTER_LEFTIL_TOPIC =
-    "/robot/digital_io/left_itb_light_inner/state";
+    "robot/digital_io/left_itb_light_inner/state";
 static const std::string BAXTER_LEFTOL_TOPIC =
-    "/robot/digital_io/left_itb_light_outer/state";
+    "robot/digital_io/left_itb_light_outer/state";
 static const std::string BAXTER_TORSO_LEFTIL_TOPIC =
-    "/robot/digital_io/torso_left_itb_light_inner/state";
+    "robot/digital_io/torso_left_itb_light_inner/state";
 static const std::string BAXTER_TORSO_LEFTOL_TOPIC =
-    "/robot/digital_io/torso_left_itb_light_outer/state";
+    "robot/digital_io/torso_left_itb_light_outer/state";
 static const std::string BAXTER_RIGHTIL_TOPIC =
-    "/robot/digital_io/right_itb_light_inner/state";
+    "robot/digital_io/right_itb_light_inner/state";
 static const std::string BAXTER_RIGHTOL_TOPIC =
-    "/robot/digital_io/right_itb_light_outer/state";
+    "robot/digital_io/right_itb_light_outer/state";
 static const std::string BAXTER_TORSO_RIGHTIL_TOPIC =
-    "/robot/digital_io/torso_right_itb_light_inner/state";
+    "robot/digital_io/torso_right_itb_light_inner/state";
 static const std::string BAXTER_TORSO_RIGHTOL_TOPIC =
-    "/robot/digital_io/torso_right_itb_light_outer/state";
+    "robot/digital_io/torso_right_itb_light_outer/state";
 
-static const std::string BAXTER_HEAD_STATE_TOPIC = "/robot/head/head_state";
+static const std::string BAXTER_HEAD_STATE_TOPIC = "robot/head/head_state";
 static const std::string BAXTER_HEAD_NOD_CMD_TOPIC =
-    "/robot/head/command_head_nod";
+    "robot/head/command_head_nod";
 
 static const int IMG_LOAD_ON_STARTUP_DELAY = 35;  // Timeout for publishing a single RSDK image on start up
 
@@ -112,7 +106,6 @@ enum nav_light_enum {
 std::map<std::string, nav_light_enum> nav_light;
 /**
  * Method to initialize the default values for all the variables, instantiate the publishers and subscribers
- * @param img_path that refers the path of the image that loads on start up
  */
 bool baxter_emulator::init() {
 
@@ -242,13 +235,13 @@ bool baxter_emulator::init() {
                                                       1);
 
   // Initialize the subscribers
-  enable_sub = n.subscribe(BAXTER_EMULATOR_TOPIC, 100,
+  enable_sub = n.subscribe(BAXTER_ENABLE_TOPIC, 100,
                            &baxter_emulator::enable_cb, this);
   stop_sub = n.subscribe(BAXTER_STOP_TOPIC, 100, &baxter_emulator::stop_cb,
                          this);
   reset_sub = n.subscribe(BAXTER_RESET_TOPIC, 100, &baxter_emulator::reset_cb,
                           this);
-  grav = n.subscribe(BAXTER_JOINT_TOPIC, 100, &baxter_emulator::update_jnt_st,
+  jnt_st = n.subscribe(BAXTER_JOINT_TOPIC, 100, &baxter_emulator::update_jnt_st,
                      this);
   left_laser_sub = n.subscribe(BAXTER_LEFT_LASER_TOPIC, 100,
                                &baxter_emulator::left_laser_cb, this);
@@ -312,7 +305,7 @@ void baxter_emulator::publish(const std::string &img_path) {
     torso_right_innerL_pub.publish(torso_rightIL_nav_light);
     torso_right_outerL_pub.publish(torso_rightOL_nav_light);
     head_pub.publish(head_msg);
-    kin.getGravityTorques(baxter_emulator::jstate_msg, assembly_state.enabled);
+    kin.getGravityTorques(jstate_msg, assembly_state.enabled);
     ros::spinOnce();
     loop_rate.sleep();
   }
@@ -347,7 +340,7 @@ void baxter_emulator::stop_cb(const std_msgs::Empty &msg) {
   assembly_state.estop_button =
       baxter_core_msgs::AssemblyState::ESTOP_BUTTON_UNPRESSED;
   assembly_state.estop_source =
-      baxter_core_msgs::AssemblyState::ESTOP_SOURCE_BRAIN;
+      baxter_core_msgs::AssemblyState::ESTOP_SOURCE_UNKNOWN;
   enable = false;
   isStopped = true;
 }
@@ -362,6 +355,7 @@ void baxter_emulator::reset_cb(const std_msgs::Empty &msg) {
       baxter_core_msgs::AssemblyState::ESTOP_BUTTON_UNPRESSED;
   assembly_state.estop_source =
       baxter_core_msgs::AssemblyState::ESTOP_SOURCE_NONE;
+  assembly_state.error = false;
   enable = false;
   isStopped = false;
 }
@@ -411,32 +405,32 @@ void baxter_emulator::nav_light_cb(
     res = baxter_core_msgs::DigitalIOState::OFF;
   switch (nav_light.find(msg.name)->second) {
     case left_itb_light_inner:
-    leftIL_nav_light.state = res;
-    break;
+      leftIL_nav_light.state = res;
+      break;
     case right_itb_light_inner:
-    rightIL_nav_light.state = res;
-    break;
+      rightIL_nav_light.state = res;
+      break;
     case torso_left_itb_light_inner:
-    torso_leftIL_nav_light.state = res;
-    break;
+      torso_leftIL_nav_light.state = res;
+      break;
     case torso_right_itb_light_inner:
-    torso_rightIL_nav_light.state = res;
-    break;
+      torso_rightIL_nav_light.state = res;
+      break;
     case left_itb_light_outer:
-    leftOL_nav_light.state = res;
-    break;
+      leftOL_nav_light.state = res;
+      break;
     case right_itb_light_outer:
-    rightOL_nav_light.state = res;
-    break;
+      rightOL_nav_light.state = res;
+      break;
     case torso_left_itb_light_outer:
-    torso_leftOL_nav_light.state = res;
-    break;
+      torso_leftOL_nav_light.state = res;
+      break;
     case torso_right_itb_light_outer:
-    torso_rightOL_nav_light.state = res;
-    break;
+      torso_rightOL_nav_light.state = res;
+      break;
     default:
-    ROS_ERROR("Not a valid component id");
-    break;
+      ROS_ERROR("Not a valid component id");
+      break;
   }
 }
 

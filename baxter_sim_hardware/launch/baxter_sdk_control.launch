@@ -8,7 +8,7 @@
 
   <!-- load the baxter_sim_hardware node -->
   <node name="baxter_emulator" pkg="baxter_sim_hardware" type="baxter_emulator" respawn="false"
-	output="screen" args="$(find baxter_tools)/share/images/researchsdk.png"/>
+	output="screen" args="$(find baxter_sim_hardware)/images/researchsdk.png"/>
 
   <!-- load the default controllers -->
   <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"

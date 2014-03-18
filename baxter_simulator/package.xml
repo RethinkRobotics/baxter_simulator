@@ -3,7 +3,7 @@
   <name>baxter_simulator</name>
   <version>0.7.0</version>
   <description>
-    Simulator for the Baxter research Robot
+    Simulator for the Baxter Research Robot
   </description>
 
   <maintainer email="rsdk.support@rethinkrobotics.com">

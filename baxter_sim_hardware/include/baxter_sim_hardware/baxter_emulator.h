@@ -90,7 +90,7 @@ class baxter_emulator {
   bool enable;
   //Subscribers
   ros::Subscriber enable_sub, stop_sub, reset_sub, left_laser_sub,
-      right_laser_sub, nav_light_sub, head_nod_sub, grav;
+      right_laser_sub, nav_light_sub, head_nod_sub, jnt_st;
 
   // Gripper Publishers
   ros::Publisher left_grip_st_pub, right_grip_st_pub, left_grip_prop_pub,
@@ -98,7 +98,7 @@ class baxter_emulator {
   // Infrared publishers
   ros::Publisher left_ir_pub, right_ir_pub, left_ir_int_pub, right_ir_int_pub,
       left_ir_state_pub, right_ir_state_pub;
-  // ITB publishers
+  // Navigator publishers
   ros::Publisher left_itb_innerL_pub, right_itb_innerL_pub,
       torso_left_innerL_pub, torso_right_innerL_pub, left_itb_outerL_pub,
       right_itb_outerL_pub, torso_left_outerL_pub, torso_right_outerL_pub;
@@ -167,4 +167,4 @@ class baxter_emulator {
 };
 }  // namespace
 
-#endif /* baxter_emulator_H_ */
+#endif /* BAXTER_EMULATOR_H_ */

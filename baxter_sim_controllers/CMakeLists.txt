@@ -29,7 +29,6 @@ include_directories(include
 add_library(${PROJECT_NAME}
   src/baxter_position_controller.cpp
   src/baxter_velocity_controller.cpp
-  src/baxter_gripper_controller.cpp
   src/baxter_effort_controller.cpp
   src/baxter_head_controller.cpp
 )

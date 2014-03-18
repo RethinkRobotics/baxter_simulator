@@ -38,8 +38,8 @@
  *  \desc   Multiple joint velocity controller for Baxter SDK
  */
 
-#ifndef BAXTER_SIM_CONTROLLERS__BAXTER_VELOCITY_CONTROLLER_H
-#define BAXTER_SIM_CONTROLLERS__BAXTER_VELOCITY_CONTROLLER_H
+#ifndef BAXTER_VELOCITY_CONTROLLER_H
+#define BAXTER_VELOCITY_CONTROLLER_H
 
 #include <ros/node_handle.h>
 

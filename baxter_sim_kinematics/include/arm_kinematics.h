@@ -74,11 +74,11 @@ class Kinematics {
   /* Initializes the solvers and the other variables required
    *  @returns true is successful
    */
-  bool init(std::string tip_name);
+  bool init(std::string tip_name, int &no_jts);
   typedef boost::shared_ptr<Kinematics> Ptr;
-  static Ptr create(std::string tip_name) {
+  static Ptr create(std::string tip_name, int &no_jts) {
     Ptr parm_kinematics = Ptr(new Kinematics());
-    if (parm_kinematics->init(tip_name)) {
+    if (parm_kinematics->init(tip_name, no_jts)) {
       return parm_kinematics;
     }
     return Ptr();

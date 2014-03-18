@@ -101,7 +101,7 @@ class BaxterGazeboRosControlPlugin :
     is_disabled = false;
     right_command_mode_.mode = -1;
     left_command_mode_.mode = -1;
-    head_is_started=false;
+    head_is_started = false;
   }
 
   void enableCommandCallback(const baxter_core_msgs::AssemblyState msg) {
@@ -153,7 +153,7 @@ class BaxterGazeboRosControlPlugin :
         ROS_INFO("Head controller was successfully started");
         ROS_INFO("Gravity compensation was turned on");
         head_is_started=true;
-	is_disabled=false;
+	      is_disabled=false;
       }
     }
     else

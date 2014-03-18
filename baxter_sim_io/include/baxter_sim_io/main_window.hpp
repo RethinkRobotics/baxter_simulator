@@ -101,4 +101,4 @@ Q_OBJECT
 
 }  // namespace baxter_sim_io
 
-#endif // baxter_sim_io_MAIN_WINDOW_H
+#endif // BAXTER_SIM_IO_MAIN_WINDOW_H

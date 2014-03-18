@@ -142,6 +142,7 @@ class position_kinematics {
   sensor_msgs::JointState joint;
   ros::NodeHandle handle;
   std::string left_tip_name, right_tip_name;
+  int no_jts;
 
 };
 

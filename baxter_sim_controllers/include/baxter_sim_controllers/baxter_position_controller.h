@@ -38,8 +38,8 @@
  *  \desc   Multiple joint position controller for Baxter SDK
  */
 
-#ifndef BAXTER_SIM CONTROLLERS__BAXTER_POSITION_CONTROLLER_H
-#define BAXTER_SIM_CONTROLLERS__BAXTER_POSITION_CONTROLLER_H
+#ifndef BAXTER_POSITION_CONTROLLER_H
+#define BAXTER_POSITION_CONTROLLER_H
 
 #include <ros/node_handle.h>
 
