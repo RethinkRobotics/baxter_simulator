@@ -50,6 +50,8 @@
 #include <baxter_core_msgs/DigitalOutputCommand.h>
 #include <baxter_core_msgs/DigitalIOState.h>
 #include <baxter_core_msgs/HeadState.h>
+#include <baxter_core_msgs/SEAJointState.h>
+
 #include <sensor_msgs/JointState.h>
 
 //ROS-Opencv Headers
@@ -104,6 +106,8 @@ class baxter_emulator {
       right_itb_outerL_pub, torso_left_outerL_pub, torso_right_outerL_pub;
   // General state publishers
   ros::Publisher assembly_state_pub, head_pub;
+  // Gravity Publishers
+  ros::Publisher left_grav_pub, right_grav_pub;
 
   ros::NodeHandle n;
   ros::Timer head_nod_timer;
@@ -116,6 +120,7 @@ class baxter_emulator {
   baxter_core_msgs::DigitalIOState leftIL_nav_light, leftOL_nav_light,
       torso_leftIL_nav_light, torso_leftOL_nav_light, rightIL_nav_light,
       rightOL_nav_light, torso_rightIL_nav_light, torso_rightOL_nav_light;
+  baxter_core_msgs::SEAJointState left_gravity, right_gravity;
   sensor_msgs::JointState jstate_msg;
   sensor_msgs::Range left_ir, right_ir;
   std_msgs::UInt32 left_ir_int, right_ir_int;

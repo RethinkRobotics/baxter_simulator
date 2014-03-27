@@ -53,6 +53,7 @@
 #include <boost/interprocess/containers/string.hpp>
 #include <boost/interprocess/allocators/allocator.hpp>
 #include <boost/interprocess/sync/named_mutex.hpp>
+#include <baxter_core_msgs/SEAJointState.h>
 
 namespace arm_kinematics {
 
@@ -103,7 +104,7 @@ class Kinematics {
    */
   //bool getGravityTorques(const sensor_msgs::JointState &joint_configuration,
   //std::vector<double> &torquesOut);
-  bool getGravityTorques(const sensor_msgs::JointState joint_configuration, bool isEnabled);
+  bool getGravityTorques(const sensor_msgs::JointState joint_configuration, baxter_core_msgs::SEAJointState &left_gravity, baxter_core_msgs::SEAJointState &right_gravity, bool isEnabled);
 
  private:
   ros::NodeHandle nh, nh_private;
