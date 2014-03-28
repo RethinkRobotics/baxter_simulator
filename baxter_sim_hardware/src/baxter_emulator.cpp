@@ -292,8 +292,6 @@ void baxter_emulator::publish(const std::string &img_path) {
   }
   ROS_INFO("Simulator is loaded and started successfully");
   while (ros::ok()) {
-//std::cout<<"After ros ok "<<std::endl;
-    //left_gravity.header.secs=
     assembly_state_pub.publish(assembly_state);
     left_grip_st_pub.publish(left_grip_st);
     right_grip_st_pub.publish(right_grip_st);
