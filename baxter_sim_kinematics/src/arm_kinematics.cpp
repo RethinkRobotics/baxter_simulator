@@ -295,10 +295,10 @@ bool arm_kinematics::Kinematics::getGravityTorques(
   bool res;
   KDL::JntArray torques_l, torques_r;
   KDL::JntArray jntPosIn_l, jntPosIn_r;
-      left_gravity.name = left_joint;
-      right_gravity.name = right_joint;
-left_gravity.gravity_model_effort.resize(num_joints);
-right_gravity.gravity_model_effort.resize(num_joints);
+  left_gravity.name = left_joint;
+  right_gravity.name = right_joint;
+  left_gravity.gravity_model_effort.resize(num_joints);
+  right_gravity.gravity_model_effort.resize(num_joints);
   if (isEnabled) {
     torques_l.resize(num_joints);
     torques_r.resize(num_joints);
