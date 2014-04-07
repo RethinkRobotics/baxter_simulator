@@ -326,7 +326,6 @@ void baxter_emulator::publish(const std::string &img_path) {
  * Method to enable the robot
  */
 void baxter_emulator::enable_cb(const std_msgs::Bool &msg) {
-//std::cout<<"Inside ebnavle callback"<<std::endl;
   if (msg.data && !isStopped) {
     assembly_state.enabled = true;
   }

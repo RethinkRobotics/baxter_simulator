@@ -334,11 +334,8 @@ right_gravity.gravity_model_effort.resize(num_joints);
     if (code_l >= 0 && code_r >= 0) {
 
       //Lock before updating the joint values
-      boost::interprocess::scoped_lock<boost::interprocess::named_mutex> lock(
-          named_mtx);
-
-     // left_gravity.gravity_model_effort = torques_l;
-     // right_gravity.gravity_model_effort = torques_r;
+      boost::interprocess::scoped_lock<boost::interprocess::named_mutex> 
+         lock(named_mtx);
       for (unsigned int i = 0; i < gravity_cmd->size(); i++) {
         if (indd[i] != -1) {
           if (indd[i] < num_joints) {
@@ -359,20 +356,13 @@ right_gravity.gravity_model_effort.resize(num_joints);
       return false;
     }
   } else {
-//std::cout<<"Inside else loop"<<std::endl;
-
     for (unsigned int i = 0; i < gravity_cmd->size(); i++) {
-//std::cout<<"i is "<<i<<std::endl;
       gravity_cmd->at(i) = 0;
-if(i<num_joints) {
-//std::cout<<"Inside the if loop "<<std::endl;
- left_gravity.gravity_model_effort[i]=0;
- right_gravity.gravity_model_effort[i]=0;
-//std::cout<<"After the updation"<<std::endl;
-}
-      
+      if(i<num_joints) {
+        left_gravity.gravity_model_effort[i]=0;
+        right_gravity.gravity_model_effort[i]=0;
+      }
     }
-//std::cout<<"Exited the loop"<<std::endl;
   }
   return true;
 }
