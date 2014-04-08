@@ -43,6 +43,7 @@ namespace kinematics {
 static const std::string ref_frame_id = "base";
 static const std::string JOINT_STATES = "/robot/joint_states";
 static const std::string ROBOT_STATE = "/robot/state";
+const int joint_id=6;//Modify this to get the FK of different joints
 
 /**
  * Method to initialize the publishing and subscribing topics, services and to acquire the resources required
@@ -122,7 +123,7 @@ void position_kinematics::FKCallback(const sensor_msgs::JointState msg) {
   reply = position_kinematics::FKCalc(joint);
 
   //The 6th index holds the PoseStamp of the end effector while the other preceeding indices holds that of the preceeding joints
-  endpoint.pose = reply.pose[6].pose;
+  endpoint.pose = reply.pose[joint_id].pose;
   end_pointstate_pub.publish(endpoint);
 }
 

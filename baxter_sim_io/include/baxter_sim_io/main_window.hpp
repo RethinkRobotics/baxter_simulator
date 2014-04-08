@@ -36,6 +36,8 @@
 #define baxter_sim_io_MAIN_WINDOW_H
 
 #include <QtGui/QMainWindow>
+#include <QBitmap>
+#include <QPushButton>
 #include "ui_main_window.h"
 #include "qnode.hpp"
 
@@ -47,6 +49,9 @@ Q_OBJECT
  public:
   MainWindow(int argc, char** argv, QWidget *parent = 0);
   ~MainWindow();
+
+private:
+    void setstyle(std::string ,std::string , QPushButton&);
 
  private Q_SLOTS:
   void on_left_arm_ok_pressed();

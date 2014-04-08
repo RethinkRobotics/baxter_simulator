@@ -90,6 +90,9 @@ static const std::string BAXTER_HEAD_STATE_TOPIC = "robot/head/head_state";
 static const std::string BAXTER_HEAD_NOD_CMD_TOPIC =
     "robot/head/command_head_nod";
 
+static const std::string BAXTER_LEFT_GRAVITY_TOPIC = "robot/limb/left/gravity_compensation_torques";
+static const std::string BAXTER_RIGHT_GRAVITY_TOPIC = "robot/limb/right/gravity_compensation_torques";
+
 static const int IMG_LOAD_ON_STARTUP_DELAY = 35;  // Timeout for publishing a single RSDK image on start up
 
 enum nav_light_enum {
@@ -182,6 +185,9 @@ bool baxter_emulator::init() {
 
   isStopped = false;
 
+  left_gravity.header.frame_id="base";
+  right_gravity.header.frame_id="base";
+
 // Initialize the map that would be used in the nav_light_cb
   nav_light["left_itb_light_inner"] =left_itb_light_inner;
   nav_light["right_itb_light_inner"] =right_itb_light_inner;
@@ -231,6 +237,9 @@ bool baxter_emulator::init() {
   torso_right_outerL_pub = n.advertise<baxter_core_msgs::DigitalIOState>(
       BAXTER_TORSO_RIGHTOL_TOPIC, 1);
 
+  left_grav_pub = n.advertise<baxter_core_msgs::SEAJointState>(BAXTER_LEFT_GRAVITY_TOPIC, 1);
+  right_grav_pub = n.advertise<baxter_core_msgs::SEAJointState>(BAXTER_RIGHT_GRAVITY_TOPIC, 1);
+
   head_pub = n.advertise<baxter_core_msgs::HeadState>(BAXTER_HEAD_STATE_TOPIC,
                                                       1);
 
@@ -269,7 +278,6 @@ void baxter_emulator::publish(const std::string &img_path) {
   image_transport::ImageTransport it(n);
   image_transport::Publisher display_pub = it.advertise(BAXTER_DISPLAY_TOPIC,
                                                         1);
-
   // Read OpenCV Mat image and convert it to ROS message
   cv_bridge::CvImagePtr cv_ptr(new cv_bridge::CvImage);
   try {
@@ -284,7 +292,6 @@ void baxter_emulator::publish(const std::string &img_path) {
   }
   ROS_INFO("Simulator is loaded and started successfully");
   while (ros::ok()) {
-
     assembly_state_pub.publish(assembly_state);
     left_grip_st_pub.publish(left_grip_st);
     right_grip_st_pub.publish(right_grip_st);
@@ -305,7 +312,11 @@ void baxter_emulator::publish(const std::string &img_path) {
     torso_right_innerL_pub.publish(torso_rightIL_nav_light);
     torso_right_outerL_pub.publish(torso_rightOL_nav_light);
     head_pub.publish(head_msg);
-    kin.getGravityTorques(jstate_msg, assembly_state.enabled);
+    kin.getGravityTorques(jstate_msg, left_gravity, right_gravity, assembly_state.enabled);
+    left_gravity.header.stamp = ros::Time::now();
+    left_grav_pub.publish(left_gravity);
+    right_gravity.header.stamp = ros::Time::now();
+    right_grav_pub.publish(right_gravity);
     ros::spinOnce();
     loop_rate.sleep();
   }
@@ -315,7 +326,6 @@ void baxter_emulator::publish(const std::string &img_path) {
  * Method to enable the robot
  */
 void baxter_emulator::enable_cb(const std_msgs::Bool &msg) {
-
   if (msg.data && !isStopped) {
     assembly_state.enabled = true;
   }
@@ -451,6 +461,12 @@ void baxter_emulator::reset_head_nod(const ros::TimerEvent &t) {
 void baxter_emulator::update_jnt_st(const sensor_msgs::JointState &msg) {
   jstate_msg = msg;
   float threshold = 0.0009;
+left_gravity.actual_position.resize(left_gravity.name.size());
+left_gravity.actual_velocity.resize(left_gravity.name.size());
+left_gravity.actual_effort.resize(left_gravity.name.size());
+right_gravity.actual_position.resize(left_gravity.name.size());
+right_gravity.actual_velocity.resize(left_gravity.name.size());
+right_gravity.actual_effort.resize(left_gravity.name.size());
   for (int i = 0; i < msg.name.size(); i++) {
     if (msg.name[i] == "head_pan") {
       if (fabs(float(head_msg.pan) - float(msg.position[i])) > threshold)
@@ -459,6 +475,22 @@ void baxter_emulator::update_jnt_st(const sensor_msgs::JointState &msg) {
         head_msg.isPanning = false;
       head_msg.pan = msg.position[i];
     }
+	else {
+	   for (int j=0;j<left_gravity.name.size();j++) {
+	     if (msg.name[i] == left_gravity.name[j]) {
+	       left_gravity.actual_position[j] = msg.position[i];
+	       left_gravity.actual_velocity[j] = msg.velocity[i];
+	       left_gravity.actual_effort[j] = msg.effort[i];
+	       break;
+	     }
+	     else if(msg.name[i] == right_gravity.name[j]) {
+	       right_gravity.actual_position[j] = msg.position[i];
+	       right_gravity.actual_velocity[j] = msg.velocity[i];
+	       right_gravity.actual_effort[j] = msg.effort[i];
+	       break;
+	      }
+	   }
+	}
   }
 }
 

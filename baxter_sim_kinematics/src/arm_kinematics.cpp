@@ -282,7 +282,7 @@ bool Kinematics::readJoints(urdf::Model &robot_model) {
  *  @returns true is successful
  */
 bool arm_kinematics::Kinematics::getGravityTorques(
-    const sensor_msgs::JointState joint_configuration, bool isEnabled) {
+    const sensor_msgs::JointState joint_configuration, baxter_core_msgs::SEAJointState &left_gravity, baxter_core_msgs::SEAJointState &right_gravity, bool isEnabled) {
   //Initialize the shared memory for the gravity commands
   boost::interprocess::managed_shared_memory shm(
       boost::interprocess::open_or_create, "MySharedMemory", 10000);
@@ -295,6 +295,10 @@ bool arm_kinematics::Kinematics::getGravityTorques(
   bool res;
   KDL::JntArray torques_l, torques_r;
   KDL::JntArray jntPosIn_l, jntPosIn_r;
+  left_gravity.name = left_joint;
+  right_gravity.name = right_joint;
+  left_gravity.gravity_model_effort.resize(num_joints);
+  right_gravity.gravity_model_effort.resize(num_joints);
   if (isEnabled) {
     torques_l.resize(num_joints);
     torques_r.resize(num_joints);
@@ -330,14 +334,16 @@ bool arm_kinematics::Kinematics::getGravityTorques(
     if (code_l >= 0 && code_r >= 0) {
 
       //Lock before updating the joint values
-      boost::interprocess::scoped_lock<boost::interprocess::named_mutex> lock(
-          named_mtx);
+      boost::interprocess::scoped_lock<boost::interprocess::named_mutex> 
+         lock(named_mtx);
       for (unsigned int i = 0; i < gravity_cmd->size(); i++) {
         if (indd[i] != -1) {
           if (indd[i] < num_joints) {
             gravity_cmd->at(i) = torques_l(indd[i]);
+            left_gravity.gravity_model_effort[indd[i]] = torques_l(indd[i]); 
           } else {
             gravity_cmd->at(i) = torques_r(indd[i] - num_joints);
+            right_gravity.gravity_model_effort[indd[i] - num_joints] = torques_r(indd[i] - num_joints); 
           }
         }
       }
@@ -352,6 +358,10 @@ bool arm_kinematics::Kinematics::getGravityTorques(
   } else {
     for (unsigned int i = 0; i < gravity_cmd->size(); i++) {
       gravity_cmd->at(i) = 0;
+      if(i<num_joints) {
+        left_gravity.gravity_model_effort[i]=0;
+        right_gravity.gravity_model_effort[i]=0;
+      }
     }
   }
   return true;
