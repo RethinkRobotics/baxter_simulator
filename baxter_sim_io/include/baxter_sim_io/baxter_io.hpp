@@ -32,23 +32,23 @@
  *  \desc   Includes the action listener events for the QT controls
  */
 
-#ifndef baxter_sim_io_MAIN_WINDOW_H
-#define baxter_sim_io_MAIN_WINDOW_H
+#ifndef BAXTER_SIM_IO_BAXTER_IO_H
+#define BAXTER_SIM_IO_BAXTER_IO_H
 
 #include <QtGui/QMainWindow>
 #include <QBitmap>
 #include <QPushButton>
-#include "ui_main_window.h"
+#include "ui_baxter_io.h"
 #include "qnode.hpp"
 
 namespace baxter_sim_io {
 
-class MainWindow : public QMainWindow {
+class BaxterIO : public QMainWindow {
 Q_OBJECT
 
  public:
-  MainWindow(int argc, char** argv, QWidget *parent = 0);
-  ~MainWindow();
+  BaxterIO(int argc, char** argv, QWidget *parent = 0);
+  ~BaxterIO();
 
 private:
     void setstyle(std::string ,std::string , QPushButton&);
@@ -100,10 +100,10 @@ private:
   void on_right_shoulder_released();
 
  private:
-  Ui::MainWindow *ui;
+  Ui::BaxterIO *ui;
   QNode qnode;
 };
 
 }  // namespace baxter_sim_io
 
-#endif // BAXTER_SIM_IO_MAIN_WINDOW_H
+#endif // BAXTER_SIM_IO_BAXTER_IO_H
