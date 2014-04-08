@@ -33,6 +33,6 @@
   </node>
 
   <node name="baxter_sim_io" pkg="baxter_sim_io" type="baxter_sim_io"
-	respawn="false" required="true" output="screen">
+	respawn="false" output="screen">
   </node>
 </launch>
