@@ -35,6 +35,7 @@ target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 add_executable(kinematics src/position_kinematics.cpp)
 target_link_libraries(kinematics ${catkin_LIBRARIES} ${PROJECT_NAME})
 
+add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
  add_dependencies(kinematics
   ${catkin_EXPORTED_TARGETS}
   baxter_core_msgs_gencpp
