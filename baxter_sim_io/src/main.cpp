@@ -32,7 +32,7 @@
  */
 #include <QtGui>
 #include <QApplication>
-#include <baxter_sim_io/main_window.hpp>
+#include <baxter_sim_io/baxter_io.hpp>
 #include <baxter_sim_io/qnode.hpp>
 
 
@@ -40,7 +40,7 @@
 int main(int argc, char **argv) {
 
     QApplication app(argc, argv);
-    baxter_sim_io::MainWindow w(argc,argv);
+    baxter_sim_io::BaxterIO w(argc,argv);
     w.show();
     app.connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
     int result = app.exec();

@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <package>
   <name>baxter_simulator</name>
-  <version>0.7.0</version>
+  <version>0.5.0</version>
   <description>
-    Simulator for the Baxter Research Robot
+    Metapackage - Baxter Research Robot Gazebo Simulation
   </description>
 
   <maintainer email="rsdk.support@rethinkrobotics.com">
