@@ -40,6 +40,9 @@
 	      -J baxter::left_w1 -0.0610333
 	      -J baxter::left_w2 -0.0124707" />
 
+  <!-- load software version into param server -->
+  <param name="/rethink/software_version" value="1.0.0" />
+
   <!-- ros_control baxter launch file -->
   <include file="$(find baxter_sim_hardware)/launch/baxter_sdk_control.launch" />
 
