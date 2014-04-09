@@ -206,6 +206,7 @@ class BaxterGazeboRosControlPlugin :
 
     switch (msg->mode) {
       case baxter_core_msgs::JointCommand::POSITION_MODE:
+      case baxter_core_msgs::JointCommand::RAW_POSITION_MODE:
         start_controllers.push_back(side + "_joint_position_controller");
         stop_controllers.push_back(side + "_joint_velocity_controller");
         stop_controllers.push_back(side + "_joint_effort_controller");
