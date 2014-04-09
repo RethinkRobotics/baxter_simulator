@@ -33,9 +33,10 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Dave Coleman
-   Desc:   Customized the default gazebo_ros_control_plugin.cpp
-*/
+/* Author: Hariharasudan Malaichamee
+ * Author: Dave Coleman
+ Desc:   Customized the default gazebo_ros_control_plugin.cpp
+ */
 
 // Overload the default plugin
 #include <gazebo_ros_control/gazebo_ros_control_plugin.h>
@@ -46,162 +47,217 @@
 // Baxter
 #include <baxter_core_msgs/JointCommand.h>
 #include <baxter_core_msgs/AssemblyState.h>
+#include <baxter_core_msgs/HeadPanCommand.h>
 
+namespace baxter_gazebo_plugin {
 
-namespace baxter_gazebo_plugin
-{
-
-static const std::string BAXTER_STATE_TOPIC = "/robot/state";
-
-class BaxterGazeboRosControlPlugin : public gazebo_ros_control::GazeboRosControlPlugin
-{
-private:
+class BaxterGazeboRosControlPlugin :
+    public gazebo_ros_control::GazeboRosControlPlugin {
+ private:
   ros::Subscriber left_command_mode_sub_;
   ros::Subscriber right_command_mode_sub_;
-  ros::Publisher assembly_state_pub_;
+  ros::Subscriber robot_state_sub_;
+  ros::Subscriber head_state_sub;
 
   // Rate to publish assembly state
   ros::Timer timer_;
-  
+
   // Cache the message
   baxter_core_msgs::AssemblyState assembly_state_;
 
   // use this as flag to indicate current mode
-  baxter_core_msgs::JointCommand right_command_mode_;
-  baxter_core_msgs::JointCommand left_command_mode_;
+  baxter_core_msgs::JointCommand right_command_mode_,left_command_mode_;
 
-  boost::mutex mtx_; // mutex for re-entrent calls to modeCommandCallback
+  boost::mutex mtx_;  // mutex for re-entrent calls to modeCommandCallback
+  bool enable_cmd, is_disabled, head_is_started;  // enabled tracks the current status of the robot that is being published & is_disabled keeps track of the action taken
 
-public:
+ public:
 
-  void Load(gazebo::physics::ModelPtr parent, sdf::ElementPtr sdf)
-  {
+  void Load(gazebo::physics::ModelPtr parent, sdf::ElementPtr sdf) {
     // Load parent class first
     GazeboRosControlPlugin::Load(parent, sdf);
 
     // Baxter customizations:
-    ROS_INFO_STREAM_NAMED("baxter_gazebo_ros_control_plugin","Loading Baxter specific simulation components");
+    ROS_INFO_STREAM_NAMED("baxter_gazebo_ros_control_plugin",
+                          "Loading Baxter specific simulation components");
 
     // Subscribe to a topic that switches' Baxter's msgs
-    left_command_mode_sub_ = nh_.subscribe<baxter_core_msgs::JointCommand>("/robot/limb/left/joint_command",
-                             1, &BaxterGazeboRosControlPlugin::leftModeCommandCallback, this);
-    right_command_mode_sub_ = nh_.subscribe<baxter_core_msgs::JointCommand>("/robot/limb/right/joint_command",
-                             1, &BaxterGazeboRosControlPlugin::rightModeCommandCallback, this);
+    left_command_mode_sub_ =
+        nh_.subscribe < baxter_core_msgs::JointCommand
+            > ("/robot/limb/left/joint_command", 1, &BaxterGazeboRosControlPlugin::leftModeCommandCallback, this);
+    right_command_mode_sub_ =
+        nh_.subscribe < baxter_core_msgs::JointCommand
+            > ("/robot/limb/right/joint_command", 1, &BaxterGazeboRosControlPlugin::rightModeCommandCallback, this);
+    head_state_sub =
+        nh_.subscribe < baxter_core_msgs::HeadPanCommand
+            > ("/robot/head/command_head_pan", 1, &BaxterGazeboRosControlPlugin::headCommandCallback, this);
 
-    // Start a publisher that publishes fake AssemblyState.msg data about Baxter
-    assembly_state_pub_ = nh_.advertise<baxter_core_msgs::AssemblyState>(BAXTER_STATE_TOPIC,10);
+    //Subscribe to the topic that publishes the robot's state
+    robot_state_sub_ =
+        nh_.subscribe < baxter_core_msgs::AssemblyState
+            > ("/robot/state", 1, &BaxterGazeboRosControlPlugin::enableCommandCallback, this);
 
-    // Create assembly state message 
-    assembly_state_.enabled = 1;             // true if enabled
-    assembly_state_.stopped = 0;            // true if stopped -- e-stop asserted
-    assembly_state_.error = 0;              // true if a component of the assembly has an error
-    assembly_state_.estop_button = baxter_core_msgs::AssemblyState::ESTOP_BUTTON_UNPRESSED;      // button status
-    assembly_state_.estop_source = baxter_core_msgs::AssemblyState::ESTOP_SOURCE_NONE;     // If stopped is true, the source of the e-stop.  
-
-    // Set publish frequency
-    ros::NodeHandle nh_tilde("~");
-    double publish_freq;
-    nh_tilde.param("publish_frequency", publish_freq, 50.0);
-    ros::Duration publish_interval = ros::Duration(1.0/std::max(publish_freq,1.0));
-
-    // trigger to publish fixed joints
-    timer_ = nh_tilde.createTimer(publish_interval, &BaxterGazeboRosControlPlugin::update, this);
-
-    //preset the mode to illegal value
+    enable_cmd = false;
+    is_disabled = false;
     right_command_mode_.mode = -1;
     left_command_mode_.mode = -1;
+    head_is_started = false;
   }
 
-  void update(const ros::TimerEvent& e)
-  {
-    assembly_state_pub_.publish(assembly_state_);
+  void enableCommandCallback(const baxter_core_msgs::AssemblyState msg) {
+    enable_cmd = msg.enabled;
+    std::vector < std::string > start_controllers;
+    std::vector < std::string > stop_controllers;
+
+    // Check if we got disable signal and if the controllers are not already disabled
+    if (!enable_cmd && !is_disabled) {
+      stop_controllers.push_back("left_joint_effort_controller");
+      stop_controllers.push_back("left_joint_velocity_controller");
+      stop_controllers.push_back("left_joint_position_controller");
+      stop_controllers.push_back("right_joint_effort_controller");
+      stop_controllers.push_back("right_joint_velocity_controller");
+      stop_controllers.push_back("right_joint_position_controller");
+      stop_controllers.push_back("head_position_controller");
+
+      if (!controller_manager_->switchController(
+          start_controllers, stop_controllers,
+          controller_manager_msgs::SwitchController::Request::BEST_EFFORT)) {
+        ROS_ERROR_STREAM_NAMED("baxter_gazebo_ros_control_plugin",
+                               "Failed to switch controllers");
+      } else {
+        //Resetting the command modes to the initial configuration
+	ROS_INFO("Robot is disabled");
+	ROS_INFO("Gravity compensation was turned off");
+        right_command_mode_.mode = -1;
+        left_command_mode_.mode = -1;
+        head_is_started=false;
+        is_disabled = true;
+      }
+    }
   }
 
-  void leftModeCommandCallback(const baxter_core_msgs::JointCommandConstPtr& msg)
-  {
-    //Check if we already received this command for this arm and bug out if so
-    if(left_command_mode_.mode == msg->mode)
-    {
-      return;
+  void headCommandCallback(
+      const baxter_core_msgs::HeadPanCommand msg) {
+    if (!head_is_started && enable_cmd){
+      std::vector < std::string > start_controllers;
+      std::vector < std::string > stop_controllers;
+
+      start_controllers.push_back("head_position_controller");
+      if (!controller_manager_->switchController(
+          start_controllers, stop_controllers,
+          controller_manager_msgs::SwitchController::Request::STRICT)) {
+        ROS_ERROR_STREAM_NAMED("baxter_gazebo_ros_control_plugin",
+                               "Failed to switch controllers");
+      }
+      else {
+        ROS_INFO("Robot is enabled");
+        ROS_INFO("Head controller was successfully started");
+        ROS_INFO("Gravity compensation was turned on");
+        head_is_started=true;
+	      is_disabled=false;
+      }
     }
     else
-    {
-      left_command_mode_.mode = msg->mode; //cache last mode
-    }
-
-    modeCommandCallback(msg, "left");
+      return;
   }
+  void leftModeCommandCallback(
+      const baxter_core_msgs::JointCommandConstPtr& msg) {
 
-  void rightModeCommandCallback(const baxter_core_msgs::JointCommandConstPtr& msg)
-  {
     //Check if we already received this command for this arm and bug out if so
-    if(right_command_mode_.mode == msg->mode)
-    {
+    if (left_command_mode_.mode == msg->mode) {
+      return;
+    } else if (enable_cmd) {
+      left_command_mode_.mode = msg->mode;  //cache last mode
+      modeCommandCallback(msg, "left");
+    } else {
+      ROS_WARN_STREAM_NAMED("baxter_gazebo_ros_control_plugin",
+                            "Enable the robot");
       return;
     }
-    else
-    {
-      right_command_mode_.mode = msg->mode; //cache last mode
-    }
-
-    modeCommandCallback(msg, "right");
   }
 
-  void modeCommandCallback(const baxter_core_msgs::JointCommandConstPtr& msg, const std::string& side)
-  {
-    ROS_DEBUG_STREAM_NAMED("baxter_gazebo_ros_control_plugin","Switching command mode for side " 
-      << side );
-    
+  void rightModeCommandCallback(
+      const baxter_core_msgs::JointCommandConstPtr& msg) {
+
+    //Check if we already received this command for this arm and bug out if so
+    if (right_command_mode_.mode == msg->mode) {
+      return;
+    } else if (enable_cmd) {
+      right_command_mode_.mode = msg->mode;  //cache last mode
+      modeCommandCallback(msg, "right");
+    } else {
+      ROS_WARN_STREAM_NAMED("baxter_gazebo_ros_control_plugin",
+                            "Enable the robot");
+      return;
+    }
+  }
+
+  void modeCommandCallback(const baxter_core_msgs::JointCommandConstPtr& msg,
+                           const std::string& side) {
+    ROS_DEBUG_STREAM_NAMED("baxter_gazebo_ros_control_plugin",
+                           "Switching command mode for side " << side);
+
     //lock out other thread(s) which are getting called back via ros.
-    boost::lock_guard<boost::mutex> guard(mtx_);
+    boost::lock_guard < boost::mutex > guard(mtx_);
 
-    std::vector<std::string> start_controllers;
-    std::vector<std::string> stop_controllers;
-    switch(msg->mode)
-    {
-    case baxter_core_msgs::JointCommand::POSITION_MODE:
-      start_controllers.push_back(side+"_joint_position_controller");
-      stop_controllers.push_back(side+"_joint_velocity_controller");
-      //stop_controllers.push_back(side+"_joint_effort_controller");
-      break;
-    case baxter_core_msgs::JointCommand::VELOCITY_MODE:
-      start_controllers.push_back(side+"_joint_velocity_controller");
-      stop_controllers.push_back(side+"_joint_position_controller");
-      //stop_controllers.push_back(side+"_joint_effort_controller");
-      break;
-    case baxter_core_msgs::JointCommand::TORQUE_MODE:
-      ROS_WARN_STREAM_NAMED("baxter_gazebo_ros_control_plugin","Torque not implemented yet!");
-      return;
-      start_controllers.push_back(side+"_joint_effort_controller");
-      stop_controllers.push_back(side+"_joint_position_controller");
-      stop_controllers.push_back(side+"_joint_velocity_controller");
-      break;
-    default:
-      ROS_ERROR_STREAM_NAMED("baxter_gazebo_ros_control_plugin","Unknown command mode " << msg->mode);
-      return;
-    }
+    std::vector < std::string > start_controllers;
+    std::vector < std::string > stop_controllers;
+    std::string start,stop;
 
-  /** \brief Switch multiple controllers simultaneously.
-   *
-   * \param start_controllers A vector of controller names to be started
-   * \param stop_controllers A vector of controller names to be stopped
-   * \param strictness How important it is that the requested controllers are
-   * started and stopped.  The levels are defined in the
-   * controller_manager_msgs/SwitchControllers service as either \c BEST_EFFORT
-   * or \c STRICT.  \c BEST_EFFORT means that \ref switchController can still
-   * succeed if a non-existant controller is requested to be stopped or started.
-   */
-    if( !controller_manager_->switchController(start_controllers,stop_controllers, 
-        controller_manager_msgs::SwitchController::Request::STRICT) )
-    {
-      ROS_ERROR_STREAM_NAMED("baxter_gazebo_ros_control_plugin","Failed to switch controllers");
+    switch (msg->mode) {
+      case baxter_core_msgs::JointCommand::POSITION_MODE:
+        start_controllers.push_back(side + "_joint_position_controller");
+        stop_controllers.push_back(side + "_joint_velocity_controller");
+        stop_controllers.push_back(side + "_joint_effort_controller");
+        start=side+"_joint_position_controller";
+	stop=side+"_joint_velocity_controller and "+side+"_joint_effort_controller";
+        break;
+      case baxter_core_msgs::JointCommand::VELOCITY_MODE:
+        start_controllers.push_back(side + "_joint_velocity_controller");
+        stop_controllers.push_back(side + "_joint_position_controller");
+        stop_controllers.push_back(side + "_joint_effort_controller");
+        start=side+"_joint_velocity_controller";
+	stop=side+"_joint_position_controller and "+side+"_joint_effort_controller";
+        break;
+      case baxter_core_msgs::JointCommand::TORQUE_MODE:
+        start_controllers.push_back(side + "_joint_effort_controller");
+        stop_controllers.push_back(side + "_joint_position_controller");
+        stop_controllers.push_back(side + "_joint_velocity_controller");
+        start=side+"_joint_position_controller";
+	stop=side+"_joint_velocity_controller and "+side+"_joint_velocity_controller";
+        break;
+      default:
+        ROS_ERROR_STREAM_NAMED("baxter_gazebo_ros_control_plugin",
+                               "Unknown command mode " << msg->mode);
+        return;
     }
-    
+    //Checks if we have already disabled the controllers
+    /** \brief Switch multiple controllers simultaneously.
+     *
+     * \param start_controllers A vector of controller names to be started
+     * \param stop_controllers A vector of controller names to be stopped
+     * \param strictness How important it is that the requested controllers are
+     * started and stopped.  The levels are defined in the
+     * controller_manager_msgs/SwitchControllers service as either \c BEST_EFFORT
+     * or \c STRICT.  \c BEST_EFFORT means that \ref switchController can still
+     * succeed if a non-existant controller is requested to be stopped or started.
+     */
+    if (!controller_manager_->switchController(
+        start_controllers, stop_controllers,
+        controller_manager_msgs::SwitchController::Request::STRICT)) {
+      ROS_ERROR_STREAM_NAMED("baxter_gazebo_ros_control_plugin",
+                             "Failed to switch controllers");
+    }
+    else {
+       is_disabled=false;
+       ROS_INFO("Robot is enabled");
+       ROS_INFO_STREAM(start<<" was started and "<<stop<<" were stopped succesfully");
+       ROS_INFO("Gravity compensation was turned on");
+    }
   }
-
 
 };
 
 // Register this plugin with the simulator
-GZ_REGISTER_MODEL_PLUGIN(BaxterGazeboRosControlPlugin);
-} // namespace
+GZ_REGISTER_MODEL_PLUGIN (BaxterGazeboRosControlPlugin);
+}  // namespace

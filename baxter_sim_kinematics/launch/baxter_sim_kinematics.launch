@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+
+  <!-- Load the URDF into the ROS Parameter Server -->
+  <param name="urdf"
+	 command="cat '$(find baxter_description)/urdf/baxter.urdf'" />
+  <param name="root_name" value="torso" />
+  <param name="grav_right_name" value="right_wrist" />
+  <param name="grav_left_name" value="left_wrist" />
+  <!-- load left and right tip name -->
+    <param name="right_tip_name" value="right_wrist" />
+  <param name="left_tip_name" value="left_wrist" />
+  <node name="baxter_sim_kinematics_left" pkg="baxter_sim_kinematics" type="kinematics" respawn="false" output="screen" args="left">
+</node>
+  <node name="baxter_sim_kinematics_right" pkg="baxter_sim_kinematics" type="kinematics" respawn="false" output="screen" args="right">
+  </node>
+
+
+</launch>

@@ -1,11 +1,11 @@
 - git:
     local-name: baxter_simulator
     uri: git@github.com:RethinkRobotics/baxter_simulator.git
-    version: master
+    version: early_interface_dev
 - git:
     local-name: gazebo_ros_pkgs
     uri: git@github.com:RethinkRobotics/gazebo_ros_pkgs.git
-    version: hydro-devel
+    version: early_interface_dev
 - git:
     local-name: ros_controllers
     uri: git@github.com:RethinkRobotics/ros_controllers.git
@@ -13,7 +13,7 @@
 - git:
     local-name: ros_control
     uri: git@github.com:RethinkRobotics/ros_control.git
-    version: hydro-devel
+    version: early_interface_dev
 - git:
     local-name: control_toolbox
     uri: git@github.com:RethinkRobotics/control_toolbox.git
@@ -37,7 +37,7 @@
 - git:
     local-name: baxter_common
     uri: git@github.com:RethinkRobotics/baxter_common.git
-    version: master
+    version: early_interface_dev
 - git:
     local-name: baxter
     uri: git@github.com:RethinkRobotics/baxter.git

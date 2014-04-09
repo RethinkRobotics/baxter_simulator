@@ -1,0 +1,24 @@
+<RCC>
+    <qresource prefix="/new/prefix">
+        <file>torso.png</file>
+        <file>arm.png</file>
+        <file>cuff_squeeze_p.png</file>
+        <file>cuff_squeeze_r.png</file>
+        <file>cuff.png</file>
+        <file>left.png</file>
+        <file>logo.png</file>
+        <file>nav_ok_p.png</file>
+        <file>nav_ok_r.png</file>
+        <file>nav_show_p.png</file>
+        <file>nav_show_r.png</file>
+        <file>nav.png</file>
+        <file>right.png</file>
+        <file>robot_arm.png</file>
+        <file>cuff_grasp_p.png</file>
+        <file>cuff_grasp_r.png</file>
+        <file>cuff_ok_p.png</file>
+        <file>cuff_ok_r.png</file>
+        <file>nav_cancel_p.png</file>
+        <file>nav_cancel_r.png</file>
+    </qresource>
+</RCC>
