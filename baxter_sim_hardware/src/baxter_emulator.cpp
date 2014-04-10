@@ -124,7 +124,7 @@ bool baxter_emulator::init() {
   //Default values for the left and right gripper end effector states
   left_grip_st.timestamp.sec = 0;
   left_grip_st.timestamp.nsec = 0;
-  left_grip_st.id = 1;
+  left_grip_st.id = 131073;
   left_grip_st.enabled = 1;
   left_grip_st.calibrated = 1;
   left_grip_st.ready = 1;
@@ -142,11 +142,10 @@ bool baxter_emulator::init() {
   right_grip_st = left_grip_st;  // Sample values recorded on both the grippers to do the spoof
 
   //Default values for the left and the right gripper properties
-  left_grip_prop.id = 65664;
-  left_grip_prop.ui_type = 2;
-  left_grip_prop.manufacturer = "test";
-  left_grip_prop.product = "test";
-  left_grip_prop.product = "test";
+  left_grip_prop.id = 131073;
+  left_grip_prop.ui_type = 3;
+  left_grip_prop.manufacturer = "Rethink Research Robot";
+  left_grip_prop.product = "SDK End Effector";
   left_grip_prop.hardware_rev = "test";
   left_grip_prop.firmware_rev = "test";
   left_grip_prop.firmware_date = "test";
