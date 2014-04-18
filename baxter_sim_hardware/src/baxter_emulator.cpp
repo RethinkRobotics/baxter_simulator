@@ -134,8 +134,8 @@ bool baxter_emulator::init() {
   left_grip_st.error = 0;
   left_grip_st.position = 0.0;
   left_grip_st.force = 0.0;
-  left_grip_st.state = "sample";
-  left_grip_st.command = "no_op";
+  left_grip_st.state = "";
+  left_grip_st.command = "";
   left_grip_st.command_sender = "";
   left_grip_st.command_sequence = 0;
 
@@ -146,9 +146,10 @@ bool baxter_emulator::init() {
   left_grip_prop.ui_type = 3;
   left_grip_prop.manufacturer = "Rethink Research Robot";
   left_grip_prop.product = "SDK End Effector";
-  left_grip_prop.hardware_rev = "test";
-  left_grip_prop.firmware_rev = "test";
-  left_grip_prop.firmware_date = "test";
+  left_grip_prop.serial_number = "";
+  left_grip_prop.hardware_rev = "";
+  left_grip_prop.firmware_rev = "";
+  left_grip_prop.firmware_date = "";
   left_grip_prop.controls_grip = true;
   left_grip_prop.senses_grip = true;
   left_grip_prop.reverses_grip = true;
