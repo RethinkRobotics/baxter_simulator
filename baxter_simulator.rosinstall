@@ -42,3 +42,7 @@
     local-name: baxter
     uri: git@github.com:RethinkRobotics/baxter.git
     version: release-1.0.0
+- git:
+    local-name: xacro
+    uri: git@github.com:RethinkRobotics/xacro.git
+    version: hydro-devel
