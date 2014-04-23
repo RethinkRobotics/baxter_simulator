@@ -57,8 +57,8 @@ static const std::string BAXTER_LEFT_LASER_TOPIC =
     "robot/laserscan/left_hand_range/state";
 static const std::string BAXTER_RIGHT_LASER_TOPIC =
     "robot/laserscan/right_hand_range/state";
-static const std::string BAXTER_LEFT_IR_TOPIC = "robot/range/left_hand_range";
-static const std::string BAXTER_RIGHT_IR_TOPIC = "robot/range/right_hand_range";
+static const std::string BAXTER_LEFT_IR_TOPIC = "robot/range/left_hand_range/state";
+static const std::string BAXTER_RIGHT_IR_TOPIC = "robot/range/right_hand_range/state";
 static const std::string BAXTER_LEFT_IR_STATE_TOPIC =
     "robot/analog_io/left_hand_range/state";
 static const std::string BAXTER_RIGHT_IR_STATE_TOPIC =
@@ -378,6 +378,7 @@ void baxter_emulator::left_laser_cb(const sensor_msgs::LaserScan &msg) {
   left_ir.min_range = msg.range_min;
   left_ir.max_range = msg.range_max;
   left_ir.radiation_type = 1;
+  left_ir.field_of_view = 0.0872664600611;
   if (msg.ranges[0] < msg.range_max && msg.ranges[0] > msg.range_min)
     left_ir.range = msg.ranges[0];
   else
@@ -396,6 +397,7 @@ void baxter_emulator::right_laser_cb(const sensor_msgs::LaserScan &msg) {
   right_ir.min_range = msg.range_min;
   right_ir.max_range = msg.range_max;
   right_ir.radiation_type = 1;
+  right_ir.field_of_view = 0.0872664600611;
   if (msg.ranges[0] < msg.range_max && msg.ranges[0] > msg.range_min)
     right_ir.range = msg.ranges[0];
   else
