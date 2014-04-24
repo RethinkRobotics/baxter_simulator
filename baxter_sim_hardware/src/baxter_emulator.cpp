@@ -1,5 +1,5 @@
 /*********************************************************************
- # Copyright (c) 2013-2014, Rethink Robotics
+ # Copyright (c) 2014, Rethink Robotics
  # All rights reserved.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -54,9 +54,9 @@ static const std::string BAXTER_RIGHT_GRIPPER_PROP =
     "robot/end_effector/right_gripper/properties";
 static const std::string BAXTER_JOINT_TOPIC = "robot/joint_states";
 static const std::string BAXTER_LEFT_LASER_TOPIC =
-    "robot/laserscan/left_hand_range/state";
+    "sim/laserscan/left_hand_range/state";
 static const std::string BAXTER_RIGHT_LASER_TOPIC =
-    "robot/laserscan/right_hand_range/state";
+    "sim/laserscan/right_hand_range/state";
 static const std::string BAXTER_LEFT_IR_TOPIC = "robot/range/left_hand_range/state";
 static const std::string BAXTER_RIGHT_IR_TOPIC = "robot/range/right_hand_range/state";
 static const std::string BAXTER_LEFT_IR_STATE_TOPIC =
