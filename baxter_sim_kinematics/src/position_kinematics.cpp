@@ -175,7 +175,7 @@ bool position_kinematics::IKCallback(
     res.isValid[req_index]=0;
     int valid_inp=0;
 
-    if(!req.seed_angles.empty() && req.seed_mode != baxter_core_msgs::SolvePositionIKRequest::SEED_USER) {
+    if(!req.seed_angles.empty() && req.seed_mode != baxter_core_msgs::SolvePositionIKRequest::SEED_CURRENT) {
       res.isValid[req_index] = m_kinematicsModel->getPositionIK(
           req.pose_stamp[req_index], req.seed_angles[req_index], &joint_pose);
       res.joints[req_index].name.resize(joint_pose.name.size());
@@ -183,7 +183,7 @@ bool position_kinematics::IKCallback(
       valid_inp=1;
     }
 
-    if((req.seed_angles.empty() || !res.isValid[req_index]) && req.seed_mode != baxter_core_msgs::SolvePositionIKRequest::SEED_CURRENT) {
+    if((!res.isValid[req_index]) && req.seed_mode != baxter_core_msgs::SolvePositionIKRequest::SEED_USER) {
       res.isValid[req_index] = m_kinematicsModel->getPositionIK(
           req.pose_stamp[req_index], joint, &joint_pose);
       res.joints[req_index].name.resize(joint_pose.name.size());
