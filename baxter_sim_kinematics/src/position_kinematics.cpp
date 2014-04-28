@@ -169,16 +169,40 @@ bool position_kinematics::IKCallback(
   sensor_msgs::JointState joint_pose;
   res.joints.resize(req.pose_stamp.size());
   res.isValid.resize(req.pose_stamp.size());
+  res.result_type.resize(req.pose_stamp.size());
   for (size_t req_index = 0; req_index < req.pose_stamp.size(); req_index++) {
-    res.isValid[req_index] = m_kinematicsModel->getPositionIK(
-        req.pose_stamp[req_index], joint, &joint_pose);
-    res.joints[req_index].name.resize(joint_pose.name.size());
+
+    res.isValid[req_index]=0;
+    int valid_inp=0;
+
+    if(!req.seed_angles.empty() && req.seed_mode != baxter_core_msgs::SolvePositionIKRequest::SEED_USER) {
+      res.isValid[req_index] = m_kinematicsModel->getPositionIK(
+          req.pose_stamp[req_index], req.seed_angles[req_index], &joint_pose);
+      res.joints[req_index].name.resize(joint_pose.name.size());
+      res.result_type[req_index]=baxter_core_msgs::SolvePositionIKRequest::SEED_USER;
+      valid_inp=1;
+    }
+
+    if((req.seed_angles.empty() || !res.isValid[req_index]) && req.seed_mode != baxter_core_msgs::SolvePositionIKRequest::SEED_CURRENT) {
+      res.isValid[req_index] = m_kinematicsModel->getPositionIK(
+          req.pose_stamp[req_index], joint, &joint_pose);
+      res.joints[req_index].name.resize(joint_pose.name.size());
+      res.result_type[req_index]=baxter_core_msgs::SolvePositionIKRequest::SEED_CURRENT;
+      valid_inp=1;
+    }
+
+    if(!valid_inp) {
+      ROS_ERROR("Not a valid request message to the IK service");
+      return false;
+    }
 
     if (res.isValid[req_index]) {
       res.joints[req_index].position.resize(joint_pose.position.size());
       res.joints[req_index].name = joint_pose.name;
       res.joints[req_index].position = joint_pose.position;
     }
+    else
+      res.result_type[req_index]=baxter_core_msgs::SolvePositionIKResponse::RESULT_INVALID;
   }
   loop_rate.sleep();
 }
