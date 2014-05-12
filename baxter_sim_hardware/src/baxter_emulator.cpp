@@ -54,11 +54,11 @@ static const std::string BAXTER_RIGHT_GRIPPER_PROP =
     "robot/end_effector/right_gripper/properties";
 static const std::string BAXTER_JOINT_TOPIC = "robot/joint_states";
 static const std::string BAXTER_LEFT_LASER_TOPIC =
-    "robot/laserscan/left_hand_range/state";
+    "sim/laserscan/left_hand_range/state";
 static const std::string BAXTER_RIGHT_LASER_TOPIC =
-    "robot/laserscan/right_hand_range/state";
-static const std::string BAXTER_LEFT_IR_TOPIC = "robot/range/left_hand_range";
-static const std::string BAXTER_RIGHT_IR_TOPIC = "robot/range/right_hand_range";
+    "sim/laserscan/right_hand_range/state";
+static const std::string BAXTER_LEFT_IR_TOPIC = "robot/range/left_hand_range/state";
+static const std::string BAXTER_RIGHT_IR_TOPIC = "robot/range/right_hand_range/state";
 static const std::string BAXTER_LEFT_IR_STATE_TOPIC =
     "robot/analog_io/left_hand_range/state";
 static const std::string BAXTER_RIGHT_IR_STATE_TOPIC =
@@ -124,7 +124,7 @@ bool baxter_emulator::init() {
   //Default values for the left and right gripper end effector states
   left_grip_st.timestamp.sec = 0;
   left_grip_st.timestamp.nsec = 0;
-  left_grip_st.id = 1;
+  left_grip_st.id = 131073;
   left_grip_st.enabled = 1;
   left_grip_st.calibrated = 1;
   left_grip_st.ready = 1;
@@ -134,22 +134,22 @@ bool baxter_emulator::init() {
   left_grip_st.error = 0;
   left_grip_st.position = 0.0;
   left_grip_st.force = 0.0;
-  left_grip_st.state = "sample";
-  left_grip_st.command = "no_op";
+  left_grip_st.state = "";
+  left_grip_st.command = "";
   left_grip_st.command_sender = "";
   left_grip_st.command_sequence = 0;
 
   right_grip_st = left_grip_st;  // Sample values recorded on both the grippers to do the spoof
 
   //Default values for the left and the right gripper properties
-  left_grip_prop.id = 65664;
-  left_grip_prop.ui_type = 2;
-  left_grip_prop.manufacturer = "test";
-  left_grip_prop.product = "test";
-  left_grip_prop.product = "test";
-  left_grip_prop.hardware_rev = "test";
-  left_grip_prop.firmware_rev = "test";
-  left_grip_prop.firmware_date = "test";
+  left_grip_prop.id = 131073;
+  left_grip_prop.ui_type = 3;
+  left_grip_prop.manufacturer = "Rethink Research Robot";
+  left_grip_prop.product = "SDK End Effector";
+  left_grip_prop.serial_number = "";
+  left_grip_prop.hardware_rev = "";
+  left_grip_prop.firmware_rev = "";
+  left_grip_prop.firmware_date = "";
   left_grip_prop.controls_grip = true;
   left_grip_prop.senses_grip = true;
   left_grip_prop.reverses_grip = true;
@@ -378,6 +378,7 @@ void baxter_emulator::left_laser_cb(const sensor_msgs::LaserScan &msg) {
   left_ir.min_range = msg.range_min;
   left_ir.max_range = msg.range_max;
   left_ir.radiation_type = 1;
+  left_ir.field_of_view = 0.0872664600611;
   if (msg.ranges[0] < msg.range_max && msg.ranges[0] > msg.range_min)
     left_ir.range = msg.ranges[0];
   else
@@ -396,6 +397,7 @@ void baxter_emulator::right_laser_cb(const sensor_msgs::LaserScan &msg) {
   right_ir.min_range = msg.range_min;
   right_ir.max_range = msg.range_max;
   right_ir.radiation_type = 1;
+  right_ir.field_of_view = 0.0872664600611;
   if (msg.ranges[0] < msg.range_max && msg.ranges[0] > msg.range_min)
     right_ir.range = msg.ranges[0];
   else

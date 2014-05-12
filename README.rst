@@ -7,11 +7,11 @@ Code & Tickets
 --------------
 
 +-----------------+----------------------------------------------------------------+
-| Documentation   | https://github.com/RethinkRobotics/sdk-docs/wiki               |
+| Documentation   | http://sdk.rethinkrobotics.com/wiki                            |
 +-----------------+----------------------------------------------------------------+
 | Issues          | https://github.com/RethinkRobotics/baxter_simulator/issues     |
 +-----------------+----------------------------------------------------------------+
-| Contributions   | https://github.com/RethinkRobotics/sdk-docs/wiki/Contributions |
+| Contributions   | http://sdk.rethinkrobotics.com/wiki/Contributions              |
 +-----------------+----------------------------------------------------------------+
 
 baxter_simulator Repository Overview
@@ -69,4 +69,4 @@ Other Baxter Repositories
 Latest Release Information
 --------------------------
 
-https://github.com/RethinkRobotics/sdk-docs/wiki/Release-Changes
+http://sdk.rethinkrobotics.com/wiki/Release-Changes

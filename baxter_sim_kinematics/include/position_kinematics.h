@@ -1,5 +1,5 @@
 /*********************************************************************
- # Copyright (c) 2014, Rethink Robotics
+ # Copyright (c) 2013-2014, Rethink Robotics
  # All rights reserved.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@
 #include <baxter_core_msgs/JointCommand.h>
 #include <baxter_core_msgs/EndpointState.h>
 #include <baxter_core_msgs/AssemblyState.h>
+#include <baxter_core_msgs/SolvePositionIK.h>
 #include <arm_kinematics.h>
 #include <sensor_msgs/JointState.h>
 

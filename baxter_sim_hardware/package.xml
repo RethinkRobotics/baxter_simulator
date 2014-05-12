@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>baxter_sim_hardware</name>
-  <version>0.5.0</version>
+  <version>0.8.0</version>
   <description>
     Publishes the state information and emulates few hardware interfaces for use with Baxter
     in Gazebo
