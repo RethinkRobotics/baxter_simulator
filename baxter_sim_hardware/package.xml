@@ -1,9 +1,10 @@
 <?xml version="1.0"?>
 <package>
-  <name>baxter_gazebo</name>
+  <name>baxter_sim_hardware</name>
   <version>0.8.0</version>
   <description>
-    Baxter Gazebo plugins and launch files
+    Publishes the state information and emulates few hardware interfaces for use with Baxter
+    in Gazebo
   </description>
 
   <maintainer email="rsdk.support@rethinkrobotics.com">
@@ -18,25 +19,26 @@
     https://github.com/RethinkRobotics/baxter_simulator/issues
   </url>
   <author>Rethink Robotics Inc.</author>
+  <author>Hariharasudan Malaichamee</author>
   <author>Dave Coleman</author>
 
+
   <buildtool_depend>catkin</buildtool_depend>
-
-  <build_depend>roscpp</build_depend>
+  
+  <build_depend>roscpp</build_depend>  
   <build_depend>baxter_core_msgs</build_depend>
-  <build_depend>gazebo_ros_control</build_depend>
-  <build_depend>controller_manager_msgs</build_depend>
-
+  <build_depend>cv_bridge</build_depend> 
+  <build_depend>image_transport</build_depend>   
+  <build_depend>baxter_sim_kinematics</build_depend>   
+  
+  <run_depend>std_msgs</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>baxter_core_msgs</run_depend>
-  <run_depend>gazebo_ros_control</run_depend>
-  <run_depend>controller_manager_msgs</run_depend>
-  <run_depend>baxter_sim_hardware</run_depend>
-  <run_depend>gazebo_ros</run_depend>
-  <run_depend>baxter_description</run_depend>
-
-  <export>
-    <gazebo plugin_path="${prefix}/lib" gazebo_media_path="${prefix}" />
-  </export>
+  <run_depend>cv_bridge</run_depend>
+  <run_depend>image_transport</run_depend>
+  <run_depend>baxter_sim_kinematics</run_depend>
+  <run_depend>controller_manager</run_depend>
 
 </package>
+
+

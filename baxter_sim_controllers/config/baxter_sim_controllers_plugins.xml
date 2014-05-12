@@ -1,0 +1,35 @@
+<library path="lib/libbaxter_sim_controllers">
+
+  <class name="baxter_sim_controllers/BaxterPositionController" 
+	 type="baxter_sim_controllers::BaxterPositionController" 
+	 base_class_type="controller_interface::ControllerBase">
+    <description>
+      The BaxterPositionController tracks position commands for the entire Baxter arm. It expects a EffortJointInterface type of hardware interface.
+    </description>
+  </class>
+
+  <class name="baxter_sim_controllers/BaxterVelocityController" 
+	 type="baxter_sim_controllers::BaxterVelocityController" 
+	 base_class_type="controller_interface::ControllerBase">
+    <description>
+      The BaxterVelocityController tracks velocity commands for the entire Baxter arm. It expects a EffortJointInterface type of hardware interface.
+    </description>
+  </class>
+
+  <class name="baxter_sim_controllers/BaxterEffortController" 
+	 type="baxter_sim_controllers::BaxterEffortController" 
+	 base_class_type="controller_interface::ControllerBase">
+    <description>
+      The BaxterEffortController tracks effort commands for the Baxter joints. It expects a EffortJointInterface type of hardware interface.
+    </description>
+  </class>
+  
+    <class name="baxter_sim_controllers/BaxterHeadController" 
+	 type="baxter_sim_controllers::BaxterHeadController" 
+	 base_class_type="controller_interface::ControllerBase">
+    <description>
+      The BaxterHeadController tracks position commands for the Baxter head. It expects a EffortJointInterface type of hardware interface.
+    </description>
+  </class>
+
+</library>

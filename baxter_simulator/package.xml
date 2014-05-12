@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<package>
+  <name>baxter_simulator</name>
+  <version>0.8.0</version>
+  <description>
+    Metapackage - Baxter Research Robot Gazebo Simulation
+  </description>
+
+  <maintainer email="rsdk.support@rethinkrobotics.com">
+    Rethink Robotics Inc.
+  </maintainer>
+  <license>BSD</license>
+  <url type="website">http://www.rethinkrobotics.com/sdk</url>
+  <url type="repository">
+    https://github.com/RethinkRobotics/baxter_simultor
+  </url>
+  <url type="bugtracker">
+    https://github.com/RethinkRobotics/baxter_simulator/issues
+  </url>
+  <author>Rethink Robotics Inc.</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <export>
+    <metapackage/>
+  </export>
+
+</package>

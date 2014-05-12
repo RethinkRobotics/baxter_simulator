@@ -4,41 +4,45 @@
     version: master
 - git:
     local-name: gazebo_ros_pkgs
-    uri: git@github.com:RethinkRobotics/gazebo_ros_pkgs.git
-    version: hydro-devel
-- git:
-    local-name: ros_controllers
-    uri: git@github.com:RethinkRobotics/ros_controllers.git
-    version: hydro-devel
+    uri: https://github.com/RethinkRobotics/gazebo_ros_pkgs.git
+    version: release-0.8.0
 - git:
     local-name: ros_control
-    uri: git@github.com:RethinkRobotics/ros_control.git
-    version: hydro-devel
+    uri: https://github.com/RethinkRobotics/ros_control.git
+    version: release-0.8.0
 - git:
     local-name: control_toolbox
-    uri: git@github.com:RethinkRobotics/control_toolbox.git
+    uri: https://github.com/RethinkRobotics/control_toolbox.git
     version: hydro-devel
 - git:
     local-name: realtime_tools
-    uri: git@github.com:RethinkRobotics/realtime_tools.git
+    uri: https://github.com/RethinkRobotics/realtime_tools.git
     version: hydro-devel
 - git:
-    local-name: baxter_interface
-    uri: git@github.com:RethinkRobotics/baxter_interface.git
+    local-name: ros_controllers
+    uri: https://github.com/RethinkRobotics/ros_controllers.git
+    version: hydro-devel
+- git:
+    local-name: xacro
+    uri: https://github.com/RethinkRobotics/xacro.git
+    version: hydro-devel
+- git:
+    local-name: baxter
+    uri: https://github.com/RethinkRobotics/baxter.git
     version: master
 - git:
-    local-name: baxter_examples
-    uri: git@github.com:RethinkRobotics/baxter_examples.git
+    local-name: baxter_interface
+    uri: https://github.com/RethinkRobotics/baxter_interface.git
     version: master
 - git:
     local-name: baxter_tools
-    uri: git@github.com:RethinkRobotics/baxter_tools.git
+    uri: https://github.com/RethinkRobotics/baxter_tools.git
     version: master
 - git:
     local-name: baxter_common
-    uri: git@github.com:RethinkRobotics/baxter_common.git
+    uri: https://github.com/RethinkRobotics/baxter_common.git
     version: master
 - git:
-    local-name: baxter
-    uri: git@github.com:RethinkRobotics/baxter.git
+    local-name: baxter_examples
+    uri: https://github.com/RethinkRobotics/baxter_examples.git
     version: master
