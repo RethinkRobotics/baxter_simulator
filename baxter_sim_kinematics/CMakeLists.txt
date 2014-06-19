@@ -11,7 +11,7 @@ find_package(catkin
   kdl_parser
 )
 
-find_package(Boost REQUIRED COMPONENTS system)
+#find_package(Boost REQUIRED COMPONENTS system)
 find_package(cmake_modules REQUIRED)
 find_package(Eigen REQUIRED)
 
@@ -26,7 +26,6 @@ catkin_package(
 
 include_directories(include
   ${catkin_INCLUDE_DIRS}
-  ${Boost_INCLUDE_DIRS}
   ${EIGEN_INCLUDE_DIRS}
 )
  
