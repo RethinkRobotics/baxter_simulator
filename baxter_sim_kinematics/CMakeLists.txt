@@ -12,6 +12,7 @@ find_package(catkin
 )
 
 find_package(Boost REQUIRED COMPONENTS system)
+find_package(cmake_modules REQUIRED)
 find_package(Eigen REQUIRED)
 
 catkin_package(
