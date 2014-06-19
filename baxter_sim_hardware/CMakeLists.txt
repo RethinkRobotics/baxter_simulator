@@ -10,7 +10,7 @@ find_package(catkin
   baxter_sim_kinematics
 )
 
-find_package(Boost REQUIRED COMPONENTS system)
+find_package(Boost REQUIRED COMPONENTS cmake_modules system)
 find_package(Eigen REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
