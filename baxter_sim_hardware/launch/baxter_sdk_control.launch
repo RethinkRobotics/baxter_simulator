@@ -32,7 +32,7 @@
     <remap from="/joint_states" to="/robot/joint_states" />
   </node>
 
-  <node name="baxter_sim_io" pkg="baxter_sim_io" type="baxter_sim_io"
+  <!--node name="baxter_sim_io" pkg="baxter_sim_io" type="baxter_sim_io"
 	respawn="false" output="screen">
-  </node>
+  </node-->
 </launch>

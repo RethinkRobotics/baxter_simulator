@@ -4,24 +4,24 @@
     version: master
 - git:
     local-name: gazebo_ros_pkgs
-    uri: https://github.com/RethinkRobotics/gazebo_ros_pkgs.git
-    version: release-0.8.0
+    uri: https://github.com/ros-simulation/gazebo_ros_pkgs.git
+    version: indigo-devel
 - git:
     local-name: ros_control
-    uri: https://github.com/RethinkRobotics/ros_control.git
-    version: release-0.8.0
+    uri: https://github.com/ros-controls/ros_control.git
+    version: indigo-devel
 - git:
     local-name: control_toolbox
-    uri: https://github.com/RethinkRobotics/control_toolbox.git
-    version: hydro-devel
+    uri: https://github.com/ros-controls/control_toolbox.git
+    version: indigo-devel
 - git:
     local-name: realtime_tools
-    uri: https://github.com/RethinkRobotics/realtime_tools.git
-    version: hydro-devel
+    uri: https://github.com/ros-controls/realtime_tools.git
+    version: indigo-devel
 - git:
     local-name: ros_controllers
-    uri: https://github.com/RethinkRobotics/ros_controllers.git
-    version: hydro-devel
+    uri: https://github.com/ros-controls/ros_controllers.git 
+    version: indigo-devel
 - git:
     local-name: xacro
     uri: https://github.com/RethinkRobotics/xacro.git
