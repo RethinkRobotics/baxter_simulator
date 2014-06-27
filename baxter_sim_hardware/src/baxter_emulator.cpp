@@ -275,11 +275,11 @@ void baxter_emulator::publish(const std::string &img_path) {
   arm_kinematics::Kinematics kin;
   kin.init_grav();
 
-  //image_transport::ImageTransport it(n);
-  //image_transport::Publisher display_pub = it.advertise(BAXTER_DISPLAY_TOPIC,
-  //                                                      1);
+  image_transport::ImageTransport it(n);
+  image_transport::Publisher display_pub = it.advertise(BAXTER_DISPLAY_TOPIC,
+                                                        1);
   // Read OpenCV Mat image and convert it to ROS message
-  /*cv_bridge::CvImagePtr cv_ptr(new cv_bridge::CvImage);
+  cv_bridge::CvImagePtr cv_ptr(new cv_bridge::CvImage);
   try {
     cv_ptr->image = cv::imread(img_path, CV_LOAD_IMAGE_UNCHANGED);
     if (cv_ptr->image.data) {
@@ -289,10 +289,9 @@ void baxter_emulator::publish(const std::string &img_path) {
     }
   } catch (std::exception e) {
     ROS_WARN("Unable to load the Startup picture on Baxter's display screen %s",e.what());
-  }*/
+  }
   ROS_INFO("Simulator is loaded and started successfully");
   while (ros::ok()) {
-    std::cout<<"one"<<std::endl;
     assembly_state_pub.publish(assembly_state);
     left_grip_st_pub.publish(left_grip_st);
     right_grip_st_pub.publish(right_grip_st);
@@ -313,9 +312,7 @@ void baxter_emulator::publish(const std::string &img_path) {
     torso_right_innerL_pub.publish(torso_rightIL_nav_light);
     torso_right_outerL_pub.publish(torso_rightOL_nav_light);
     head_pub.publish(head_msg);
-    std::cout<<"onee"<<std::endl;
     kin.getGravityTorques(jstate_msg, left_gravity, right_gravity, assembly_state.enabled);
-    std::cout<<"oone"<<std::endl;
     left_gravity.header.stamp = ros::Time::now();
     left_grav_pub.publish(left_gravity);
     right_gravity.header.stamp = ros::Time::now();

@@ -31,8 +31,6 @@
  *  \author Hariharasudan Malaichamee
  *  \desc   library that performs the calculations for the IK,FK and Gravity compensation using the KDL library
  */
-#include <algorithm>
-
 #include <cstring>
 #include <ros/ros.h>
 #include <arm_kinematics.h>
@@ -91,22 +89,21 @@ bool Kinematics::init_grav() {
     ROS_FATAL("Could not load models!");
     return false;
   }
+
   grav_chain_r = chain;
   right_joint.clear();
   right_joint.reserve(chain.getNrOfSegments());
-std::cout<<"Size is ________________________________________"<<chain.getNrOfSegments()<<std::endl;
   std::vector<std::string>::iterator idx;
+  //Update the right_joint with the fixed joints from the URDF. Get each of the link's properties from GetLinkProperties service and
+  //call the SetLinkProperties service with the same set of parameters except for the gravity_mode, which would be disabled. This is
+  //to disable the gravity in the links, thereby to eliminate the need for gravity compensation
   for (int i = 0; i < chain.getNrOfSegments(); i++) {
-//  for (int i = 0; i < info.joint_names.size(); i++) {
     std::string seg_name = chain.getSegment(i).getName();
     std::string joint_name = chain.getSegment(i).getJoint().getName();
-    std::cout<<"The seg name is "<<joint_name<<std::endl;
     idx = std::find(info.joint_names.begin(), info.joint_names.end(), joint_name);
     if (idx != info.joint_names.end()) {
       right_joint.push_back(*idx);
-      std::cout<<"The name is**********************"<<*idx<<std::endl;
     }
-    std::cout<<chain.getSegment(i).getName()<<std::endl;
     std::string link_name = chain.getSegment(i).getName();
     getlinkproperties.request.link_name=link_name;
     setlinkproperties.request.link_name=link_name;
@@ -120,11 +117,7 @@ std::cout<<"Size is ________________________________________"<<chain.getNrOfSegm
     setlinkproperties.request.iyz = getlinkproperties.response.iyz;
     setlinkproperties.request.ixz = getlinkproperties.response.ixz;
     setlinkproperties.request.gravity_mode = false;
-    
-    if(set_lp_client.call(setlinkproperties))
-	std::cout<<"success"<<std::endl;
-    else
-	std::cout<<"failure"<<std::endl;
+    set_lp_client.call(setlinkproperties);
   }
 
   //Create a gravity solver for the right chain
@@ -137,21 +130,18 @@ std::cout<<"Size is ________________________________________"<<chain.getNrOfSegm
     ROS_FATAL("Could not load models!");
     return false;
   }
+
   grav_chain_l = chain;
   left_joint.clear();
   left_joint.reserve(chain.getNrOfSegments());
-  //std::vector<std::string>::iterator idx;
-
-
+  //Update the left_joint with the fixed joints from the URDF. Get each of the link's properties from GetLinkProperties service and
+  //call the SetLinkProperties service with the same set of parameters except for the gravity_mode, which would be disabled. This is
+  //to disable the gravity in the links, thereby to eliminate the need for gravity compensation
   for (int i = 0; i < chain.getNrOfSegments(); i++) {
-//  for (int i = 0; i < info.joint_names.size(); i++) {
     std::string seg_name = chain.getSegment(i).getName();
     std::string joint_name = chain.getSegment(i).getJoint().getName();
-    std::cout<<"The seg name is "<<joint_name<<std::endl;
     idx = std::find(info.joint_names.begin(), info.joint_names.end(), joint_name);
-    std::cout<<"Before if*****************************************"<<std::endl;
     if (idx != info.joint_names.end()) {
-      std::cout<<"inside if loop &&&&&&&&&&&&&&&&&&&"<<*idx<<std::endl;
       left_joint.push_back(*idx);
     }
     getlinkproperties.request.link_name=chain.getSegment(i).getName();
@@ -325,34 +315,23 @@ bool arm_kinematics::Kinematics::getGravityTorques(
   left_gravity.gravity_model_effort.resize(num_joints);
   right_gravity.gravity_model_effort.resize(num_joints);
   if (isEnabled) {
-    std::cout<<"the"<<std::endl;
     torques_l.resize(num_joints);
-    std::cout<<"two"<<std::endl;
     torques_r.resize(num_joints);
-    std::cout<<"three"<<std::endl;
     jntPosIn_l.resize(num_joints);
-    std::cout<<"four"<<std::endl;
     jntPosIn_r.resize(num_joints);
-    std::cout<<"five"<<std::endl;
 
     // Copying the positions of the joints relative to its index in the KDL chain
     for (unsigned int j = 0; j < joint_configuration.name.size(); j++) {
       for (unsigned int i = 0; i < num_joints; i++) {
-    std::cout<<"six "<<num_joints<<" "<<i<<" "<<j<<" "<<joint_configuration.name[j]<<std::endl;
         if (joint_configuration.name[j] == left_joint.at(i)) {
-    std::cout<<"seven"<<std::endl;
           jntPosIn_l(i) = joint_configuration.position[j];
-    std::cout<<"eight"<<std::endl;
           break;
         } else if (joint_configuration.name[j] == right_joint.at(i)) {
-    std::cout<<"nine"<<std::endl;
           jntPosIn_r(i) = joint_configuration.position[j];
-    std::cout<<"ten"<<std::endl;
           break;
         }
       }
     }
-    std::cout<<"eleven"<<std::endl;
     KDL::JntArray jntArrayNull(num_joints);
     KDL::Wrenches wrenchNull_l(grav_chain_l.getNrOfSegments(),
                                KDL::Wrench::Zero());

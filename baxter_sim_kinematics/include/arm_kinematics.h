@@ -51,6 +51,7 @@
 #include <baxter_core_msgs/SEAJointState.h>
 #include <gazebo_msgs/SetLinkProperties.h>
 #include <gazebo_msgs/GetLinkProperties.h>
+#include <algorithm>
 
 namespace arm_kinematics {
 
