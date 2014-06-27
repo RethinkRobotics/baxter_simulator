@@ -49,6 +49,8 @@
 #include <sensor_msgs/JointState.h>
 #include <std_msgs/Bool.h>
 #include <baxter_core_msgs/SEAJointState.h>
+#include <gazebo_msgs/SetLinkProperties.h>
+#include <gazebo_msgs/GetLinkProperties.h>
 
 namespace arm_kinematics {
 

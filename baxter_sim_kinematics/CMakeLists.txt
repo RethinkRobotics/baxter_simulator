@@ -9,6 +9,7 @@ find_package(catkin
   tf
   tf_conversions
   kdl_parser
+  gazebo_msgs
 )
 
 find_package(cmake_modules REQUIRED)
@@ -19,6 +20,7 @@ catkin_package(
   CATKIN_DEPENDS
   std_msgs
   baxter_core_msgs
+  gazebo_msgs
   sensor_msgs
   LIBRARIES ${PROJECT_NAME}
 )

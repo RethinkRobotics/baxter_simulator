@@ -22,6 +22,7 @@
 
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>baxter_core_msgs</build_depend>
+  <build_depend>gazebo_msgs</build_depend>
   <build_depend>sensor_msgs</build_depend>
   <build_depend>kdl_parser</build_depend>
   <build_depend>tf</build_depend>
@@ -33,6 +34,7 @@
   <run_depend>roscpp</run_depend>
 
   <run_depend>baxter_core_msgs</run_depend>
+  <run_depend>gazebo_msgs</run_depend>
   <run_depend>sensor_msgs</run_depend>
 
   <run_depend>tf</run_depend>
