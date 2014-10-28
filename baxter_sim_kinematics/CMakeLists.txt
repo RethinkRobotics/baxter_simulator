@@ -22,6 +22,7 @@ catkin_package(
   baxter_core_msgs
   gazebo_msgs
   sensor_msgs
+  kdl_parser
   LIBRARIES ${PROJECT_NAME}
 )
 

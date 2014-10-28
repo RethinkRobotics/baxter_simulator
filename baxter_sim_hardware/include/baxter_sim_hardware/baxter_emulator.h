@@ -64,7 +64,7 @@
 #include <sensor_msgs/Range.h>
 #include <sensor_msgs/LaserScan.h>
 
-#include <arm_kinematics.h>
+#include <baxter_sim_kinematics/arm_kinematics.h>
 #include <cmath>
 #include <map>
 

@@ -33,7 +33,7 @@
  */
 #include <cstring>
 #include <ros/ros.h>
-#include <arm_kinematics.h>
+#include <baxter_sim_kinematics/arm_kinematics.h>
 
 namespace arm_kinematics {
 
