@@ -9,9 +9,10 @@ find_package(catkin
   tf
   tf_conversions
   kdl_parser
+  gazebo_msgs
 )
 
-find_package(Boost REQUIRED COMPONENTS system)
+find_package(cmake_modules REQUIRED)
 find_package(Eigen REQUIRED)
 
 catkin_package(
@@ -19,13 +20,13 @@ catkin_package(
   CATKIN_DEPENDS
   std_msgs
   baxter_core_msgs
+  gazebo_msgs
   sensor_msgs
   LIBRARIES ${PROJECT_NAME}
 )
 
 include_directories(include
   ${catkin_INCLUDE_DIRS}
-  ${Boost_INCLUDE_DIRS}
   ${EIGEN_INCLUDE_DIRS}
 )
  

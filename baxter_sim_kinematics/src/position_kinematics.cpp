@@ -33,13 +33,10 @@
  */
 
 #include <position_kinematics.h>
-//#include <typeinfo>
 #include <signal.h>
-//#include <string>
 
 namespace kinematics {
 
-//static const int no_jts = 7;
 static const std::string ref_frame_id = "base";
 static const std::string JOINT_STATES = "/robot/joint_states";
 static const std::string ROBOT_STATE = "/robot/state";
