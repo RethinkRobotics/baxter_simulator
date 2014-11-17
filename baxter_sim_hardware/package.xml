@@ -24,15 +24,16 @@
 
 
   <buildtool_depend>catkin</buildtool_depend>
-  
-  <build_depend>roscpp</build_depend>  
+
+  <build_depend>std_msgs</build_depend>
+  <build_depend>tf</build_depend>
+  <build_depend>roscpp</build_depend>
   <build_depend>baxter_core_msgs</build_depend>
-  <build_depend>cv_bridge</build_depend> 
-  <build_depend>image_transport</build_depend>   
-  <build_depend>baxter_sim_kinematics</build_depend>   
+  <build_depend>cv_bridge</build_depend>
+  <build_depend>image_transport</build_depend>
+  <build_depend>baxter_sim_kinematics</build_depend>
   <build_depend>cmake_modules</build_depend>
 
-  <run_depend>std_msgs</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>baxter_core_msgs</run_depend>
   <run_depend>cv_bridge</run_depend>
@@ -41,5 +42,3 @@
   <run_depend>controller_manager</run_depend>
 
 </package>
-
-

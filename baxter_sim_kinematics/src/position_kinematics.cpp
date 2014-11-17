@@ -32,7 +32,7 @@
  *  \desc   Node to wrap/unwrap the messages and calculate the kinematics for the Simulated Baxter
  */
 
-#include <position_kinematics.h>
+#include <baxter_sim_kinematics/position_kinematics.h>
 #include <signal.h>
 
 namespace kinematics {

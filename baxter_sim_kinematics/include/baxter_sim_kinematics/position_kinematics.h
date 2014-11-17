@@ -43,7 +43,7 @@
 #include <baxter_core_msgs/EndpointState.h>
 #include <baxter_core_msgs/AssemblyState.h>
 #include <baxter_core_msgs/SolvePositionIK.h>
-#include <arm_kinematics.h>
+#include <baxter_sim_kinematics/arm_kinematics.h>
 #include <sensor_msgs/JointState.h>
 
 namespace kinematics {
