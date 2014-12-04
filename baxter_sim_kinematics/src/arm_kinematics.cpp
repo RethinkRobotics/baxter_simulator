@@ -465,7 +465,6 @@ bool arm_kinematics::Kinematics::getPositionFK(
       jnt_pos_in(tmp_index) = joint_configuration.position[i];
   }
 
-  bool valid = true;
   int num_segments = chain.getNrOfSegments();
   ROS_DEBUG("Number of Segments in the KDL chain: %d", num_segments);
   if (fk_solver->JntToCart(jnt_pos_in, p_out, num_segments) >= 0) {
@@ -481,9 +480,9 @@ bool arm_kinematics::Kinematics::getPositionFK(
     tf::poseStampedTFToMsg(tf_pose, result);
   } else {
     ROS_ERROR("Could not compute FK for endpoint.");
-    valid = false;
+    return false;
   }
-  return valid;
+  return true;
 }
 
 }  //namespace
