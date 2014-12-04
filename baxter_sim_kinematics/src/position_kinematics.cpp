@@ -115,15 +115,13 @@ void position_kinematics::stateCB(
 void position_kinematics::FKCallback(const sensor_msgs::JointState msg) {
   baxter_core_msgs::EndpointState endpoint;
 
-  arm_kinematics::FKReply reply;
   sensor_msgs::JointState configuration;
 
   position_kinematics::FilterJointState(&msg, joint);
   //Copy the current Joint positions and names of the appropriate side to the configuration
-  reply = position_kinematics::FKCalc(joint);
+  endpoint.pose = position_kinematics::FKCalc(joint).pose;
 
-  //The 6th index holds the PoseStamp of the end effector while the other preceeding indices holds that of the preceeding joints
-  endpoint.pose = reply.pose[joint_id].pose;
+  //Publish the PoseStamp of the end effector
   end_pointstate_pub.publish(endpoint);
 }
 
@@ -150,10 +148,10 @@ void position_kinematics::FilterJointState(
  * Method to pass the desired configuration of the joints and calculate the FK
  * @return calculated FK
  */
-arm_kinematics::FKReply position_kinematics::FKCalc(
+geometry_msgs::PoseStamped position_kinematics::FKCalc(
     const sensor_msgs::JointState configuration) {
   bool isV;
-  arm_kinematics::FKReply fk_result;
+  geometry_msgs::PoseStamped fk_result;
   isV = m_kinematicsModel->getPositionFK(ref_frame_id, configuration,
                                          fk_result);
   return fk_result;

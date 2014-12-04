@@ -206,7 +206,7 @@ bool Kinematics::loadModel(const std::string xml) {
     return false;
   }
   if (!tree.getChain(root_name, tip_name, chain)) {
-    ROS_ERROR("Could not initialize chain object");
+    ROS_ERROR("Could not initialize chain object for root_name %s and tip_name %s",root_name.c_str(), tip_name.c_str());
     return false;
   }
   if (!readJoints(robot_model)) {
@@ -452,10 +452,9 @@ bool arm_kinematics::Kinematics::getPositionIK(
  */
 bool arm_kinematics::Kinematics::getPositionFK(
     std::string frame_id, const sensor_msgs::JointState &joint_configuration,
-    FKReply &result) {
+    geometry_msgs::PoseStamped &result) {
   KDL::Frame p_out;
   KDL::JntArray jnt_pos_in;
-  geometry_msgs::PoseStamped pose;
   tf::Stamped<tf::Pose> tf_pose;
 
   // Copying the positions of the joints relative to its index in the KDL chain
@@ -466,29 +465,22 @@ bool arm_kinematics::Kinematics::getPositionFK(
       jnt_pos_in(tmp_index) = joint_configuration.position[i];
   }
 
-  result.pose.resize(joint_configuration.name.size());
-  bool valid = true;
-  for (unsigned int i = 0; i < joint_configuration.name.size(); i++) {
-    int segmentIndex = getKDLSegmentIndex(joint_configuration.name[i]);
-    ROS_DEBUG("End effector index: %d", segmentIndex);
-    ROS_DEBUG("Chain indices: %d", chain.getNrOfSegments());
-    if (fk_solver->JntToCart(jnt_pos_in, p_out, segmentIndex) >= 0) {
-      tf_pose.frame_id_ = root_name;
-      tf_pose.stamp_ = ros::Time();
-      tf::PoseKDLToTF(p_out, tf_pose);
-      try {
-        tf_listener.transformPose(frame_id, tf_pose, tf_pose);  //resolve frame_id
-      } catch (...) {
-        ROS_ERROR("Could not transform FK pose to frame: %s", frame_id.c_str());
-        return false;
-      }
-      tf::poseStampedTFToMsg(tf_pose, pose);
-      result.pose[i] = pose;
-    } else {
-      ROS_ERROR("Could not compute FK for %s",
-                joint_configuration.name[i].c_str());
-      valid = false;
+  int num_segments = chain.getNrOfSegments();
+  ROS_DEBUG("Number of Segments in the KDL chain: %d", num_segments);
+  if (fk_solver->JntToCart(jnt_pos_in, p_out, num_segments) >= 0) {
+    tf_pose.frame_id_ = root_name;
+    tf_pose.stamp_ = ros::Time();
+    tf::PoseKDLToTF(p_out, tf_pose);
+    try {
+      tf_listener.transformPose(frame_id, tf_pose, tf_pose);
+    } catch (...) {
+      ROS_ERROR("Could not transform FK pose to frame: %s", frame_id.c_str());
+      return false;
     }
+    tf::poseStampedTFToMsg(tf_pose, result);
+  } else {
+    ROS_ERROR("Could not compute FK for endpoint.");
+    return false;
   }
   return true;
 }
