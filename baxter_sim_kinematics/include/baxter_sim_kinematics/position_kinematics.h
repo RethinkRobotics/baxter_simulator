@@ -112,9 +112,9 @@ class position_kinematics {
 
   /**
    * Method to pass the desired configuration of the joints and calculate the FK
-   * @return calculated FK
+   * @return calculated FK pose
    */
-  arm_kinematics::FKReply FKCalc(const sensor_msgs::JointState req);
+  geometry_msgs::PoseStamped FKCalc(const sensor_msgs::JointState req);
 
   /**
    * Callback function for the IK service that responds with the appropriate joint configuration or error message if not found

@@ -47,6 +47,7 @@
 #include <kdl/chainidsolver_recursive_newton_euler.hpp>
 #include <urdf/model.h>
 #include <sensor_msgs/JointState.h>
+#include <geometry_msgs/PoseStamped.h>
 #include <std_msgs/Bool.h>
 #include <baxter_core_msgs/SEAJointState.h>
 #include <gazebo_msgs/SetLinkProperties.h>
@@ -60,10 +61,6 @@ typedef struct INFO {
   std::vector<std::string> link_names;
   std::vector<std::string> joint_names;
 } KinematicSolverInfo;
-typedef struct fkr {
-  std::vector<geometry_msgs::PoseStamped> pose;
-  std::vector<std_msgs::Bool> isValid;
-} FKReply;
 
 class Kinematics {
  public:
@@ -95,7 +92,7 @@ class Kinematics {
    */
   bool getPositionFK(std::string frame_id,
                      const sensor_msgs::JointState &joint_configuration,
-                     FKReply &res);
+                     geometry_msgs::PoseStamped &res);
 
   /* Method to calculate the torques required to apply at each of the joints for gravity compensation
    *  @returns true is successful
