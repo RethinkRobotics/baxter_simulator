@@ -141,7 +141,6 @@ bool baxter_emulator::init() {
 
   right_grip_st = left_grip_st;  // Sample values recorded on both the grippers to do the spoof
 
-  //Default values for the left and the right gripper properties
   left_grip_prop.id = 131073;
   left_grip_prop.ui_type = 3;
   left_grip_prop.manufacturer = "Rethink Research Robot";
@@ -158,8 +157,41 @@ bool baxter_emulator::init() {
   left_grip_prop.controls_position = true;
   left_grip_prop.senses_position = true;
   left_grip_prop.properties = "";
+  std::string gripper_type;
+  ros::param::param<std::string>("~left_gripper_type", gripper_type, "CUSTOM_GRIPPER");
+  if (gripper_type == "SUCTION_CUP_GRIPPER" ) {
+      left_grip_prop.id = 65537;
+      left_grip_prop.ui_type = 1;
+  } else if (gripper_type == "ELECTRIC_GRIPPER" ) {
+      left_grip_prop.id = 65538;
+      left_grip_prop.ui_type = 2;
+      left_grip_prop.serial_number = "3712199347";
+      left_grip_prop.hardware_rev = "2";
+      left_grip_prop.firmware_rev = "3.0.0 5.5";
+      left_grip_prop.firmware_date = "2014/7/24 18:30:00";
+  } 
 
   right_grip_prop = left_grip_prop;  // Sample values recorded on both the grippers to do the spoof
+  right_grip_prop.serial_number = "";
+  right_grip_prop.hardware_rev = "";
+  right_grip_prop.firmware_rev = "";
+  right_grip_prop.firmware_date = "";
+  ros::param::param<std::string>("~right_gripper_type", gripper_type, "CUSTOM_GRIPPER");
+  if (gripper_type == "SUCTION_CUP_GRIPPER" ) {
+      right_grip_prop.id = 65537;
+      right_grip_prop.ui_type = 1;
+  } else if (gripper_type == "ELECTRIC_GRIPPER" ) {
+      right_grip_prop.id = 65538;
+      right_grip_prop.ui_type = 2;
+      right_grip_prop.serial_number = "3712199347";
+      right_grip_prop.hardware_rev = "2";
+      right_grip_prop.firmware_rev = "3.0.0 5.5";
+      right_grip_prop.firmware_date = "2014/7/24 18:30:00";
+  } else {
+      //Default values for the right gripper properties
+      right_grip_prop.id = 131073;
+      right_grip_prop.ui_type = 3;
+  } 
 
   leftIL_nav_light.isInputOnly = false;
   leftOL_nav_light.isInputOnly = false;
@@ -476,6 +508,13 @@ right_gravity.actual_effort.resize(left_gravity.name.size());
       else
         head_msg.isPanning = false;
       head_msg.pan = msg.position[i];
+    }
+    else if (msg.name[i] == "l_gripper_r_finger_joint") {
+        //     <limit effort="20.0" lower="-0.0095" upper="0.0215" velocity="5.0"/> <!-- upper is open -->
+        left_grip_st.position = (100 - (msg.position[i]+0.0095)/(0.0215+0.0095)*100);
+    }
+    else if (msg.name[i] == "r_gripper_r_finger_joint") {
+        right_grip_st.position = (100 - (msg.position[i]+0.0095)/(0.0215+0.0095)*100);
     }
 	else {
 	   for (int j=0;j<left_gravity.name.size();j++) {
