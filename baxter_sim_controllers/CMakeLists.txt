@@ -31,6 +31,7 @@ add_library(${PROJECT_NAME}
   src/baxter_velocity_controller.cpp
   src/baxter_effort_controller.cpp
   src/baxter_head_controller.cpp
+  src/baxter_gripper_controller.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}

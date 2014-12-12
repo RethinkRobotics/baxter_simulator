@@ -8,8 +8,10 @@
 
   <!-- load the baxter_sim_hardware node -->
   <node name="baxter_emulator" pkg="baxter_sim_hardware" type="baxter_emulator" respawn="false"
-	output="screen" args="$(find baxter_sim_hardware)/images/researchsdk.png"/>
-
+	output="screen" args="$(find baxter_sim_hardware)/images/researchsdk.png">
+    <param name="left_gripper_type" value="ELECTRIC_GRIPPER" />
+    <param name="right_gripper_type" value="ELECTRIC_GRIPPER" />
+  </node>
   <!-- load the default controllers -->
   <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
 	output="screen" ns="/robot" args="joint_state_controller" />
@@ -24,6 +26,8 @@
 					   right_joint_velocity_controller
 					   left_joint_effort_controller
 					   right_joint_effort_controller
+					   left_gripper_controller
+					   right_gripper_controller
 					   " />  
 
   <!-- convert joint states to TF transforms -->

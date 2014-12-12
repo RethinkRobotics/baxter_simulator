@@ -32,4 +32,12 @@
     </description>
   </class>
 
+  <class name="baxter_sim_controllers/BaxterGripperController"
+	 type="baxter_sim_controllers::BaxterGripperController"
+	 base_class_type="controller_interface::ControllerBase">
+    <description>
+      The BaxterGripperController tracks gripper commands for the Baxter end effector. It expects a EffortJointInterface type of hardware interface.
+    </description>
+  </class>
+
 </library>
