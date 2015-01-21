@@ -1,5 +1,5 @@
 /*********************************************************************
- # Copyright (c) 2013-2014, Rethink Robotics
+ # Copyright (c) 2013-2015, Rethink Robotics
  # All rights reserved.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -64,7 +64,7 @@
 #include <sensor_msgs/Range.h>
 #include <sensor_msgs/LaserScan.h>
 
-#include <arm_kinematics.h>
+#include <baxter_sim_kinematics/arm_kinematics.h>
 #include <cmath>
 #include <map>
 

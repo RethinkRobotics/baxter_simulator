@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>baxter_sim_hardware</name>
-  <version>0.8.1</version>
+  <version>0.9.0</version>
   <description>
     Publishes the state information and emulates few hardware interfaces for use with Baxter
     in Gazebo
@@ -11,7 +11,7 @@
     Rethink Robotics Inc.
   </maintainer>
   <license>BSD</license>
-  <url type="website">http://www.rethinkrobotics.com/sdk</url>
+  <url type="website">http://sdk.rethinkrobotics.com</url>
   <url type="repository">
     https://github.com/RethinkRobotics/baxter_simulator
   </url>
@@ -24,14 +24,16 @@
 
 
   <buildtool_depend>catkin</buildtool_depend>
-  
-  <build_depend>roscpp</build_depend>  
+
+  <build_depend>std_msgs</build_depend>
+  <build_depend>tf</build_depend>
+  <build_depend>roscpp</build_depend>
   <build_depend>baxter_core_msgs</build_depend>
-  <build_depend>cv_bridge</build_depend> 
-  <build_depend>image_transport</build_depend>   
-  <build_depend>baxter_sim_kinematics</build_depend>   
-  
-  <run_depend>std_msgs</run_depend>
+  <build_depend>cv_bridge</build_depend>
+  <build_depend>image_transport</build_depend>
+  <build_depend>baxter_sim_kinematics</build_depend>
+  <build_depend>cmake_modules</build_depend>
+
   <run_depend>roscpp</run_depend>
   <run_depend>baxter_core_msgs</run_depend>
   <run_depend>cv_bridge</run_depend>
@@ -40,5 +42,3 @@
   <run_depend>controller_manager</run_depend>
 
 </package>
-
-

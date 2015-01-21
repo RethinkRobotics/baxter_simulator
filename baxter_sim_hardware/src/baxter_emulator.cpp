@@ -1,5 +1,5 @@
 /*********************************************************************
- # Copyright (c) 2014, Rethink Robotics
+ # Copyright (c) 2015, Rethink Robotics
  # All rights reserved.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -38,62 +38,62 @@
 namespace baxter_en {
 
 // Topics to subscribe and publish
-static const std::string BAXTER_STATE_TOPIC = "robot/state";
-static const std::string BAXTER_ENABLE_TOPIC = "robot/set_super_enable";
-static const std::string BAXTER_STOP_TOPIC = "robot/set_super_stop";
-static const std::string BAXTER_RESET_TOPIC = "robot/set_super_reset";
-static const std::string BAXTER_DISPLAY_TOPIC = "robot/xdisplay";
+const std::string BAXTER_STATE_TOPIC = "robot/state";
+const std::string BAXTER_ENABLE_TOPIC = "robot/set_super_enable";
+const std::string BAXTER_STOP_TOPIC = "robot/set_super_stop";
+const std::string BAXTER_RESET_TOPIC = "robot/set_super_reset";
+const std::string BAXTER_DISPLAY_TOPIC = "robot/xdisplay";
 
-static const std::string BAXTER_LEFT_GRIPPER_ST =
+const std::string BAXTER_LEFT_GRIPPER_ST =
     "robot/end_effector/left_gripper/state";
-static const std::string BAXTER_RIGHT_GRIPPER_ST =
+const std::string BAXTER_RIGHT_GRIPPER_ST =
     "robot/end_effector/right_gripper/state";
-static const std::string BAXTER_LEFT_GRIPPER_PROP =
+const std::string BAXTER_LEFT_GRIPPER_PROP =
     "robot/end_effector/left_gripper/properties";
-static const std::string BAXTER_RIGHT_GRIPPER_PROP =
+const std::string BAXTER_RIGHT_GRIPPER_PROP =
     "robot/end_effector/right_gripper/properties";
-static const std::string BAXTER_JOINT_TOPIC = "robot/joint_states";
-static const std::string BAXTER_LEFT_LASER_TOPIC =
+const std::string BAXTER_JOINT_TOPIC = "robot/joint_states";
+const std::string BAXTER_LEFT_LASER_TOPIC =
     "sim/laserscan/left_hand_range/state";
-static const std::string BAXTER_RIGHT_LASER_TOPIC =
+const std::string BAXTER_RIGHT_LASER_TOPIC =
     "sim/laserscan/right_hand_range/state";
-static const std::string BAXTER_LEFT_IR_TOPIC = "robot/range/left_hand_range/state";
-static const std::string BAXTER_RIGHT_IR_TOPIC = "robot/range/right_hand_range/state";
-static const std::string BAXTER_LEFT_IR_STATE_TOPIC =
+const std::string BAXTER_LEFT_IR_TOPIC = "robot/range/left_hand_range/state";
+const std::string BAXTER_RIGHT_IR_TOPIC = "robot/range/right_hand_range/state";
+const std::string BAXTER_LEFT_IR_STATE_TOPIC =
     "robot/analog_io/left_hand_range/state";
-static const std::string BAXTER_RIGHT_IR_STATE_TOPIC =
+const std::string BAXTER_RIGHT_IR_STATE_TOPIC =
     "robot/analog_io/right_hand_range/state";
-static const std::string BAXTER_LEFT_IR_INT_TOPIC =
+const std::string BAXTER_LEFT_IR_INT_TOPIC =
     "robot/analog_io/left_hand_range/value_uint32";
-static const std::string BAXTER_RIGHT_IR_INT_TOPIC =
+const std::string BAXTER_RIGHT_IR_INT_TOPIC =
     "robot/analog_io/right_hand_range/value_uint32";
 
-static const std::string BAXTER_NAV_LIGHT_TOPIC = "robot/digital_io/command";
-static const std::string BAXTER_LEFTIL_TOPIC =
+const std::string BAXTER_NAV_LIGHT_TOPIC = "robot/digital_io/command";
+const std::string BAXTER_LEFTIL_TOPIC =
     "robot/digital_io/left_itb_light_inner/state";
-static const std::string BAXTER_LEFTOL_TOPIC =
+const std::string BAXTER_LEFTOL_TOPIC =
     "robot/digital_io/left_itb_light_outer/state";
-static const std::string BAXTER_TORSO_LEFTIL_TOPIC =
+const std::string BAXTER_TORSO_LEFTIL_TOPIC =
     "robot/digital_io/torso_left_itb_light_inner/state";
-static const std::string BAXTER_TORSO_LEFTOL_TOPIC =
+const std::string BAXTER_TORSO_LEFTOL_TOPIC =
     "robot/digital_io/torso_left_itb_light_outer/state";
-static const std::string BAXTER_RIGHTIL_TOPIC =
+const std::string BAXTER_RIGHTIL_TOPIC =
     "robot/digital_io/right_itb_light_inner/state";
-static const std::string BAXTER_RIGHTOL_TOPIC =
+const std::string BAXTER_RIGHTOL_TOPIC =
     "robot/digital_io/right_itb_light_outer/state";
-static const std::string BAXTER_TORSO_RIGHTIL_TOPIC =
+const std::string BAXTER_TORSO_RIGHTIL_TOPIC =
     "robot/digital_io/torso_right_itb_light_inner/state";
-static const std::string BAXTER_TORSO_RIGHTOL_TOPIC =
+const std::string BAXTER_TORSO_RIGHTOL_TOPIC =
     "robot/digital_io/torso_right_itb_light_outer/state";
 
-static const std::string BAXTER_HEAD_STATE_TOPIC = "robot/head/head_state";
-static const std::string BAXTER_HEAD_NOD_CMD_TOPIC =
+const std::string BAXTER_HEAD_STATE_TOPIC = "robot/head/head_state";
+const std::string BAXTER_HEAD_NOD_CMD_TOPIC =
     "robot/head/command_head_nod";
 
-static const std::string BAXTER_LEFT_GRAVITY_TOPIC = "robot/limb/left/gravity_compensation_torques";
-static const std::string BAXTER_RIGHT_GRAVITY_TOPIC = "robot/limb/right/gravity_compensation_torques";
+const std::string BAXTER_LEFT_GRAVITY_TOPIC = "robot/limb/left/gravity_compensation_torques";
+const std::string BAXTER_RIGHT_GRAVITY_TOPIC = "robot/limb/right/gravity_compensation_torques";
 
-static const int IMG_LOAD_ON_STARTUP_DELAY = 35;  // Timeout for publishing a single RSDK image on start up
+const int IMG_LOAD_ON_STARTUP_DELAY = 35;  // Timeout for publishing a single RSDK image on start up
 
 enum nav_light_enum {
   left_itb_light_inner,
@@ -287,8 +287,8 @@ void baxter_emulator::publish(const std::string &img_path) {
       sleep(IMG_LOAD_ON_STARTUP_DELAY);  // Wait for the model to load
       display_pub.publish(cv_ptr->toImageMsg());
     }
-  } catch (std::exception &e) {
-    ROS_WARN("Unable to load the Startup picture on Baxter's display screen ",e.what());
+  } catch (std::exception e) {
+    ROS_WARN("Unable to load the Startup picture on Baxter's display screen %s",e.what());
   }
   ROS_INFO("Simulator is loaded and started successfully");
   while (ros::ok()) {

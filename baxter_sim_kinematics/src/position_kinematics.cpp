@@ -1,5 +1,5 @@
 /*********************************************************************
- # Copyright (c) 2013-2014, Rethink Robotics
+ # Copyright (c) 2013-2015, Rethink Robotics
  # All rights reserved.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -32,14 +32,11 @@
  *  \desc   Node to wrap/unwrap the messages and calculate the kinematics for the Simulated Baxter
  */
 
-#include <position_kinematics.h>
-//#include <typeinfo>
+#include <baxter_sim_kinematics/position_kinematics.h>
 #include <signal.h>
-//#include <string>
 
 namespace kinematics {
 
-//static const int no_jts = 7;
 static const std::string ref_frame_id = "base";
 static const std::string JOINT_STATES = "/robot/joint_states";
 static const std::string ROBOT_STATE = "/robot/state";

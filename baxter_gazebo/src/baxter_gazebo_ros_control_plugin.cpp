@@ -83,18 +83,18 @@ class BaxterGazeboRosControlPlugin :
 
     // Subscribe to a topic that switches' Baxter's msgs
     left_command_mode_sub_ =
-        nh_.subscribe < baxter_core_msgs::JointCommand
+        model_nh_.subscribe < baxter_core_msgs::JointCommand
             > ("/robot/limb/left/joint_command", 1, &BaxterGazeboRosControlPlugin::leftModeCommandCallback, this);
     right_command_mode_sub_ =
-        nh_.subscribe < baxter_core_msgs::JointCommand
+        model_nh_.subscribe < baxter_core_msgs::JointCommand
             > ("/robot/limb/right/joint_command", 1, &BaxterGazeboRosControlPlugin::rightModeCommandCallback, this);
     head_state_sub =
-        nh_.subscribe < baxter_core_msgs::HeadPanCommand
+        model_nh_.subscribe < baxter_core_msgs::HeadPanCommand
             > ("/robot/head/command_head_pan", 1, &BaxterGazeboRosControlPlugin::headCommandCallback, this);
 
     //Subscribe to the topic that publishes the robot's state
     robot_state_sub_ =
-        nh_.subscribe < baxter_core_msgs::AssemblyState
+        model_nh_.subscribe < baxter_core_msgs::AssemblyState
             > ("/robot/state", 1, &BaxterGazeboRosControlPlugin::enableCommandCallback, this);
 
     enable_cmd = false;

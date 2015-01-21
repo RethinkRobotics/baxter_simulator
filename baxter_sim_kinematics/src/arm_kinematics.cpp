@@ -1,5 +1,5 @@
 /*********************************************************************
- # Copyright (c) 2013-2014, Rethink Robotics
+ # Copyright (c) 2013-2015, Rethink Robotics
  # All rights reserved.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
  */
 #include <cstring>
 #include <ros/ros.h>
-#include <arm_kinematics.h>
+#include <baxter_sim_kinematics/arm_kinematics.h>
 
 namespace arm_kinematics {
 
@@ -42,27 +42,6 @@ Kinematics::Kinematics()
 }
 
 bool Kinematics::init_grav() {
-//Inititalize the shared memory object and remove any existing ones
-  boost::interprocess::shared_memory_object::remove("MySharedMemory");
-  boost::interprocess::managed_shared_memory shm(
-      boost::interprocess::open_or_create, "MySharedMemory", 10000);
-  StringAllocator stringallocator(shm.get_segment_manager());
-  std::pair<MyShmStringVector*, std::size_t> myshmvector = shm.find<MyShmStringVector>("joint_vector");
-
-//Create a mutex object to establish synchronization between the shared memory access
-  boost::interprocess::named_mutex::remove("mtx");
-  boost::interprocess::named_mutex mutex(boost::interprocess::open_or_create,
-                                         "mtx");
-
-//Wait to check for the shared memroy object to be created by the other process
-  while (!myshmvector.first)
-    myshmvector = shm.find<MyShmStringVector>("joint_vector");
-
-//Acquire the lock to read the joint_names once the other process updates it
-  boost::interprocess::scoped_lock<boost::interprocess::named_mutex> lock(
-      mutex);
-  MyShmStringVector* joint_names = shm.find_or_construct<MyShmStringVector>(
-      "joint_vector")(stringallocator);
 
   std::string urdf_xml, full_urdf_xml;
   nh.param("urdf_xml", urdf_xml, std::string("robot_description"));
@@ -88,17 +67,57 @@ bool Kinematics::init_grav() {
     return false;
   }
 
+  //Service client to set the gravity false for the limbs
+  ros::ServiceClient get_lp_client = nh.serviceClient<gazebo_msgs::GetLinkProperties>("/gazebo/get_link_properties");
+
+  //Wait for service to become available
+  get_lp_client.waitForExistence();
+
+  //Service client to set the gravity false for the limbs
+  ros::ServiceClient set_lp_client = nh.serviceClient<gazebo_msgs::SetLinkProperties>("/gazebo/set_link_properties");
+
+  //Wait for service to become availablestd::find(vector.begin(), vector.end(), item)!=vector.end()
+  set_lp_client.waitForExistence();
+
+  gazebo_msgs::SetLinkProperties setlinkproperties;
+  gazebo_msgs::GetLinkProperties getlinkproperties;
+
+  setlinkproperties.request.gravity_mode=0;
   //Load the right chain and copy them to Right specific variables
   tip_name = grav_right_name;
   if (!loadModel(result)) {
     ROS_FATAL("Could not load models!");
     return false;
   }
+
   grav_chain_r = chain;
   right_joint.clear();
-  right_joint.reserve(num_joints);
-  for (int i = 0; i < info.joint_names.size(); i++) {
-    right_joint.push_back(info.joint_names[i]);
+  right_joint.reserve(chain.getNrOfSegments());
+  std::vector<std::string>::iterator idx;
+  //Update the right_joint with the fixed joints from the URDF. Get each of the link's properties from GetLinkProperties service and
+  //call the SetLinkProperties service with the same set of parameters except for the gravity_mode, which would be disabled. This is
+  //to disable the gravity in the links, thereby to eliminate the need for gravity compensation
+  for (int i = 0; i < chain.getNrOfSegments(); i++) {
+    std::string seg_name = chain.getSegment(i).getName();
+    std::string joint_name = chain.getSegment(i).getJoint().getName();
+    idx = std::find(info.joint_names.begin(), info.joint_names.end(), joint_name);
+    if (idx != info.joint_names.end()) {
+      right_joint.push_back(*idx);
+    }
+    std::string link_name = chain.getSegment(i).getName();
+    getlinkproperties.request.link_name=link_name;
+    setlinkproperties.request.link_name=link_name;
+    get_lp_client.call(getlinkproperties);
+    setlinkproperties.request.com = getlinkproperties.response.com;
+    setlinkproperties.request.mass = getlinkproperties.response.mass;
+    setlinkproperties.request.ixx = getlinkproperties.response.ixx;
+    setlinkproperties.request.iyy = getlinkproperties.response.iyy;
+    setlinkproperties.request.izz = getlinkproperties.response.izz;
+    setlinkproperties.request.ixy = getlinkproperties.response.ixy;
+    setlinkproperties.request.iyz = getlinkproperties.response.iyz;
+    setlinkproperties.request.ixz = getlinkproperties.response.ixz;
+    setlinkproperties.request.gravity_mode = false;
+    set_lp_client.call(setlinkproperties);
   }
 
   //Create a gravity solver for the right chain
@@ -111,36 +130,40 @@ bool Kinematics::init_grav() {
     ROS_FATAL("Could not load models!");
     return false;
   }
+
   grav_chain_l = chain;
   left_joint.clear();
-  left_joint.reserve(num_joints);
-  for (int i = 0; i < info.joint_names.size(); i++) {
-    left_joint.push_back(info.joint_names[i]);
+  left_joint.reserve(chain.getNrOfSegments());
+  //Update the left_joint with the fixed joints from the URDF. Get each of the link's properties from GetLinkProperties service and
+  //call the SetLinkProperties service with the same set of parameters except for the gravity_mode, which would be disabled. This is
+  //to disable the gravity in the links, thereby to eliminate the need for gravity compensation
+  for (int i = 0; i < chain.getNrOfSegments(); i++) {
+    std::string seg_name = chain.getSegment(i).getName();
+    std::string joint_name = chain.getSegment(i).getJoint().getName();
+    idx = std::find(info.joint_names.begin(), info.joint_names.end(), joint_name);
+    if (idx != info.joint_names.end()) {
+      left_joint.push_back(*idx);
+    }
+    getlinkproperties.request.link_name=chain.getSegment(i).getName();
+    std::string link_name = chain.getSegment(i).getName();
+    getlinkproperties.request.link_name=link_name;
+    setlinkproperties.request.link_name=link_name;
+    get_lp_client.call(getlinkproperties);
+    setlinkproperties.request.com = getlinkproperties.response.com;
+    setlinkproperties.request.mass = getlinkproperties.response.mass;
+    setlinkproperties.request.ixx = getlinkproperties.response.ixx;
+    setlinkproperties.request.iyy = getlinkproperties.response.iyy;
+    setlinkproperties.request.izz = getlinkproperties.response.izz;
+    setlinkproperties.request.ixy = getlinkproperties.response.ixy;
+    setlinkproperties.request.iyz = getlinkproperties.response.iyz;
+    setlinkproperties.request.ixz = getlinkproperties.response.ixz;
+    setlinkproperties.request.gravity_mode = false;
+    set_lp_client.call(setlinkproperties);
   }
 
   //Create a gravity solver for the left chain
   gravity_solver_l = new KDL::ChainIdSolver_RNE(grav_chain_l,
                                                 KDL::Vector(0.0, 0.0, -9.8));
-
-  //Copy the indices of the shared joint names with respect to the joint names in the chains
-  indd[joint_names->size()];
-  indd.reserve(joint_names->size());
-  for (int k = 0; k < joint_names->size(); k++) {
-    int flag = 0;
-    for (int kk = 0; kk < num_joints; kk++) {
-      if (joint_names->at(k).c_str() == left_joint.at(kk)) {
-        indd.push_back(kk);
-        flag = 1;
-        break;
-      } else if (joint_names->at(k).c_str() == right_joint.at(kk)) {
-        indd.push_back(kk + num_joints);
-        flag = 1;
-        break;
-      }
-    }
-    if (flag == 0)
-      indd.push_back(-1);
-  }
   return true;
 }
 
@@ -283,14 +306,6 @@ bool Kinematics::readJoints(urdf::Model &robot_model) {
  */
 bool arm_kinematics::Kinematics::getGravityTorques(
     const sensor_msgs::JointState joint_configuration, baxter_core_msgs::SEAJointState &left_gravity, baxter_core_msgs::SEAJointState &right_gravity, bool isEnabled) {
-  //Initialize the shared memory for the gravity commands
-  boost::interprocess::managed_shared_memory shm(
-      boost::interprocess::open_or_create, "MySharedMemory", 10000);
-  DoubleAllocator dblallocator(shm.get_segment_manager());
-  MyDoubleVector* gravity_cmd = shm.find_or_construct<MyDoubleVector>(
-      "grav_vector")(dblallocator);
-  boost::interprocess::named_mutex named_mtx(
-      boost::interprocess::open_or_create, "mutx");
 
   bool res;
   KDL::JntArray torques_l, torques_r;
@@ -317,7 +332,6 @@ bool arm_kinematics::Kinematics::getGravityTorques(
         }
       }
     }
-
     KDL::JntArray jntArrayNull(num_joints);
     KDL::Wrenches wrenchNull_l(grav_chain_l.getNrOfSegments(),
                                KDL::Wrench::Zero());
@@ -333,19 +347,9 @@ bool arm_kinematics::Kinematics::getGravityTorques(
     //Check if the gravity was succesfully calculated by both the solvers
     if (code_l >= 0 && code_r >= 0) {
 
-      //Lock before updating the joint values
-      boost::interprocess::scoped_lock<boost::interprocess::named_mutex> 
-         lock(named_mtx);
-      for (unsigned int i = 0; i < gravity_cmd->size(); i++) {
-        if (indd[i] != -1) {
-          if (indd[i] < num_joints) {
-            gravity_cmd->at(i) = torques_l(indd[i]);
-            left_gravity.gravity_model_effort[indd[i]] = torques_l(indd[i]); 
-          } else {
-            gravity_cmd->at(i) = torques_r(indd[i] - num_joints);
-            right_gravity.gravity_model_effort[indd[i] - num_joints] = torques_r(indd[i] - num_joints); 
-          }
-        }
+	for (unsigned int i = 0; i < num_joints; i++) {
+            left_gravity.gravity_model_effort[i] = torques_l(i); 
+            right_gravity.gravity_model_effort[i] = torques_r(i); 
       }
       return true;
     } else {
@@ -356,12 +360,9 @@ bool arm_kinematics::Kinematics::getGravityTorques(
       return false;
     }
   } else {
-    for (unsigned int i = 0; i < gravity_cmd->size(); i++) {
-      gravity_cmd->at(i) = 0;
-      if(i<num_joints) {
+    for (unsigned int i = 0; i <  num_joints; i++) {
         left_gravity.gravity_model_effort[i]=0;
         right_gravity.gravity_model_effort[i]=0;
-      }
     }
   }
   return true;

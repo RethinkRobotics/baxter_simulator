@@ -23,7 +23,10 @@
 	 command="cat '$(find baxter_description)/urdf/baxter.urdf'" />
 
   <!-- Load the software version into the ROS Parameter Server -->
-  <param name="rethink/software_version" value="1.0.0" />
+  <param name="rethink/software_version" value="1.1.0" />
+
+  <!-- Publish a static transform between the world and the base of the robot -->
+  <node pkg="tf2_ros" type="static_transform_publisher" name="base_to_world" args="0 0 0 0 0 0 0 world base" />
 
   <!-- Run a python script to the send a service call to gazebo_ros to spawn a URDF robot -->
    <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"

@@ -1,5 +1,5 @@
 /*********************************************************************
- # Copyright (c) 2013-2014, Rethink Robotics
+ # Copyright (c) 2013-2015, Rethink Robotics
  # All rights reserved.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -49,12 +49,10 @@
 #include <sensor_msgs/JointState.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <std_msgs/Bool.h>
-#include <boost/interprocess/managed_shared_memory.hpp>
-#include <boost/interprocess/containers/vector.hpp>
-#include <boost/interprocess/containers/string.hpp>
-#include <boost/interprocess/allocators/allocator.hpp>
-#include <boost/interprocess/sync/named_mutex.hpp>
 #include <baxter_core_msgs/SEAJointState.h>
+#include <gazebo_msgs/SetLinkProperties.h>
+#include <gazebo_msgs/GetLinkProperties.h>
+#include <algorithm>
 
 namespace arm_kinematics {
 
@@ -142,20 +140,6 @@ class Kinematics {
    *  @returns the index of the segment
    */
   int getKDLSegmentIndex(const std::string &name);
-
-  // Boost interprocess storage allocators for various data types
-  typedef boost::interprocess::allocator<char,
-      boost::interprocess::managed_shared_memory::segment_manager> CharAllocator;
-  typedef boost::interprocess::allocator<double,
-      boost::interprocess::managed_shared_memory::segment_manager> DoubleAllocator;
-  typedef boost::interprocess::basic_string<char, std::char_traits<char>,
-      CharAllocator> MyShmString;
-  typedef boost::interprocess::allocator<MyShmString,
-      boost::interprocess::managed_shared_memory::segment_manager> StringAllocator;
-  typedef boost::interprocess::vector<MyShmString, StringAllocator> MyShmStringVector;
-  typedef boost::interprocess::vector<double, DoubleAllocator> MyDoubleVector;
-
-
 };
 
 }

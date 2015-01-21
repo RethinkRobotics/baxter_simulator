@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>baxter_sim_io</name>
-  <version>0.8.1</version>
+  <version>0.9.0</version>
   <description> 
   The Navigator buttons for the Baxter Research Robot are simulated, and their states are captured and published on the corresponding rostopics  
   </description>
@@ -11,11 +11,11 @@
   <url type="bugtracker">https://github.com/RethinkRobotics/baxter_simulator/issues</url>
 
   <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>qt_build</build_depend>
+  <!--build_depend>qt_build</build_depend-->
   <build_depend>roscpp</build_depend>
   <build_depend>libqt4-dev</build_depend>
   <build_depend>baxter_core_msgs</build_depend>
-  <run_depend>qt_build</run_depend>
+  <!--run_depend>qt_build</run_depend-->
   <run_depend>roscpp</run_depend>
   <run_depend>libqt4-dev</run_depend>
   <run_depend>baxter_core_msgs</run_depend>
