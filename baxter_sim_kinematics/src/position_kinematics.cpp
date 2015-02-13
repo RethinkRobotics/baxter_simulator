@@ -118,6 +118,9 @@ void position_kinematics::FKCallback(const sensor_msgs::JointState msg) {
   //Copy the current Joint positions and names of the appropriate side to the configuration
   endpoint.pose = position_kinematics::FKCalc(joint).pose;
 
+  //Fill out timestamp for endpoint
+  endpoint.header.stamp = msg.header.stamp;
+
   //Publish the PoseStamp of the end effector
   end_pointstate_pub.publish(endpoint);
 }
