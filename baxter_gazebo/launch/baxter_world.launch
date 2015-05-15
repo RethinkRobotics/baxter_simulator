@@ -23,7 +23,7 @@
 	 command="cat '$(find baxter_description)/urdf/baxter.urdf'" />
 
   <!-- Load the software version into the ROS Parameter Server -->
-  <param name="rethink/software_version" value="1.1.0" />
+  <param name="rethink/software_version" value="1.1.1" />
 
   <!-- Publish a static transform between the world and the base of the robot -->
   <node pkg="tf2_ros" type="static_transform_publisher" name="base_to_world" args="0 0 0 0 0 0 0 world base" />
