@@ -245,7 +245,7 @@ class BaxterGazeboRosControlPlugin :
      */
     if (!controller_manager_->switchController(
         start_controllers, stop_controllers,
-        controller_manager_msgs::SwitchController::Request::STRICT)) {
+        controller_manager_msgs::SwitchController::Request::BEST_EFFORT)) {
       ROS_ERROR_STREAM_NAMED("baxter_gazebo_ros_control_plugin",
                              "Failed to switch controllers");
     }
