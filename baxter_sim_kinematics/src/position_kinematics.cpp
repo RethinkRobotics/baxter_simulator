@@ -75,21 +75,22 @@ bool position_kinematics::init(std::string side) {
   robot_state_sub = handle.subscribe < baxter_core_msgs::AssemblyState
       > (ROBOT_STATE, 100, &position_kinematics::stateCB, this);
 
-  if (!handle.getParam("right_tip_name", right_tip_name)) {
-    ROS_FATAL("GenericIK: No tip name for Right arm found on parameter server");
-    return false;
-  }
-  if (!handle.getParam("left_tip_name", left_tip_name)) {
-    ROS_FATAL("GenericIK: No tip name for Right arm found on parameter server");
-    return false;
-  }
   no_jts=0;
   //Initialize the Parameter server with the root_name and tip_name of the Kinematic Chain based on the side
-  if (side == "right")
+  if (side == "right") {
+    if (!handle.getParam("right_tip_name", right_tip_name)) {
+      ROS_FATAL("GenericIK: No tip name for Right arm found on parameter server");
+      return false;
+    }
     m_kinematicsModel = arm_kinematics::Kinematics::create(right_tip_name, no_jts);
-  else
+  }
+  else {
+    if (!handle.getParam("left_tip_name", left_tip_name)) {
+      ROS_FATAL("GenericIK: No tip name for Right arm found on parameter server");
+      return false;
+    }
     m_kinematicsModel = arm_kinematics::Kinematics::create(left_tip_name, no_jts);
-
+  }
   return true;
 
 }

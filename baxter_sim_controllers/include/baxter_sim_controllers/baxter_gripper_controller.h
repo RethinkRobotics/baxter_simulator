@@ -68,6 +68,9 @@ namespace baxter_sim_controllers
 
     size_t n_joints;
     std::string topic_name;
+    // Indices for mimic and orignal joints
+    int mimic_idx_;
+    int main_idx_;
 
     std::map<std::string,std::size_t> joint_to_index_map; // allows incoming messages to be quickly ordered
 

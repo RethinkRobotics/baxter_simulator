@@ -35,7 +35,9 @@ namespace baxter_sim_controllers {
 
 BaxterGripperController::BaxterGripperController()
     : new_command(true),
-      update_counter(0) {
+      update_counter(0),
+      mimic_idx_(0),
+      main_idx_(0) {
 }
 
 BaxterGripperController::~BaxterGripperController() {
@@ -95,6 +97,14 @@ bool BaxterGripperController::init(hardware_interface::EffortJointInterface *rob
 
     }  // end of joint-namespaces
 
+    // Set mimic indices
+    if ( gripper_controllers[i]->joint_urdf_->mimic ) {
+      mimic_idx_ = i;
+    }
+    else{
+      main_idx_ = i;
+    }
+
     // Add joint name to map (allows unordered list to quickly be mapped to the ordered index)
     joint_to_index_map.insert(
         std::pair<std::string, std::size_t>(gripper_controllers[i]->getJointName(),
@@ -123,12 +133,6 @@ bool BaxterGripperController::init(hardware_interface::EffortJointInterface *rob
 }
 
 void BaxterGripperController::starting(const ros::Time& time) {
-  baxter_core_msgs::EndEffectorCommand initial_command;
-
-  // Fill in the initial command
-
-  gripper_command_buffer.initRT(initial_command);
-  new_command = true;
 }
 
 void BaxterGripperController::stopping(const ros::Time& time) {
@@ -139,9 +143,10 @@ void BaxterGripperController::update(const ros::Time& time,
                                   const ros::Duration& period) {
   // Debug info
   update_counter++;
-  if (update_counter % 100 == 0)
-
-  updateCommands();
+  //TODO: Change to ROS Param (20 Hz)
+  if (update_counter % 5 == 0) {
+    updateCommands();
+  }
 
   // Apply joint commands
   for (size_t i = 0; i < n_joints; i++) {
@@ -163,33 +168,28 @@ void BaxterGripperController::updateCommands() {
       .readFromRT());
 
   ROS_INFO_STREAM("update commands " << command.command << " " << command.args);
-  if ( command.command != "go" )
+  if ( command.command != baxter_core_msgs::EndEffectorCommand::CMD_GO)
       return;
 
-  // Find root joints
-  int id = 0;
-  for (size_t i = 0; i < n_joints; i++) {
-      if ( ! gripper_controllers[i]->joint_urdf_->mimic ) {
-          id = i;
-      }
-  }
-
+  double cmd_position  = gripper_controllers[main_idx_]->getPosition();
   YAML::Node args = YAML::Load(command.args);
-  double position  = gripper_controllers[id]->getPosition();
   if ( args["position"] ) {
-      position = (100 - args["position"].as<double>())/100.0*(gripper_controllers[id]->joint_urdf_->limits->upper-gripper_controllers[id]->joint_urdf_->limits->lower)+gripper_controllers[id]->joint_urdf_->limits->lower;
-  }
-
-
-  for (size_t i = 0; i < n_joints; i++) {
-    double p = position;
-    // Update the individual joint controllers
-    if ( !! gripper_controllers[i]->joint_urdf_->mimic ) {
-        p = position * gripper_controllers[i]->joint_urdf_->mimic->multiplier;
+    cmd_position = args["position"].as<double>();
+    // Check Command Limits:
+    if(cmd_position < 0.0){
+      cmd_position = 0.0;
     }
-    ROS_INFO_STREAM(gripper_controllers[i]->joint_urdf_->name << "->setCommand(" << p << ")");
-    gripper_controllers[i]->setCommand(p);
+    else if(cmd_position > 100.0){
+      cmd_position = 100.0;
+    }
+    // cmd = ratio * range
+    cmd_position = (cmd_position/100.0) *
+      (gripper_controllers[main_idx_]->joint_urdf_->limits->upper - gripper_controllers[main_idx_]->joint_urdf_->limits->lower);
   }
+  // Update the individual joint controllers
+  ROS_INFO_STREAM(gripper_controllers[main_idx_]->joint_urdf_->name << "->setCommand(" << cmd_position << ")");
+  gripper_controllers[main_idx_]->setCommand(cmd_position);
+  gripper_controllers[mimic_idx_]->setCommand(gripper_controllers[mimic_idx_]->joint_urdf_->mimic->multiplier*cmd_position+gripper_controllers[mimic_idx_]->joint_urdf_->mimic->offset);
 }
 
 void BaxterGripperController::commandCB(
@@ -206,4 +206,3 @@ void BaxterGripperController::commandCB(
 
 PLUGINLIB_EXPORT_CLASS(baxter_sim_controllers::BaxterGripperController,
                        controller_interface::ControllerBase)
-
