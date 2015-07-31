@@ -1,6 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
+ *  Copyright (c) 2013-2015, Rethink Robotics
  *  Copyright (c) 2013, Open Source Robotics Foundation
  *  All rights reserved.
  *
@@ -34,6 +35,7 @@
  *********************************************************************/
 
 /**
+ *  \author Ian McMahon
  *  \author Dave Coleman
  *  \desc   Multiple joint position controller for Baxter SDK
  */
@@ -42,65 +44,18 @@
 #define BAXTER_POSITION_CONTROLLER_H
 
 #include <ros/node_handle.h>
-
-#include <urdf/model.h>
-#include <control_toolbox/pid.h>
-#include <boost/scoped_ptr.hpp>
-#include <boost/thread/condition.hpp>
-#include <hardware_interface/joint_command_interface.h>
-#include <controller_interface/controller.h>
-#include <realtime_tools/realtime_buffer.h>
-
+#include <effort_controllers/joint_group_effort_controller.h> // used for controlling arm joints
 #include <baxter_core_msgs/JointCommand.h> // the input command
-
-#include <effort_controllers/joint_position_controller.h> // used for controlling individual joints
-
 
 namespace baxter_sim_controllers
 {
 
-  class BaxterPositionController: public controller_interface::Controller<hardware_interface::EffortJointInterface>
+  class BaxterPositionController: public effort_controllers::JointGroupEffortController
   {
-
-  public:
-    BaxterPositionController();
-    ~BaxterPositionController();
-
-    bool init(hardware_interface::EffortJointInterface *robot, ros::NodeHandle &n);
-    void starting(const ros::Time& time);
-    void stopping(const ros::Time& time);
-    void update(const ros::Time& time, const ros::Duration& period);
-    void updateCommands();
-
   private:
-    ros::NodeHandle nh_;
-
-    /**< Last commanded position. */
-    realtime_tools::RealtimeBuffer<baxter_core_msgs::JointCommand> position_command_buffer_; 
-
-    size_t n_joints_;
     std::string topic_name;
-
-    std::map<std::string,std::size_t> joint_to_index_map_; // allows incoming messages to be quickly ordered
-
-    bool verbose_;
-    bool new_command_; // true when an unproccessed new command is in the realtime buffer
-    size_t update_counter_;
-
-    // Command subscriber
-    ros::Subscriber position_command_sub_;
-    
-    /**
-     * @brief Callback from a recieved goal from the published topic message
-     * @param msg trajectory goal
-     */
+    void initCommandSub(ros::NodeHandle &n);
     void commandCB(const baxter_core_msgs::JointCommandConstPtr& msg);
-
-    // Create an effort-based joint position controller for every joint
-    std::vector< 
-      boost::shared_ptr<
-        effort_controllers::JointPositionController> > position_controllers_;    
-
   };
 
 } // namespace
