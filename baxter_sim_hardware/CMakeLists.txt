@@ -38,11 +38,6 @@ target_link_libraries(baxter_emulator ${catkin_LIBRARIES})
 add_dependencies(baxter_emulator ${catkin_EXPORTED_TARGETS})
 
 install(
-  TARGETS baxter_emulator
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-)
-
-install(
   DIRECTORY config images include launch
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
