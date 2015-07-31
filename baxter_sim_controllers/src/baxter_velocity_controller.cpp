@@ -41,7 +41,6 @@
  */
 
  #include <baxter_sim_controllers/baxter_velocity_controller.h>
- #include <effort_controllers/joint_group_effort_controller.h>
  #include <pluginlib/class_list_macros.h>
  #include <vector>
 
