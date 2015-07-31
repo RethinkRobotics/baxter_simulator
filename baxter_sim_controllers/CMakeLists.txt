@@ -43,3 +43,12 @@ add_dependencies(${PROJECT_NAME}
   baxter_core_msgs_gencpp
 )
 
+install(
+  TARGETS ${PROJECT_NAME}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+)
+
+install(
+  DIRECTORY config include
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
