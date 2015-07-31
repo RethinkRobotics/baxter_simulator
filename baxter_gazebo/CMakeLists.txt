@@ -15,8 +15,8 @@ find_package(Boost REQUIRED COMPONENTS system)
 find_package(gazebo REQUIRED)
 
 catkin_package(
-  CATKIN_DEPENDS 
-  baxter_core_msgs 
+  CATKIN_DEPENDS
+  baxter_core_msgs
   gazebo_ros_control
   roscpp
   controller_manager_msgs
@@ -50,3 +50,12 @@ add_dependencies(
   ${catkin_EXPORTED_TARGETS}
 )
 
+install(
+  TARGETS baxter_gazebo_ros_control
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+)
+
+install(
+  DIRECTORY launch worlds
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(baxter_sim_hardware)
 
-find_package(catkin 
+find_package(catkin
   REQUIRED COMPONENTS
   std_msgs
   roscpp
@@ -36,3 +36,13 @@ include_directories(include
 add_executable(baxter_emulator src/baxter_emulator.cpp)
 target_link_libraries(baxter_emulator ${catkin_LIBRARIES})
 add_dependencies(baxter_emulator ${catkin_EXPORTED_TARGETS})
+
+install(
+  TARGETS baxter_emulator
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+)
+
+install(
+  DIRECTORY config images include launch
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
