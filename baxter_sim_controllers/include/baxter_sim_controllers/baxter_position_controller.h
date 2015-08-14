@@ -44,20 +44,20 @@
 #define BAXTER_POSITION_CONTROLLER_H
 
 #include <ros/node_handle.h>
-#include <effort_controllers/joint_group_effort_controller.h> // used for controlling arm joints
+#include <forward_command_controller/forward_joint_group_command_controller.h> // used for controlling arm joints
 #include <baxter_core_msgs/JointCommand.h> // the input command
 
 namespace baxter_sim_controllers
 {
-
-  class BaxterPositionController: public effort_controllers::JointGroupEffortController
+  class BaxterPositionController: public ForwardJointGroupCommandControllerBase<hardware_interface::PositionJointInterface>
   {
+  public:
+    virtual ~BaxterPositionController() {sub_joint_command_.shutdown();}
+    virtual bool init(T* hw, ros::NodeHandle &n);
   private:
-    std::string topic_name;
-    void initCommandSub(ros::NodeHandle &n);
-    void commandCB(const baxter_core_msgs::JointCommandConstPtr& msg);
+    ros::Subscriber sub_joint_command_;
+    void jointCommandCB(const baxter_core_msgs::JointCommandConstPtr& msg);
   };
-
 } // namespace
 
 #endif
