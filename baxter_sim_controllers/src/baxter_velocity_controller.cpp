@@ -44,58 +44,60 @@
  #include <pluginlib/class_list_macros.h>
  #include <vector>
 
- namespace baxter_sim_controllers {
+namespace baxter_sim_controllers {
 
- void BaxterVelocityController::initCommandSub(ros::NodeHandle &n)
- {
-     if( n.getParam("topic", topic_name) ) // They provided a custom topic to subscribe to
-     {
-       // Get a node handle that is relative to the base path
-       ros::NodeHandle nh_base("~");
-       // Create command subscriber custom to baxter
-       sub_command_ = nh_base.subscribe<baxter_core_msgs::JointCommand>(topic_name, 1, &BaxterVelocityController::commandCB, this);
-     }
-     else // default "command" topic
-     {
-       // Create command subscriber custom to baxter
-       sub_command_ = n.subscribe<baxter_core_msgs::JointCommand>("command", 1, &BaxterVelocityController::commandCB, this);
+void BaxterVelocityController::init(T* hw, ros::NodeHandle &n)
+{
+  if(!ForwardJointGroupCommandControllerBase<hardware_interface::VelocityJointInterface>::init(hw, n)){
+    return false;
+  }
+  else{
+    std::string topic_name;
+    if( n.getParam("topic", topic_name) ){ // They provided a custom topic to subscribe to
+      // Get a node handle that is relative to the base path
+      ros::NodeHandle nh_base("~");
+      // Create command subscriber custom to baxter
+      sub_joint_command_ = nh_base.subscribe<baxter_core_msgs::JointCommand>(topic_name, 1, &BaxterPositionController::commandCB, this);
+    }
+    else{ // default "command" topic
+      // Create command subscriber custom to baxter
+      sub_joint_command_ = n.subscribe<baxter_core_msgs::JointCommand>("command", 1, &BaxterPositionController::commandCB, this);
+    }
+    return true;
+  }
+}
+
+ void BaxterVelocityController::jointCommandCB(const baxter_core_msgs::JointCommandConstPtr& msg){
+   // Error check message data
+   if( msg->command.size() != msg->names.size() ){
+     ROS_ERROR_STREAM_NAMED("jointCommandCB","List of names does not match list of angles size, "
+       << msg->command.size() << " != " << msg->names.size() );
+     return;
    }
+   std::vector<double> command_multi_array;
+   //Resize the muti array buffer to the number of joints
+   command_multi_array.resize(n_joints_); // Defaults to 0.0 cmd at every position
+   if(msg->command.size()!=n_joints_){
+     ROS_INFO_STREAM_NAMED("jointCommandCB","Dimension of command (" << msg->command.size()
+       << ") does not match number of joints (" << n_joints_
+       << "). Filling in missing commands with Zero velocity commands.");
+   }
+   size_t cmd_idx;
+   // Map incoming joint names and angles to the correct internal ordering
+   for(size_t i=0; i<msg->names.size(); i++){
+     // Check if the joint name is in the joint name vector
+     cmd_idx = find(joint_names_.begin(), joint_names_.end(), msg->names[i]) - joint_names_.begin();
+     if( cmd_idx < joint_names_.size() ){
+       // Joint is in the vector, so we'll update the joint position
+       command_multi_array[cmd_idx] = msg->command[i];
+     }
+     else{
+       ROS_WARN_STREAM_NAMED("jointCommandCB","Unkown joint commanded: "
+         << msg->names[i] <<". Ignoring the command for this joint.");
+     }
+   }
+   commands_buffer_.writeFromNonRT(command_multi_array);
  }
-
- void BaxterVelocityController::commandCB(const baxter_core_msgs::JointCommandConstPtr& msg)
- {
-     // Error check message data
-     if( msg->command.size() != msg->names.size() )
-     {
-       ROS_ERROR_STREAM_NAMED("commandCB","List of names does not match list of angles size, "
-         << msg->command.size() << " != " << msg->names.size() );
-       return;
-     }
-     if(msg->command.size()!=n_joints_)
-     {
-       ROS_ERROR_STREAM_NAMED("commandCB","Dimension of command (" << msg->command.size() << ") does not match number of joints (" << n_joints_ << ")! Not executing!");
-       return;
-     }
-     std::vector<std::string>::iterator name_idx;
-     std::vector<double> command_multi_array;
-     command_multi_array.resize(n_joints_);
-     size_t cmd_idx;
-     // Map incoming joint names and angles to the correct internal ordering
-     for(size_t i=0; i<msg->names.size(); i++)
-     {
-       // Check if the joint name is in the joint name vector
-       name_idx = find(joint_names_.begin(), joint_names_.end(), msg->names[i]);
-       cmd_idx = name_idx - joint_names_.begin();
-
-       if( name_idx != joint_names_.end() )
-       {
-         // Joint is in the vector, so we'll update the joint position
-         command_multi_array[cmd_idx] = msg->command[i];
-       }
-     }
-     commands_buffer_.writeFromNonRT(command_multi_array);
- }
-
 
  } // namespace
  PLUGINLIB_EXPORT_CLASS( baxter_sim_controllers::BaxterVelocityController,controller_interface::ControllerBase)

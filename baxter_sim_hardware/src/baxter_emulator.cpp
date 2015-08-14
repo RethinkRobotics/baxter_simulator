@@ -282,9 +282,10 @@ void baxter_emulator::publish(const std::string &img_path) {
   cv_bridge::CvImagePtr cv_ptr(new cv_bridge::CvImage);
   try {
     cv_ptr->image = cv::imread(img_path, CV_LOAD_IMAGE_UNCHANGED);
+    sleep(IMG_LOAD_ON_STARTUP_DELAY);  // Wait for the model to load
     if (cv_ptr->image.data) {
       cv_ptr->encoding = sensor_msgs::image_encodings::BGR8;
-      sleep(IMG_LOAD_ON_STARTUP_DELAY);  // Wait for the model to load
+      //sleep(IMG_LOAD_ON_STARTUP_DELAY);  // Wait for the model to load
       display_pub.publish(cv_ptr->toImageMsg());
     }
   } catch (std::exception e) {
