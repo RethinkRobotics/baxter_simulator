@@ -49,11 +49,11 @@
 
 namespace baxter_sim_controllers
 {
-  class BaxterPositionController: public ForwardJointGroupCommandControllerBase<hardware_interface::PositionJointInterface>
+  class BaxterPositionController: public forward_command_controller::ForwardJointGroupCommandControllerBase<hardware_interface::EffortJointInterface>
   {
   public:
     virtual ~BaxterPositionController() {sub_joint_command_.shutdown();}
-    virtual bool init(T* hw, ros::NodeHandle &n);
+    virtual bool init(hardware_interface::EffortJointInterface* hw, ros::NodeHandle &n);
   private:
     ros::Subscriber sub_joint_command_;
     void jointCommandCB(const baxter_core_msgs::JointCommandConstPtr& msg);

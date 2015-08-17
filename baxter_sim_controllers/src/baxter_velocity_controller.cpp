@@ -46,9 +46,8 @@
 
 namespace baxter_sim_controllers {
 
-void BaxterVelocityController::init(T* hw, ros::NodeHandle &n)
-{
-  if(!ForwardJointGroupCommandControllerBase<hardware_interface::VelocityJointInterface>::init(hw, n)){
+bool BaxterVelocityController::init(hardware_interface::EffortJointInterface* hw, ros::NodeHandle &n){
+  if(!forward_command_controller::ForwardJointGroupCommandControllerBase<hardware_interface::EffortJointInterface>::init(hw, n)){
     return false;
   }
   else{
@@ -57,11 +56,11 @@ void BaxterVelocityController::init(T* hw, ros::NodeHandle &n)
       // Get a node handle that is relative to the base path
       ros::NodeHandle nh_base("~");
       // Create command subscriber custom to baxter
-      sub_joint_command_ = nh_base.subscribe<baxter_core_msgs::JointCommand>(topic_name, 1, &BaxterPositionController::commandCB, this);
+      sub_joint_command_ = nh_base.subscribe<baxter_core_msgs::JointCommand>(topic_name, 1, &BaxterVelocityController::jointCommandCB, this);
     }
     else{ // default "command" topic
       // Create command subscriber custom to baxter
-      sub_joint_command_ = n.subscribe<baxter_core_msgs::JointCommand>("command", 1, &BaxterPositionController::commandCB, this);
+      sub_joint_command_ = n.subscribe<baxter_core_msgs::JointCommand>("command", 1, &BaxterVelocityController::jointCommandCB, this);
     }
     return true;
   }
@@ -74,9 +73,8 @@ void BaxterVelocityController::init(T* hw, ros::NodeHandle &n)
        << msg->command.size() << " != " << msg->names.size() );
      return;
    }
-   std::vector<double> command_multi_array;
    //Resize the muti array buffer to the number of joints
-   command_multi_array.resize(n_joints_); // Defaults to 0.0 cmd at every position
+   std::vector<double> command_multi_array(n_joints_, 0.0);
    if(msg->command.size()!=n_joints_){
      ROS_INFO_STREAM_NAMED("jointCommandCB","Dimension of command (" << msg->command.size()
        << ") does not match number of joints (" << n_joints_
