@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <launch>
 
   <!-- Load RQT with a pre-setup GUI for Baxter controls from a perspective file  -->
