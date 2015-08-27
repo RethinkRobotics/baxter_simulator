@@ -62,6 +62,12 @@ bool BaxterVelocityController::init(hardware_interface::EffortJointInterface* hw
       // Create command subscriber custom to baxter
       sub_joint_command_ = n.subscribe<baxter_core_msgs::JointCommand>("command", 1, &BaxterVelocityController::jointCommandCB, this);
     }
+    for (std::size_t i; i < n_joints_; i++)
+    {
+      // Add joint name to map (allows unordered list to quickly be mapped to the ordered index)
+      joint_to_index_map_.insert(std::pair<std::string,std::size_t>(joint_names_[i],i));
+      std::cout<<"joint: "<< joint_names_[i]<<"idx: "<<i<<std::endl;
+    }
     return true;
   }
 }
@@ -74,20 +80,22 @@ bool BaxterVelocityController::init(hardware_interface::EffortJointInterface* hw
      return;
    }
    //Resize the muti array buffer to the number of joints
+   //Initialize to zero velocity for all commands
    std::vector<double> command_multi_array(n_joints_, 0.0);
    if(msg->command.size()!=n_joints_){
      ROS_INFO_STREAM_NAMED("jointCommandCB","Dimension of command (" << msg->command.size()
        << ") does not match number of joints (" << n_joints_
        << "). Filling in missing commands with Zero velocity commands.");
    }
-   size_t cmd_idx;
+   std::map<std::string,std::size_t>::iterator name_it;
    // Map incoming joint names and angles to the correct internal ordering
-   for(size_t i=0; i<msg->names.size(); i++){
-     // Check if the joint name is in the joint name vector
-     cmd_idx = find(joint_names_.begin(), joint_names_.end(), msg->names[i]) - joint_names_.begin();
-     if( cmd_idx < joint_names_.size() ){
+   for(std::size_t i=0; i<msg->names.size(); i++){
+     // Check if the joint name is in our map
+     name_it = joint_to_index_map_.find(msg->names[i]);
+     //std::cout<<"Name_it: "<<name_it<<std::endl;
+     if( name_it != joint_to_index_map_.end() ){
        // Joint is in the vector, so we'll update the joint position
-       command_multi_array[cmd_idx] = msg->command[i];
+       command_multi_array[name_it->second] = msg->command[i];
      }
      else{
        ROS_WARN_STREAM_NAMED("jointCommandCB","Unkown joint commanded: "

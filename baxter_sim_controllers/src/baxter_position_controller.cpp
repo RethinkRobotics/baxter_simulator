@@ -43,6 +43,7 @@
 #include <baxter_sim_controllers/baxter_position_controller.h>
 #include <pluginlib/class_list_macros.h>
 #include <vector>
+#include <limits> // numeric_limits
 
 namespace baxter_sim_controllers {
 
@@ -62,7 +63,29 @@ bool BaxterPositionController::init(hardware_interface::EffortJointInterface* hw
       // Create command subscriber custom to baxter
       sub_joint_command_ = n.subscribe<baxter_core_msgs::JointCommand>("command", 1, &BaxterPositionController::jointCommandCB, this);
     }
+    for (size_t i; i < n_joints_; i++)
+    {
+      // Add joint name to map (allows unordered list to quickly be mapped to the ordered index)
+      joint_to_index_map_.insert(std::pair<std::string,std::size_t>(joint_names_[i],i));
+      std::cout<<"joint: "<< joint_names_[i]<<"idx: "<<i<<std::endl;
+    }
     return true;
+  }
+}
+
+void BaxterPositionController::update(const ros::Time& time, const ros::Duration& period)
+{
+  std::vector<double> & commands = *commands_buffer_.readFromRT();
+  for(std::size_t i=0; i<n_joints_; i++)
+  {
+    // Determine if we have a valid position command
+    // if it is infinity (not valid), use the current position
+    if(commands[i] == std::numeric_limits<double>::infinity()){
+      joints_[i].setCommand(this->joints_[i].getPosition());
+    }
+    else{
+      joints_[i].setCommand(commands[i]);
+    }
   }
 }
 
@@ -74,25 +97,22 @@ void BaxterPositionController::jointCommandCB(const baxter_core_msgs::JointComma
     return;
   }
   //Resize the muti array buffer to the number of joints
-  std::vector<double> command_multi_array(n_joints_, 0.0);
+  //Stuff the vector with infinity to let Update to fill in
+  //current joint positions if they are not specified
+  std::vector<double> command_multi_array(n_joints_, std::numeric_limits<double>::infinity());
   if(msg->command.size()!=n_joints_){
     ROS_INFO_STREAM_NAMED("jointCommandCB","Dimension of command (" << msg->command.size()
       << ") does not match number of joints (" << n_joints_
-      << "). Initializing joint commands with current joint positions,"
-      << " then applying available commanded positions.");
-    for(unsigned int i=0; i<this->joints_.size(); i++)
-    {
-      command_multi_array[i]=this->joints_[i].getPosition();
-    }
+      << "). Using current joint positions in place of missing commands.");
   }
-  size_t cmd_idx;
+  std::map<std::string,std::size_t>::iterator name_it;
   // Map incoming joint names and angles to the correct internal ordering
-  for(size_t i=0; i<msg->names.size(); i++){
-    // Check if the joint name is in the joint name vector
-    cmd_idx = find(joint_names_.begin(), joint_names_.end(), msg->names[i]) - joint_names_.begin();
-    if( cmd_idx < joint_names_.size() ){
+  for(std::size_t i=0; i<msg->names.size(); i++){
+    // Check if the joint name is in our map
+    name_it = joint_to_index_map_.find(msg->names[i]);
+    if( name_it != joint_to_index_map_.end() ){
       // Joint is in the vector, so we'll update the joint position
-      command_multi_array[cmd_idx] = msg->command[i];
+      command_multi_array[name_it->second] = msg->command[i];
     }
     else{
       ROS_WARN_STREAM_NAMED("jointCommandCB","Unkown joint commanded: "

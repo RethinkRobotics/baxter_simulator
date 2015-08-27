@@ -45,7 +45,9 @@
 
 #include <ros/node_handle.h>
 #include <forward_command_controller/forward_joint_group_command_controller.h> // used for controlling arm joints
+#include <hardware_interface/joint_command_interface.h>
 #include <baxter_core_msgs/JointCommand.h> // the input command
+#include <map> // joint map
 
 namespace baxter_sim_controllers
 {
@@ -56,7 +58,9 @@ namespace baxter_sim_controllers
     virtual bool init(hardware_interface::EffortJointInterface* hw, ros::NodeHandle &n);
   private:
     ros::Subscriber sub_joint_command_;
+    std::map<std::string,std::size_t> joint_to_index_map_; // allows incoming messages to be quickly ordered
     void jointCommandCB(const baxter_core_msgs::JointCommandConstPtr& msg);
+    void update(const ros::Time& time, const ros::Duration& period);
   };
 } // namespace
 
