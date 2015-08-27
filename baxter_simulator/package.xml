@@ -20,6 +20,11 @@
   <author>Rethink Robotics Inc.</author>
 
   <buildtool_depend>catkin</buildtool_depend>
+  <run_depend>baxter_gazebo</run_depend>
+  <run_depend>baxter_sim_controllers</run_depend>
+  <run_depend>baxter_sim_hardware</run_depend>
+  <run_depend>baxter_sim_io</run_depend>
+  <run_depend>baxter_sim_kinematics</run_depend>
 
   <export>
     <metapackage/>
