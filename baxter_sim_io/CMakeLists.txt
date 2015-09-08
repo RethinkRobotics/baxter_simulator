@@ -16,7 +16,7 @@ find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui)
 include_directories(${catkin_INCLUDE_DIRS})
 # Use this to define what the package will export (e.g. libs, headers).
 # Since the default here is to produce only a binary, we don't worry about
-# exporting anything. 
+# exporting anything.
 catkin_package(INCLUDE_DIRS include
   CATKIN_DEPENDS
   baxter_core_msgs
@@ -32,7 +32,7 @@ include_directories(include
 # Qt Environment
 ##############################################################################
 
-# this comes from qt_build's qt-ros.cmake which is automatically 
+# this comes from qt_build's qt-ros.cmake which is automatically
 # included via the dependency call in manifest.xml
 
 ##############################################################################
@@ -64,9 +64,12 @@ target_link_libraries(baxter_sim_io ${QT_LIBRARIES} ${ROS_LIBRARIES} ${catkin_LI
 
 add_dependencies(baxter_sim_io baxter_core_msgs_gencpp)
 
-install(TARGETS baxter_sim_io 
+install(TARGETS baxter_sim_io
 ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
-
+install(
+  DIRECTORY include resources ui
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)

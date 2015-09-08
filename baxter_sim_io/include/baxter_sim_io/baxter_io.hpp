@@ -94,10 +94,6 @@ private:
   void on_right_cuff_ok_released();
   void on_right_cuff_grasp_pressed();
   void on_right_cuff_grasp_released();
-  void on_left_shoulder_pressed();
-  void on_left_shoulder_released();
-  void on_right_shoulder_pressed();
-  void on_right_shoulder_released();
 
  private:
   Ui::BaxterIO *ui;

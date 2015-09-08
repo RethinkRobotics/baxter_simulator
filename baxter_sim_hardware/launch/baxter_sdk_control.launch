@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <launch>
 
   <!-- baxter_sim_kinematics launch file to do the Forward/Inverse Kinematics -->
@@ -12,11 +13,11 @@
 
   <!-- load the default controllers -->
   <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
-	output="screen" ns="/robot" args="joint_state_controller" />
+        output="screen" ns="/robot" args="--shutdown-timeout -1 joint_state_controller" />
 
   <!-- load the stopped controllers -->
   <node name="controller_spawner_stopped" pkg="controller_manager" type="spawner" respawn="false"
-	output="screen" ns="/robot" args=" --stopped
+       output="screen" ns="/robot" args="--shutdown-timeout -1 --stopped
 					   left_joint_position_controller
 					   right_joint_position_controller
 					   head_position_controller

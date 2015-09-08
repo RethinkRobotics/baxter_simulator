@@ -103,6 +103,7 @@ BaxterIO::BaxterIO(int argc, char** argv, QWidget *parent)
 }
 
 BaxterIO::~BaxterIO() {
+  delete ui;
 }
 
 void BaxterIO::on_left_arm_ok_pressed() {
@@ -265,17 +266,4 @@ void BaxterIO::on_right_cuff_grasp_released() {
   QNode::right_cuff_grasp.state = baxter_core_msgs::DigitalIOState::UNPRESSED;
 }
 
-void BaxterIO::on_left_shoulder_pressed() {
-  QNode::left_shoulder.state = baxter_core_msgs::DigitalIOState::PRESSED;
-}
-void BaxterIO::on_left_shoulder_released() {
-  QNode::left_shoulder.state = baxter_core_msgs::DigitalIOState::UNPRESSED;
-}
-void BaxterIO::on_right_shoulder_pressed() {
-  QNode::right_shoulder.state = baxter_core_msgs::DigitalIOState::PRESSED;
-}
-void BaxterIO::on_right_shoulder_released() {
-  QNode::right_shoulder.state = baxter_core_msgs::DigitalIOState::UNPRESSED;
-}
 }  // namespace baxter_sim_io
-
