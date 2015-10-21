@@ -133,13 +133,6 @@ bool BaxterGripperController::init(hardware_interface::EffortJointInterface *rob
 }
 
 void BaxterGripperController::starting(const ros::Time& time) {
-  // Fill in the initial command
-  baxter_core_msgs::EndEffectorCommand initial_command;
-  initial_command.command = baxter_core_msgs::EndEffectorCommand::CMD_GO;
-  initial_command.id = 65538;
-  initial_command.args = "{ \"position\": 0.0}";
-  gripper_command_buffer.initRT(initial_command);
-  new_command = true;
 }
 
 void BaxterGripperController::stopping(const ros::Time& time) {

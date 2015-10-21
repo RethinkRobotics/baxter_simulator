@@ -509,10 +509,10 @@ right_gravity.actual_effort.resize(left_gravity.name.size());
         head_msg.isPanning = false;
       head_msg.pan = msg.position[i];
     }
-    else if (msg.name[i] == "left_gripper_l_finger_joint") {
+    else if (msg.name[i] == "l_gripper_l_finger_joint") {
         left_grip_st.position = (msg.position[i]/0.020833)*100;
     }
-    else if (msg.name[i] == "right_gripper_l_finger_joint") {
+    else if (msg.name[i] == "r_gripper_l_finger_joint") {
         right_grip_st.position = (msg.position[i]/0.020833)*100;
     }
 	else {
