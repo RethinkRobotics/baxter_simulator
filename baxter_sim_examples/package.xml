@@ -40,18 +40,19 @@
   <!-- Use test_depend for packages you need only for testing: -->
   <!--   <test_depend>gtest</test_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>rospy</build_depend>
   <build_depend>baxter_core_msgs</build_depend>
   <build_depend>baxter_gazebo</build_depend>
   <build_depend>baxter_interface</build_depend>
   <build_depend>baxter_tools</build_depend>
-  <build_depend>baxter_tools</build_depend>
   <build_depend>gazebo_ros</build_depend>
+  <run_depend>rospy</run_depend>
   <run_depend>baxter_core_msgs</run_depend>
   <run_depend>baxter_gazebo</run_depend>
   <run_depend>baxter_interface</run_depend>
   <run_depend>baxter_tools</run_depend>
   <run_depend>gazebo_ros</run_depend>
-
+ 
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
