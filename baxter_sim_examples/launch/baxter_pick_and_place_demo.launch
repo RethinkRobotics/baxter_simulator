@@ -31,7 +31,6 @@
   <node pkg="gazebo_ros" type="spawn_model" name="table_spawner" 
         args="-file $(find baxter_sim_examples)/models/cafe_table/model.sdf -sdf -x 1.0 -model cafe_table" />
   <node pkg="gazebo_ros" type="spawn_model" name="block_spawner" 
-        args="-file $(find baxter_sim_examples)/models/block/model.urdf -urdf -x 0.7 -z 0.86 -y 0.15 -model block" />
-
+        args="-file $(find baxter_sim_examples)/models/block/model.urdf -urdf -x 0.7225 -z 0.8025 -y 0.149 -model block" />
 
 </launch>

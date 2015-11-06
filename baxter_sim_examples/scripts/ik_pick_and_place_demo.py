@@ -33,6 +33,7 @@ Baxter RSDK Inverse Kinematics Pick and Place Demo
 import argparse
 import struct
 import sys
+import copy
 
 import rospy
 
@@ -52,8 +53,10 @@ from baxter_core_msgs.srv import (
 import baxter_interface
 
 class PickAndPlace(object):
-    def __init__(self, limb):
-        self._limb_name = limb
+    def __init__(self, limb, hover_distance = 0.15, verbose=True):
+        self._limb_name = limb # string
+        self._hover_distance = hover_distance # in meters
+        self._verbose = verbose # bool
         self._limb = baxter_interface.Limb(limb)
         self._gripper = baxter_interface.Gripper(limb)
         ns = "ExternalTools/" + limb + "/PositionKinematicsNode/IKService"
@@ -65,14 +68,14 @@ class PickAndPlace(object):
         self._init_state = self._rs.state().enabled
         print("Enabling robot... ")
         self._rs.enable()
-        self._joint_names = '{0}_w0 {0}_w1 {0}_w2 {0}_e0 {0}_e1 {0}_s0 {0}_s1'.format(limb).split()
-        self._neutral_angles = dict(zip(self._joint_names, [0]*7)) 
 
-    def move_to_start(self, start_angles):
-        print("Moving the {} arm to neutral pose...".format(self._limb_name))
-        self.set_neutral_angles(start_angles)
+    def move_to_start(self, start_angles=None):
+        print("Moving the {} arm to start pose...".format(self._limb_name))
+        if not start_angles:
+            start_angles = dict(zip(self._joint_names, [0]*7))
         self._limb.move_to_joint_positions(start_angles)
-        self._gripper.open()
+        self.gripper_open()
+        rospy.sleep(1.0)
         print("Running. Ctrl-c to quit")
 
     def ik_request(self, pose):
@@ -87,7 +90,6 @@ class PickAndPlace(object):
         # Check if result valid, and type of seed ultimately used to get solution
         # convert rospy's string representation of uint8[]'s to int's
         resp_seeds = struct.unpack('<%dB' % len(resp.result_type), resp.result_type)
-        print resp
         limb_joints = {}
         if (resp_seeds[0] != resp.RESULT_INVALID):
             seed_str = {
@@ -95,105 +97,128 @@ class PickAndPlace(object):
                         ikreq.SEED_CURRENT: 'Current Joint Angles',
                         ikreq.SEED_NS_MAP: 'Nullspace Setpoints',
                        }.get(resp_seeds[0], 'None')
-            print("SUCCESS - Valid Joint Solution Found from Seed Type: %s" %
-                  (seed_str,))
+            if self._verbose:
+                print("SUCCESS - Valid Joint Solution Found from Seed Type: %s" %
+                         (seed_str,))
             # Format solution into Limb API-compatible dictionary
             limb_joints = dict(zip(resp.joints[0].name, resp.joints[0].position))
-            print "\nIK Joint Solution:\n", limb_joints
-            print "------------------"
-            print "Response Message:\n", resp
+            if self._verbose:
+                print "IK Joint Solution:\n", limb_joints
+                print "------------------"
         else:
-            print("INVALID POSE - No Valid Joint Solution Found.")
+            rospy.logerr("INVALID POSE - No Valid Joint Solution Found.")
             return False
         return limb_joints
 
-    def pick(self, pose):
-        # servo to 5 cm above pose
-        pre_pose = pose
-        pre_pose.position.z = pre_pose.position.z + 0.05
-        joint_angles = self.ik_request(pre_pose)
-        self._limb.move_to_joint_positions(joint_angles)
-        # open the gripper
+    def gripper_open(self):
         self._gripper.open()
-        # servo down 5 cm (to original pose)
-        joint_angles = self.ik_request(pose)
-        self._limb.move_to_joint_positions(joint_angles)
-        # close gripper
+        rospy.sleep(1.0)
+
+    def gripper_close(self):
         self._gripper.close()
-        self.retract()
+        rospy.sleep(1.0)
 
-    def set_neutral_angles(self, neutral_angles):
-        self._neutral_angles = neutral_angles
+    def _approach(self, pose):
+        approach = copy.deepcopy(pose)
+        # approach with a pose the hover-distance above the requested pose
+        approach.position.z = approach.position.z + self._hover_distance
+        joint_angles = self.ik_request(approach)
+        self._limb.move_to_joint_positions(joint_angles)
 
-    def retract(self):
-        # servo to 5 cm up from starting pose
+    def _retract(self):
+        # retrieve current pose from endpoint
         current_pose = self._limb.endpoint_pose()
         ik_pose = Pose()
         ik_pose.position.x = current_pose['position'].x 
         ik_pose.position.y = current_pose['position'].y 
-        ik_pose.position.z = current_pose['position'].z + 0.05
+        ik_pose.position.z = current_pose['position'].z + self._hover_distance
         ik_pose.orientation.x = current_pose['orientation'].x 
         ik_pose.orientation.y = current_pose['orientation'].y 
         ik_pose.orientation.z = current_pose['orientation'].z 
         ik_pose.orientation.w = current_pose['orientation'].w
         joint_angles = self.ik_request(ik_pose)
-        # servo to neutral pose
-        #self._limb.move_to_neutral()
-        self._limb.move_to_joint_positions(self._neutral_angles)
-
-    def place(self, pose):
-        # servo to 5 cm above pose
-        pre_pose = pose
-        pre_pose.position.z = pre_pose.position.z + 0.05
-        joint_angles = self.ik_request(pre_pose)
+        # servo up from current pose
         self._limb.move_to_joint_positions(joint_angles)
-        # servo down 5 cm
+
+    def _servo_to_pose(self, pose):
+        # servo down to release
         joint_angles = self.ik_request(pose)
         self._limb.move_to_joint_positions(joint_angles)
-        # open the gripper
-        self._gripper.open()
-        self.retract()
 
+    def pick(self, pose):
+        # open the gripper
+        self.gripper_open()
+        # servo above pose
+        self._approach(pose)
+        # servo to pose
+        self._servo_to_pose(pose)
+        # close gripper
+        self.gripper_close()
+        # retract to clear object
+        self._retract()
+
+    def place(self, pose):
+        # servo above pose
+        self._approach(pose)
+        # servo to pose
+        self._servo_to_pose(pose)
+        # open the gripper
+        self.gripper_open()
+        # retract to clear object
+        self._retract()
 
 def main():
-    """RSDK Inverse Kinematics Example
+    """RSDK Inverse Kinematics Pick and Place Example
 
-    A simple example of using the Rethink Inverse Kinematics
-    Service which returns the joint angles and validity for
-    a requested Cartesian Pose.
+    A Pick and Place example using the Rethink Inverse Kinematics
+    Service which returns the joint angles a requested Cartesian Pose.
+    This ROS Service client is used to request both pick and place
+    poses in the /base frame of the robot.
 
-    Run this example, passing the *limb* to test, and the
-    example will call the Service with a sample Cartesian
-    Pose, pre-defined in the example code, printing the
-    response of whether a valid joint solution was found,
-    and if so, the corresponding joint angles.
+    Note: This is a highly scripted and tuned demo. The object location
+    is "known" and movement is done completely open loop. It is expected
+    behavior that Baxter will eventually mis-pick or drop the block. You
+    can improve on this demo by adding perception and feedback to close
+    the loop.
     """
     rospy.init_node("ik_pick_and_place_demo")
     limb = 'left'
-    pnp = PickAndPlace(limb)
+    hover_distance = 0.15 # meters
+    # Starting Joint angles for left arm
+    starting_joint_angles = {'left_w0': 0.6699952259595108,
+                             'left_w1': 1.030009435085784,
+                             'left_w2': -0.4999997247485215,
+                             'left_e0': -1.189968899785275,
+                             'left_e1': 1.9400238130755056,
+                             'left_s0': -0.08000397926829805,
+                             'left_s1': -0.9999781166910306}
+    pnp = PickAndPlace(limb, hover_distance)
+    # An orientation for gripper fingers to be overhead and parallel to the obj
+    overhead_orientation = Quaternion(
+                             x=-0.0249590815779,
+                             y=0.999649402929,
+                             z=0.00737916180073,
+                             w=0.00486450832011)
     block_poses = list()
-    neutral_angles = {'left_w0': 0.6699952259595108, 'left_w1': 1.030009435085784, 'left_w2': -0.4999997247485215, 'left_e0': -1.189968899785275, 'left_e1': 1.9400238130755056, 'left_s0': -0.08000397926829805, 'left_s1': -0.9999781166910306}
-    overhead_orientation = Quaternion(
-            x=-0.0249590815779,
-            y=0.999649402929,
-            z=0.00737916180073,
-            w=0.00486450832011)
-    overhead_orientation = Quaternion(
-    x= 0.140764818367,
-    y= 0.989646742913,
-    z= 0.0116553763534,
-    w= 0.0254704211511)
+    # The Pose of the block in its initial location.
+    # You may wish to replace these poses with estimates
+    # from a perception node.
     block_poses.append(Pose(
-        position=Point(x=0.7, y=0.15, z=-0.03),
+        position=Point(x=0.7, y=0.15, z=0.0),
         orientation=overhead_orientation))
+    # Feel free to add additional desired poses for the object.
+    # Each additional pose will get its own pick and place.
     block_poses.append(Pose(
-        position=Point(x=0.9, y=0.0, z=-0.03),
+        position=Point(x=0.75, y=0.0, z=0.0),
         orientation=overhead_orientation))
-    pnp.move_to_start(neutral_angles)
+    # Move to the desired starting angles
+    pnp.move_to_start(starting_joint_angles)
     idx = 0
     while not rospy.is_shutdown():
+        print("\nPicking...")
         pnp.pick(block_poses[idx])
-        idx = idx+1 % len(block_poses)
+        print("\nPlacing...")
+        idx = (idx+1) % len(block_poses)
         pnp.place(block_poses[idx])
     return 0
 
