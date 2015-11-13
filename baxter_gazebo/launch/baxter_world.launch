@@ -9,19 +9,14 @@
   <arg name="debug" default="false"/>
 
   <!-- These arguments load the electric grippers, for example left_electric_gripper:=true -->
-  <arg name="left_end_effector" default="true"/>
-  <arg name="right_end_effector" default="true"/>
-  <arg name="left_electric_gripper" default="$(arg left_end_effector)"/>
-  <arg name="right_electric_gripper" default="$(arg right_end_effector)"/>
+  <arg name="left_electric_gripper" default="true"/>
+  <arg name="right_electric_gripper" default="true"/>
 
   <!-- Load the URDF into the ROS Parameter Server -->
   <!-- This xacro will pull in baxter.urdf, left_end_effector.urdf.xacro,
                                            and right_end_effector.urdf.xacro -->
   <param name="robot_description"
-      command="$(find xacro)/xacro.py --inorder $(find baxter_description)/urdf/baxter.urdf.xacro
-          right_end_effector:=$(arg right_end_effector)
-          left_end_effector:=$(arg left_end_effector)
-          gazebo:=true"/>
+      command="$(find xacro)/xacro.py --inorder $(find baxter_description)/urdf/baxter.urdf.xacro gazebo:=true"/>
 
   <!-- We resume the logic in empty_world.launch, changing the name of the world to be launched -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
