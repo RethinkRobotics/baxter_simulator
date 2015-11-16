@@ -70,21 +70,21 @@ const std::string BAXTER_RIGHT_IR_INT_TOPIC =
 
 const std::string BAXTER_NAV_LIGHT_TOPIC = "robot/digital_io/command";
 const std::string BAXTER_LEFTIL_TOPIC =
-    "robot/digital_io/left_itb_light_inner/state";
+    "robot/digital_io/left_inner_light/state";
 const std::string BAXTER_LEFTOL_TOPIC =
-    "robot/digital_io/left_itb_light_outer/state";
+    "robot/digital_io/left_outer_light/state";
 const std::string BAXTER_TORSO_LEFTIL_TOPIC =
-    "robot/digital_io/torso_left_itb_light_inner/state";
+    "robot/digital_io/torso_left_inner_light/state";
 const std::string BAXTER_TORSO_LEFTOL_TOPIC =
-    "robot/digital_io/torso_left_itb_light_outer/state";
+    "robot/digital_io/torso_left_outer_light/state";
 const std::string BAXTER_RIGHTIL_TOPIC =
-    "robot/digital_io/right_itb_light_inner/state";
+    "robot/digital_io/right_inner_light/state";
 const std::string BAXTER_RIGHTOL_TOPIC =
-    "robot/digital_io/right_itb_light_outer/state";
+    "robot/digital_io/right_outer_light/state";
 const std::string BAXTER_TORSO_RIGHTIL_TOPIC =
-    "robot/digital_io/torso_right_itb_light_inner/state";
+    "robot/digital_io/torso_right_inner_light/state";
 const std::string BAXTER_TORSO_RIGHTOL_TOPIC =
-    "robot/digital_io/torso_right_itb_light_outer/state";
+    "robot/digital_io/torso_right_outer_light/state";
 
 const std::string BAXTER_HEAD_STATE_TOPIC = "robot/head/head_state";
 const std::string BAXTER_HEAD_NOD_CMD_TOPIC =
@@ -96,14 +96,14 @@ const std::string BAXTER_RIGHT_GRAVITY_TOPIC = "robot/limb/right/gravity_compens
 const int IMG_LOAD_ON_STARTUP_DELAY = 35;  // Timeout for publishing a single RSDK image on start up
 
 enum nav_light_enum {
-  left_itb_light_inner,
-  right_itb_light_inner,
-  torso_left_itb_light_inner,
-  torso_right_itb_light_inner,
-  left_itb_light_outer,
-  right_itb_light_outer,
-  torso_left_itb_light_outer,
-  torso_right_itb_light_outer
+  left_inner_light,
+  right_inner_light,
+  torso_left_inner_light,
+  torso_right_inner_light,
+  left_outer_light,
+  right_outer_light,
+  torso_left_outer_light,
+  torso_right_outer_light
 };
 
 std::map<std::string, nav_light_enum> nav_light;
@@ -141,7 +141,6 @@ bool baxter_emulator::init() {
 
   right_grip_st = left_grip_st;  // Sample values recorded on both the grippers to do the spoof
 
-  //Default values for the left and the right gripper properties
   left_grip_prop.id = 131073;
   left_grip_prop.ui_type = 3;
   left_grip_prop.manufacturer = "Rethink Research Robot";
@@ -158,8 +157,41 @@ bool baxter_emulator::init() {
   left_grip_prop.controls_position = true;
   left_grip_prop.senses_position = true;
   left_grip_prop.properties = "";
+  std::string gripper_type;
+  ros::param::param<std::string>("~left_gripper_type", gripper_type, "CUSTOM_GRIPPER");
+  if (gripper_type == "SUCTION_CUP_GRIPPER" ) {
+      left_grip_prop.id = 65537;
+      left_grip_prop.ui_type = 1;
+  } else if (gripper_type == "ELECTRIC_GRIPPER" ) {
+      left_grip_prop.id = 65538;
+      left_grip_prop.ui_type = 2;
+      left_grip_prop.serial_number = "3712199347";
+      left_grip_prop.hardware_rev = "2";
+      left_grip_prop.firmware_rev = "3.0.0 5.5";
+      left_grip_prop.firmware_date = "2014/7/24 18:30:00";
+  }
 
   right_grip_prop = left_grip_prop;  // Sample values recorded on both the grippers to do the spoof
+  right_grip_prop.serial_number = "";
+  right_grip_prop.hardware_rev = "";
+  right_grip_prop.firmware_rev = "";
+  right_grip_prop.firmware_date = "";
+  ros::param::param<std::string>("~right_gripper_type", gripper_type, "CUSTOM_GRIPPER");
+  if (gripper_type == "SUCTION_CUP_GRIPPER" ) {
+      right_grip_prop.id = 65537;
+      right_grip_prop.ui_type = 1;
+  } else if (gripper_type == "ELECTRIC_GRIPPER" ) {
+      right_grip_prop.id = 65538;
+      right_grip_prop.ui_type = 2;
+      right_grip_prop.serial_number = "3712199347";
+      right_grip_prop.hardware_rev = "2";
+      right_grip_prop.firmware_rev = "3.0.0 5.5";
+      right_grip_prop.firmware_date = "2014/7/24 18:30:00";
+  } else {
+      //Default values for the right gripper properties
+      right_grip_prop.id = 131073;
+      right_grip_prop.ui_type = 3;
+  }
 
   leftIL_nav_light.isInputOnly = false;
   leftOL_nav_light.isInputOnly = false;
@@ -180,7 +212,7 @@ bool baxter_emulator::init() {
   torso_rightOL_nav_light.state = baxter_core_msgs::DigitalIOState::OFF;
 
   head_msg.pan = 0;
-  head_msg.isPanning = false;
+  head_msg.isTurning = false;
   head_msg.isNodding = false;
 
   isStopped = false;
@@ -189,14 +221,14 @@ bool baxter_emulator::init() {
   right_gravity.header.frame_id="base";
 
 // Initialize the map that would be used in the nav_light_cb
-  nav_light["left_itb_light_inner"] =left_itb_light_inner;
-  nav_light["right_itb_light_inner"] =right_itb_light_inner;
-  nav_light["torso_left_itb_light_inner"] =torso_left_itb_light_inner;
-  nav_light["torso_right_itb_light_inner"] =torso_right_itb_light_inner;
-  nav_light["left_itb_light_outer"] =left_itb_light_outer;
-  nav_light["right_itb_light_outer"] =right_itb_light_outer;
-  nav_light["torso_left_itb_light_outer"] =torso_left_itb_light_outer;
-  nav_light["torso_right_itb_light_outer"] =torso_right_itb_light_outer;
+  nav_light["left_inner_light"] =left_inner_light;
+  nav_light["right_inner_light"] =right_inner_light;
+  nav_light["torso_left_inner_light"] =torso_left_inner_light;
+  nav_light["torso_right_inner_light"] =torso_right_inner_light;
+  nav_light["left_outer_light"] =left_outer_light;
+  nav_light["right_outer_light"] =right_outer_light;
+  nav_light["torso_left_outer_light"] =torso_left_outer_light;
+  nav_light["torso_right_outer_light"] =torso_right_outer_light;
 
   // Initialize the publishers
   assembly_state_pub = n.advertise<baxter_core_msgs::AssemblyState>(
@@ -219,22 +251,22 @@ bool baxter_emulator::init() {
   right_ir_int_pub = n.advertise<std_msgs::UInt32>(BAXTER_RIGHT_IR_INT_TOPIC,
                                                    1);
 
-  left_itb_innerL_pub = n.advertise<baxter_core_msgs::DigitalIOState>(
+  left_inner_light_pub = n.advertise<baxter_core_msgs::DigitalIOState>(
       BAXTER_LEFTIL_TOPIC, 1);
-  left_itb_outerL_pub = n.advertise<baxter_core_msgs::DigitalIOState>(
+  left_outer_light_pub = n.advertise<baxter_core_msgs::DigitalIOState>(
       BAXTER_LEFTOL_TOPIC, 1);
-  torso_left_innerL_pub = n.advertise<baxter_core_msgs::DigitalIOState>(
+  torso_left_inner_light_pub = n.advertise<baxter_core_msgs::DigitalIOState>(
       BAXTER_TORSO_LEFTIL_TOPIC, 1);
-  torso_left_outerL_pub = n.advertise<baxter_core_msgs::DigitalIOState>(
+  torso_left_outer_light_pub = n.advertise<baxter_core_msgs::DigitalIOState>(
       BAXTER_TORSO_LEFTOL_TOPIC, 1);
 
-  right_itb_innerL_pub = n.advertise<baxter_core_msgs::DigitalIOState>(
+  right_inner_light_pub = n.advertise<baxter_core_msgs::DigitalIOState>(
       BAXTER_RIGHTIL_TOPIC, 1);
-  right_itb_outerL_pub = n.advertise<baxter_core_msgs::DigitalIOState>(
+  right_outer_light_pub = n.advertise<baxter_core_msgs::DigitalIOState>(
       BAXTER_RIGHTOL_TOPIC, 1);
-  torso_right_innerL_pub = n.advertise<baxter_core_msgs::DigitalIOState>(
+  torso_right_inner_light_pub = n.advertise<baxter_core_msgs::DigitalIOState>(
       BAXTER_TORSO_RIGHTIL_TOPIC, 1);
-  torso_right_outerL_pub = n.advertise<baxter_core_msgs::DigitalIOState>(
+  torso_right_outer_light_pub = n.advertise<baxter_core_msgs::DigitalIOState>(
       BAXTER_TORSO_RIGHTOL_TOPIC, 1);
 
   left_grav_pub = n.advertise<baxter_core_msgs::SEAJointState>(BAXTER_LEFT_GRAVITY_TOPIC, 1);
@@ -300,17 +332,17 @@ void baxter_emulator::publish(const std::string &img_path) {
     left_ir_pub.publish(left_ir);
     left_ir_state_pub.publish(left_ir_state);
     left_ir_int_pub.publish(left_ir_int);
-    left_itb_innerL_pub.publish(leftIL_nav_light);
-    left_itb_outerL_pub.publish(leftOL_nav_light);
-    torso_left_innerL_pub.publish(torso_leftIL_nav_light);
-    torso_left_outerL_pub.publish(torso_leftOL_nav_light);
+    left_inner_light_pub.publish(leftIL_nav_light);
+    left_outer_light_pub.publish(leftOL_nav_light);
+    torso_left_inner_light_pub.publish(torso_leftIL_nav_light);
+    torso_left_outer_light_pub.publish(torso_leftOL_nav_light);
     right_ir_pub.publish(right_ir);
     right_ir_state_pub.publish(right_ir_state);
     right_ir_int_pub.publish(right_ir_int);
-    right_itb_innerL_pub.publish(rightIL_nav_light);
-    right_itb_outerL_pub.publish(rightOL_nav_light);
-    torso_right_innerL_pub.publish(torso_rightIL_nav_light);
-    torso_right_outerL_pub.publish(torso_rightOL_nav_light);
+    right_inner_light_pub.publish(rightIL_nav_light);
+    right_outer_light_pub.publish(rightOL_nav_light);
+    torso_right_inner_light_pub.publish(torso_rightIL_nav_light);
+    torso_right_outer_light_pub.publish(torso_rightOL_nav_light);
     head_pub.publish(head_msg);
     kin.getGravityTorques(jstate_msg, left_gravity, right_gravity, assembly_state.enabled);
     left_gravity.header.stamp = ros::Time::now();
@@ -416,28 +448,28 @@ void baxter_emulator::nav_light_cb(
   else
     res = baxter_core_msgs::DigitalIOState::OFF;
   switch (nav_light.find(msg.name)->second) {
-    case left_itb_light_inner:
+    case left_inner_light:
       leftIL_nav_light.state = res;
       break;
-    case right_itb_light_inner:
+    case right_inner_light:
       rightIL_nav_light.state = res;
       break;
-    case torso_left_itb_light_inner:
+    case torso_left_inner_light:
       torso_leftIL_nav_light.state = res;
       break;
-    case torso_right_itb_light_inner:
+    case torso_right_inner_light:
       torso_rightIL_nav_light.state = res;
       break;
-    case left_itb_light_outer:
+    case left_outer_light:
       leftOL_nav_light.state = res;
       break;
-    case right_itb_light_outer:
+    case right_outer_light:
       rightOL_nav_light.state = res;
       break;
-    case torso_left_itb_light_outer:
+    case torso_left_outer_light:
       torso_leftOL_nav_light.state = res;
       break;
-    case torso_right_itb_light_outer:
+    case torso_right_outer_light:
       torso_rightOL_nav_light.state = res;
       break;
     default:
@@ -472,10 +504,16 @@ right_gravity.actual_effort.resize(left_gravity.name.size());
   for (int i = 0; i < msg.name.size(); i++) {
     if (msg.name[i] == "head_pan") {
       if (fabs(float(head_msg.pan) - float(msg.position[i])) > threshold)
-        head_msg.isPanning = true;
+        head_msg.isTurning = true;
       else
-        head_msg.isPanning = false;
+        head_msg.isTurning = false;
       head_msg.pan = msg.position[i];
+    }
+    else if (msg.name[i] == "l_gripper_l_finger_joint") {
+        left_grip_st.position = (msg.position[i]/0.020833)*100;
+    }
+    else if (msg.name[i] == "r_gripper_l_finger_joint") {
+        right_grip_st.position = (msg.position[i]/0.020833)*100;
     }
 	else {
 	   for (int j=0;j<left_gravity.name.size();j++) {

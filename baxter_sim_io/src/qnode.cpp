@@ -41,6 +41,23 @@
 
 namespace baxter_sim_io {
 
+const std::string BAXTER_LEFTIL_TOPIC =
+        "robot/digital_io/left_inner_light/state";
+const std::string BAXTER_LEFTOL_TOPIC =
+        "robot/digital_io/left_outer_light/state";
+const std::string BAXTER_TORSO_LEFTIL_TOPIC =
+        "robot/digital_io/torso_left_inner_light/state";
+const std::string BAXTER_TORSO_LEFTOL_TOPIC =
+        "robot/digital_io/torso_left_outer_light/state";
+const std::string BAXTER_RIGHTIL_TOPIC =
+        "robot/digital_io/right_inner_light/state";
+const std::string BAXTER_RIGHTOL_TOPIC =
+        "robot/digital_io/right_outer_light/state";
+const std::string BAXTER_TORSO_RIGHTIL_TOPIC =
+        "robot/digital_io/torso_right_inner_light/state";
+const std::string BAXTER_TORSO_RIGHTOL_TOPIC =
+        "robot/digital_io/torso_right_outer_light/state";
+
 QNode::QNode(int argc, char** argv)
     : init_argc(argc),
       init_argv(argv) {
@@ -68,14 +85,15 @@ bool QNode::init() {
   }
   ros::start();  // explicitly needed since our nodehandle is going out of scope.
   ros::NodeHandle n;
-  left_itb = n.advertise<baxter_core_msgs::ITBState>(
-      "/robot/itb/left_itb/state", 1);
-  right_itb = n.advertise<baxter_core_msgs::ITBState>(
-      "/robot/itb/right_itb/state", 1);
-  torso_left_itb = n.advertise<baxter_core_msgs::ITBState>(
-      "/robot/itb/torso_left_itb/state", 1);
-  torso_right_itb = n.advertise<baxter_core_msgs::ITBState>(
-      "/robot/itb/torso_right_itb/state", 1);
+
+  left_navigator = n.advertise<baxter_core_msgs::NavigatorState>(
+      "/robot/navigators/left_navigator/state", 1);
+  right_navigator = n.advertise<baxter_core_msgs::NavigatorState>(
+      "/robot/navigators/right_navigator/state", 1);
+  torso_left_navigator = n.advertise<baxter_core_msgs::NavigatorState>(
+      "/robot/navigators/torso_left_navigator/state", 1);
+  torso_right_navigator = n.advertise<baxter_core_msgs::NavigatorState>(
+      "/robot/navigators/torso_right_navigator/state", 1);
 
   left_lower_cuff = n.advertise<baxter_core_msgs::DigitalIOState>(
       "/robot/digital_io/left_lower_cuff/state", 1);
@@ -95,22 +113,55 @@ bool QNode::init() {
       "/robot/digital_io/left_shoulder_button/state", 1);
   right_shoulder_button = n.advertise<baxter_core_msgs::DigitalIOState>(
       "/robot/digital_io/right_shoulder_button/state", 1);
-  QNode::left_arm_nav.buttons[0] = false;
-  QNode::left_arm_nav.buttons[1] = false;
-  QNode::left_arm_nav.buttons[2] = false;
-  QNode::right_arm_nav.buttons[0] = false;
-  QNode::right_arm_nav.buttons[1] = false;
-  QNode::right_arm_nav.buttons[2] = false;
-  QNode::left_shoulder_nav.buttons[0] = false;
-  QNode::left_shoulder_nav.buttons[1] = false;
-  QNode::left_shoulder_nav.buttons[2] = false;
-  QNode::right_shoulder_nav.buttons[0] = false;
-  QNode::right_shoulder_nav.buttons[1] = false;
-  QNode::right_shoulder_nav.buttons[2] = false;
+
+  QNode::left_arm_nav.button_names.push_back("ok");
+  QNode::left_arm_nav.button_names.push_back("back");
+  QNode::left_arm_nav.button_names.push_back("show");
+  QNode::left_arm_nav.buttons.push_back(false);
+  QNode::left_arm_nav.buttons.push_back(false);
+  QNode::left_arm_nav.buttons.push_back(false);
+  QNode::left_arm_nav.light_names.push_back("inner");
+  QNode::left_arm_nav.light_names.push_back("outer");
+  QNode::left_arm_nav.lights.push_back(false);
+  QNode::left_arm_nav.lights.push_back(false);
   QNode::left_arm_nav.wheel = 0;
+
+  QNode::right_arm_nav.button_names.push_back("ok");
+  QNode::right_arm_nav.button_names.push_back("back");
+  QNode::right_arm_nav.button_names.push_back("show");
+  QNode::right_arm_nav.buttons.push_back(false);
+  QNode::right_arm_nav.buttons.push_back(false);
+  QNode::right_arm_nav.buttons.push_back(false);
+  QNode::right_arm_nav.light_names.push_back("inner");
+  QNode::right_arm_nav.light_names.push_back("outer");
+  QNode::right_arm_nav.lights.push_back(false);
+  QNode::right_arm_nav.lights.push_back(false);
   QNode::right_arm_nav.wheel = 0;
+
+  QNode::left_shoulder_nav.button_names.push_back("ok");
+  QNode::left_shoulder_nav.button_names.push_back("back");
+  QNode::left_shoulder_nav.button_names.push_back("show");
+  QNode::left_shoulder_nav.buttons.push_back(false);
+  QNode::left_shoulder_nav.buttons.push_back(false);
+  QNode::left_shoulder_nav.buttons.push_back(false);
+  QNode::left_shoulder_nav.light_names.push_back("inner");
+  QNode::left_shoulder_nav.light_names.push_back("outer");
+  QNode::left_shoulder_nav.lights.push_back(false);
+  QNode::left_shoulder_nav.lights.push_back(false);
   QNode::left_shoulder_nav.wheel = 0;
+
+  QNode::right_shoulder_nav.button_names.push_back("ok");
+  QNode::right_shoulder_nav.button_names.push_back("back");
+  QNode::right_shoulder_nav.button_names.push_back("show");
+  QNode::right_shoulder_nav.buttons.push_back(false);
+  QNode::right_shoulder_nav.buttons.push_back(false);
+  QNode::right_shoulder_nav.buttons.push_back(false);
+  QNode::right_shoulder_nav.light_names.push_back("inner");
+  QNode::right_shoulder_nav.light_names.push_back("outer");
+  QNode::right_shoulder_nav.lights.push_back(false);
+  QNode::right_shoulder_nav.lights.push_back(false);
   QNode::right_shoulder_nav.wheel = 0;
+
   QNode::left_cuff_squeeze.state = baxter_core_msgs::DigitalIOState::UNPRESSED;
   QNode::left_cuff_squeeze.isInputOnly = true;
   QNode::right_cuff_squeeze.state = baxter_core_msgs::DigitalIOState::UNPRESSED;
@@ -127,18 +178,60 @@ bool QNode::init() {
   QNode::left_shoulder.isInputOnly = true;
   QNode::right_shoulder.state = baxter_core_msgs::DigitalIOState::UNPRESSED;
   QNode::right_shoulder.isInputOnly = true;
+
+  left_inner_light_sub = n.subscribe(BAXTER_LEFTIL_TOPIC, 100,
+                           &QNode::left_inner_light_sub_cb, this);
+  left_outer_light_sub = n.subscribe(BAXTER_LEFTOL_TOPIC, 100,
+                           &QNode::left_outer_light_sub_cb, this);
+  right_inner_light_sub = n.subscribe(BAXTER_RIGHTIL_TOPIC, 100,
+                           &QNode::right_inner_light_sub_cb, this);
+  right_outer_light_sub = n.subscribe(BAXTER_RIGHTOL_TOPIC, 100,
+                           &QNode::right_outer_light_sub_cb, this);
+  torso_left_inner_light_sub = n.subscribe(BAXTER_TORSO_LEFTIL_TOPIC, 100,
+                           &QNode::torso_left_inner_light_sub_cb, this);
+  torso_left_outer_light_sub = n.subscribe(BAXTER_TORSO_LEFTOL_TOPIC, 100,
+                           &QNode::torso_left_outer_light_sub_cb, this);
+  torso_right_inner_light_sub = n.subscribe(BAXTER_TORSO_RIGHTIL_TOPIC, 100,
+                           &QNode::torso_right_inner_light_sub_cb, this);
+  torso_right_outer_light_sub = n.subscribe(BAXTER_TORSO_RIGHTOL_TOPIC, 100,
+                           &QNode::torso_right_outer_light_sub_cb, this);
   start();
   return true;
+}
+
+void QNode::left_inner_light_sub_cb(const baxter_core_msgs::DigitalIOState &msg){
+    QNode::left_arm_nav.lights[0] = bool(msg.state);
+}
+void QNode::left_outer_light_sub_cb(const baxter_core_msgs::DigitalIOState &msg){
+    QNode::left_arm_nav.lights[1] = bool(msg.state);
+}
+void QNode::right_inner_light_sub_cb(const baxter_core_msgs::DigitalIOState &msg){
+    QNode::right_arm_nav.lights[0] = bool(msg.state);
+}
+void QNode::right_outer_light_sub_cb(const baxter_core_msgs::DigitalIOState &msg){
+    QNode::right_arm_nav.lights[1] = bool(msg.state);
+}
+void QNode::torso_left_inner_light_sub_cb(const baxter_core_msgs::DigitalIOState &msg){
+    QNode::left_shoulder_nav.lights[0] = bool(msg.state);
+}
+void QNode::torso_left_outer_light_sub_cb(const baxter_core_msgs::DigitalIOState &msg){
+    QNode::left_shoulder_nav.lights[1] = bool(msg.state);
+}
+void QNode::torso_right_inner_light_sub_cb(const baxter_core_msgs::DigitalIOState &msg){
+    QNode::right_shoulder_nav.lights[0] = bool(msg.state);
+}
+void QNode::torso_right_outer_light_sub_cb(const baxter_core_msgs::DigitalIOState &msg){
+    QNode::right_shoulder_nav.lights[1] = bool(msg.state);
 }
 
 void QNode::run() {
   ros::Rate loop_rate(100);
   while (ros::ok()) {
 
-    left_itb.publish(QNode::left_arm_nav);
-    right_itb.publish(QNode::right_arm_nav);
-    torso_left_itb.publish(QNode::left_shoulder_nav);
-    torso_right_itb.publish(QNode::right_shoulder_nav);
+    left_navigator.publish(QNode::left_arm_nav);
+    right_navigator.publish(QNode::right_arm_nav);
+    torso_left_navigator.publish(QNode::left_shoulder_nav);
+    torso_right_navigator.publish(QNode::right_shoulder_nav);
 
     left_lower_cuff.publish(QNode::left_cuff_squeeze);
     right_lower_cuff.publish(QNode::right_cuff_squeeze);
