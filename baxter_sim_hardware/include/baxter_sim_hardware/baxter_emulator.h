@@ -101,9 +101,10 @@ class baxter_emulator {
   ros::Publisher left_ir_pub, right_ir_pub, left_ir_int_pub, right_ir_int_pub,
       left_ir_state_pub, right_ir_state_pub;
   // Navigator publishers
-  ros::Publisher left_itb_innerL_pub, right_itb_innerL_pub,
-      torso_left_innerL_pub, torso_right_innerL_pub, left_itb_outerL_pub,
-      right_itb_outerL_pub, torso_left_outerL_pub, torso_right_outerL_pub;
+  ros::Publisher left_inner_light_pub, right_inner_light_pub,
+                 left_outer_light_pub, right_outer_light_pub,
+                 torso_left_inner_light_pub, torso_right_inner_light_pub,
+                 torso_left_outer_light_pub, torso_right_outer_light_pub;
   // General state publishers
   ros::Publisher assembly_state_pub, head_pub;
   // Gravity Publishers

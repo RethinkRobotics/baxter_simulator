@@ -60,7 +60,7 @@ int main(int argc, char **argv) {
 	return result;
 }
 
-    baxter_core_msgs::ITBState baxter_sim_io::QNode::left_arm_nav, baxter_sim_io::QNode::right_arm_nav,
+    baxter_core_msgs::NavigatorState baxter_sim_io::QNode::left_arm_nav, baxter_sim_io::QNode::right_arm_nav,
 	baxter_sim_io::QNode::left_shoulder_nav, baxter_sim_io::QNode::right_shoulder_nav;
 
     baxter_core_msgs::DigitalIOState baxter_sim_io::QNode::left_cuff_squeeze,
