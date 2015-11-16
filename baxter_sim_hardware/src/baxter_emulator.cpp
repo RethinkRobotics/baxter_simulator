@@ -212,7 +212,7 @@ bool baxter_emulator::init() {
   torso_rightOL_nav_light.state = baxter_core_msgs::DigitalIOState::OFF;
 
   head_msg.pan = 0;
-  head_msg.isPanning = false;
+  head_msg.isTurning = false;
   head_msg.isNodding = false;
 
   isStopped = false;
@@ -504,9 +504,9 @@ right_gravity.actual_effort.resize(left_gravity.name.size());
   for (int i = 0; i < msg.name.size(); i++) {
     if (msg.name[i] == "head_pan") {
       if (fabs(float(head_msg.pan) - float(msg.position[i])) > threshold)
-        head_msg.isPanning = true;
+        head_msg.isTurning = true;
       else
-        head_msg.isPanning = false;
+        head_msg.isTurning = false;
       head_msg.pan = msg.position[i];
     }
     else if (msg.name[i] == "l_gripper_l_finger_joint") {
