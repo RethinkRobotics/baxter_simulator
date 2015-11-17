@@ -1,16 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <launch>
 
+  <arg name="left_electric_gripper" default="true"/>
+  <arg name="right_electric_gripper" default="true"/>
+
   <!-- baxter_sim_kinematics launch file to do the Forward/Inverse Kinematics -->
   <include file="$(find baxter_sim_kinematics)/launch/baxter_sim_kinematics.launch" />
 
   <!-- Load joint controller configurations from YAML file to parameter server -->
   <rosparam file="$(find baxter_sim_hardware)/config/baxter_sim_controllers.yaml" command="load"/>
+  <rosparam if="$(arg left_electric_gripper)" file="$(find baxter_sim_hardware)/config/baxter_left_electric_gripper_controller.yaml" command="load"/>
+  <rosparam if="$(arg right_electric_gripper)" file="$(find baxter_sim_hardware)/config/baxter_right_electric_gripper_controller.yaml" command="load"/>
 
   <!-- load the baxter_sim_hardware node -->
   <node name="baxter_emulator" pkg="baxter_sim_hardware" type="baxter_emulator" respawn="false"
-	output="screen" args="$(find baxter_sim_hardware)/images/researchsdk.png"/>
-
+	output="screen" args="$(find baxter_sim_hardware)/images/researchsdk.png">
+    <param if="$(arg left_electric_gripper)" name="left_gripper_type" value="ELECTRIC_GRIPPER" />
+    <param if="$(arg right_electric_gripper)" name="right_gripper_type" value="ELECTRIC_GRIPPER" />
+  </node>
   <!-- load the default controllers -->
   <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
         output="screen" ns="/robot" args="--shutdown-timeout -1 joint_state_controller" />
@@ -24,8 +31,13 @@
 					   left_joint_velocity_controller
 					   right_joint_velocity_controller
 					   left_joint_effort_controller
-					   right_joint_effort_controller
-					   " />  
+					   right_joint_effort_controller"/>
+
+    <node if="$(arg left_electric_gripper)" name="left_gripper_controller_spawner_stopped" pkg="controller_manager" type="spawner" respawn="false"
+        output="screen" ns="/robot" args="--shutdown-timeout -1 --stopped left_gripper_controller"/>
+
+    <node if="$(arg right_electric_gripper)" name="right_gripper_controller_spawner_stopped" pkg="controller_manager" type="spawner" respawn="false"
+        output="screen" ns="/robot" args="--shutdown-timeout -1 --stopped right_gripper_controller"/>
 
   <!-- convert joint states to TF transforms -->
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"

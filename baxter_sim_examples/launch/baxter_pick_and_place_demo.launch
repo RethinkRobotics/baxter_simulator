@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+
+  <!-- these are the arguments you can pass this launch file, for example paused:=true -->
+  <arg name="paused" default="false"/>
+  <arg name="use_sim_time" default="true"/>
+  <arg name="gui" default="true"/>
+  <arg name="headless" default="false"/>
+  <arg name="debug" default="false"/>
+
+  <!-- We resume the logic in empty_world.launch, changing the name of the world to be launched -->
+  <include file="$(find baxter_gazebo)/launch/baxter_world.launch">
+    <arg name="debug" value="$(arg debug)" />
+    <arg name="gui" value="$(arg gui)" />
+    <arg name="paused" value="$(arg paused)"/>
+    <arg name="use_sim_time" value="$(arg use_sim_time)"/>
+    <arg name="headless" value="$(arg headless)"/>
+    <arg name="left_electric_gripper" value="true"/>
+    <arg name="right_electric_gripper" value="true"/>
+  </include>
+
+  <!-- Spawn Object for Baxter to interact with -->
+  <node pkg="gazebo_ros" type="spawn_model" name="table_spawner" 
+        args="-file $(find baxter_sim_examples)/models/cafe_table/model.sdf -sdf -x 1.0 -model cafe_table" />
+  <node pkg="gazebo_ros" type="spawn_model" name="block_spawner" 
+        args="-file $(find baxter_sim_examples)/models/block/model.urdf -urdf -x 0.7 -z 0.8025 -y 0.150 -model block" />
+
+</launch>

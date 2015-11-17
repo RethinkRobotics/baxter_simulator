@@ -158,7 +158,7 @@ bool baxter_emulator::init() {
   left_grip_prop.senses_position = true;
   left_grip_prop.properties = "";
   std::string gripper_type;
-  ros::param::param<std::string>("~left_gripper_type", gripper_type, "CUSTOM_GRIPPER");
+  ros::param::param<std::string>("~left_gripper_type", gripper_type, "PASSIVE_GRIPPER");
   if (gripper_type == "SUCTION_CUP_GRIPPER" ) {
       left_grip_prop.id = 65537;
       left_grip_prop.ui_type = 1;
@@ -176,7 +176,7 @@ bool baxter_emulator::init() {
   right_grip_prop.hardware_rev = "";
   right_grip_prop.firmware_rev = "";
   right_grip_prop.firmware_date = "";
-  ros::param::param<std::string>("~right_gripper_type", gripper_type, "CUSTOM_GRIPPER");
+  ros::param::param<std::string>("~right_gripper_type", gripper_type, "PASSIVE_GRIPPER");
   if (gripper_type == "SUCTION_CUP_GRIPPER" ) {
       right_grip_prop.id = 65537;
       right_grip_prop.ui_type = 1;
