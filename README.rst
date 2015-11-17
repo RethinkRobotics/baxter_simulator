@@ -33,6 +33,12 @@ baxter_simulator Repository Overview
      |   +-- include/
      |   +-- config/
      |
+     +-- baxter_sim_examples/     Examples specific to Baxter in Simulation
+     |   +-- scripts/             (use baxter_examples for examples that will work both in
+     |   +-- include/              simulation AND the real Baxter robot)
+     |   +-- launch/
+     |   +-- models/
+     |
      +-- baxter_sim_hardware/     This emulates the hardware interfaces of Baxter 
      |   +-- src/
      |   +-- include/
