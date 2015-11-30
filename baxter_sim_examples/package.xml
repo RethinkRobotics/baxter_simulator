@@ -21,18 +21,22 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <build_depend>rospy</build_depend>
+  <build_depend>rospack</build_depend>
   <build_depend>baxter_core_msgs</build_depend>
   <build_depend>baxter_gazebo</build_depend>
   <build_depend>baxter_interface</build_depend>
   <build_depend>baxter_tools</build_depend>
   <build_depend>gazebo_ros</build_depend>
+  <build_depend>gazebo_msgs</build_depend>
 
   <run_depend>rospy</run_depend>
+  <run_depend>rospack</run_depend>
   <run_depend>baxter_core_msgs</run_depend>
   <run_depend>baxter_gazebo</run_depend>
   <run_depend>baxter_interface</run_depend>
   <run_depend>baxter_tools</run_depend>
   <run_depend>gazebo_ros</run_depend>
+  <run_depend>gazebo_msgs</run_depend>
  
   <export>
     <gazebo_ros gazebo_model_path="${prefix}/models"/>

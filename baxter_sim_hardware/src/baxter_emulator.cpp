@@ -93,6 +93,8 @@ const std::string BAXTER_HEAD_NOD_CMD_TOPIC =
 const std::string BAXTER_LEFT_GRAVITY_TOPIC = "robot/limb/left/gravity_compensation_torques";
 const std::string BAXTER_RIGHT_GRAVITY_TOPIC = "robot/limb/right/gravity_compensation_torques";
 
+const std::string BAXTER_SIM_STARTED = "robot/sim/started";
+
 const int IMG_LOAD_ON_STARTUP_DELAY = 35;  // Timeout for publishing a single RSDK image on start up
 
 enum nav_light_enum {
@@ -274,6 +276,9 @@ bool baxter_emulator::init() {
 
   head_pub = n.advertise<baxter_core_msgs::HeadState>(BAXTER_HEAD_STATE_TOPIC,
                                                       1);
+  // Latched Simulator Started Publisher
+  sim_started_pub = n.advertise<std_msgs::Empty>(BAXTER_SIM_STARTED, 1, true);
+
 
   // Initialize the subscribers
   enable_sub = n.subscribe(BAXTER_ENABLE_TOPIC, 100,
@@ -323,6 +328,8 @@ void baxter_emulator::publish(const std::string &img_path) {
     ROS_WARN("Unable to load the Startup picture on Baxter's display screen %s",e.what());
   }
   ROS_INFO("Simulator is loaded and started successfully");
+  std_msgs::Empty started_msg;
+  sim_started_pub.publish(started_msg);
   while (ros::ok()) {
     assembly_state_pub.publish(assembly_state);
     left_grip_st_pub.publish(left_grip_st);

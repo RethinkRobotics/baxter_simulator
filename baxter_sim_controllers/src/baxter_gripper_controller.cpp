@@ -167,7 +167,7 @@ void BaxterGripperController::updateCommands() {
   const baxter_core_msgs::EndEffectorCommand &command = *(gripper_command_buffer
       .readFromRT());
 
-  ROS_INFO_STREAM("update commands " << command.command << " " << command.args);
+  ROS_DEBUG_STREAM("Gripper update commands " << command.command << " " << command.args);
   if ( command.command != baxter_core_msgs::EndEffectorCommand::CMD_GO)
       return;
 
@@ -187,7 +187,7 @@ void BaxterGripperController::updateCommands() {
       (gripper_controllers[main_idx_]->joint_urdf_->limits->upper - gripper_controllers[main_idx_]->joint_urdf_->limits->lower);
   }
   // Update the individual joint controllers
-  ROS_INFO_STREAM(gripper_controllers[main_idx_]->joint_urdf_->name << "->setCommand(" << cmd_position << ")");
+  ROS_DEBUG_STREAM(gripper_controllers[main_idx_]->joint_urdf_->name << "->setCommand(" << cmd_position << ")");
   gripper_controllers[main_idx_]->setCommand(cmd_position);
   gripper_controllers[mimic_idx_]->setCommand(gripper_controllers[mimic_idx_]->joint_urdf_->mimic->multiplier*cmd_position+gripper_controllers[mimic_idx_]->joint_urdf_->mimic->offset);
 }
