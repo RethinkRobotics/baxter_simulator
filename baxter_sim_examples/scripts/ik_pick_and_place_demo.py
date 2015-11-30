@@ -48,7 +48,10 @@ from geometry_msgs.msg import (
     Point,
     Quaternion,
 )
-from std_msgs.msg import Header
+from std_msgs.msg import (
+    Header,
+    Empty,
+)
 
 from baxter_core_msgs.srv import (
     SolvePositionIK,
@@ -201,7 +204,7 @@ def load_gazebo_models():
         print "Spawn URDF service call failed: %s"%e
 
 def delete_gazebo_models():
-    # This will be called on ROS Exit, for deleting Gazebo models
+    # This will be called on ROS Exit, deleting Gazebo models
     # Do not wait for the service, as Gazebo should be running
     # if it is not running, it is fine to error out
     try:
@@ -226,11 +229,14 @@ def main():
     the loop.
     """
     rospy.init_node("ik_pick_and_place_demo")
-    #rospy.sleep(30)
     # Load Gazebo Models via Spawning Services
     load_gazebo_models()
     # Remove models from the scene on shutdown
     rospy.on_shutdown(delete_gazebo_models)
+
+    # Wait for the All Clear for emulator starting
+    rospy.wait_for_message("/robot/sim/started", Empty)
+
     limb = 'left'
     hover_distance = 0.15 # meters
     # Starting Joint angles for left arm
