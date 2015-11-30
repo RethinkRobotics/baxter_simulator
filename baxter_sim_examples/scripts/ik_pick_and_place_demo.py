@@ -36,7 +36,12 @@ import sys
 import copy
 
 import rospy
+import rospkg
 
+from gazebo_msgs.srv import (
+    SpawnModel,
+    DeleteModel,
+)
 from geometry_msgs.msg import (
     PoseStamped,
     Pose,
@@ -167,6 +172,45 @@ class PickAndPlace(object):
         # retract to clear object
         self._retract()
 
+def load_gazebo_models():
+    # Get Models' Path
+    model_path = rospkg.RosPack().get_path('baxter_sim_examples')+"/models/"
+    # Load Table SDF
+    table_xml = ''
+    with open (model_path + "cafe_table/model.sdf", "r") as table_file:
+      table_xml=table_file.read().replace('\n', '')
+    # Load Block URDF
+    block_xml = ''
+    with open (model_path + "block/model.urdf", "r") as block_file:
+      block_xml=block_file.read().replace('\n', '')
+    # Spawn Table SDF
+    rospy.wait_for_service('/gazebo/spawn_sdf_model')
+    try:
+        spawn_sdf = rospy.ServiceProxy('/gazebo/spawn_sdf_model', SpawnModel)
+        table_pose = Pose(position=Point(x = 1.0, y = 0.0, z = 0.0))
+        resp_sdf = spawn_sdf("cafe_table", table_xml, "/", table_pose, "world")
+    except rospy.ServiceException, e:
+        print "Spawn SDF service call failed: %s"%e
+    # Spawn Block URDF
+    rospy.wait_for_service('/gazebo/spawn_urdf_model')
+    try:
+        spawn_urdf = rospy.ServiceProxy('/gazebo/spawn_urdf_model', SpawnModel)
+        block_pose = Pose(position=Point(x = 0.7, y = 0.150, z = 0.8035))
+        resp_urdf = spawn_urdf("block", block_xml, "/", block_pose, "world")
+    except rospy.ServiceException, e:
+        print "Spawn URDF service call failed: %s"%e
+
+def delete_gazebo_models():
+    # This will be called on ROS Exit, for deleting Gazebo models
+    # Do not wait for the service, as Gazebo should be running
+    # if it is not running, it is fine to error out
+    try:
+        delete_model = rospy.ServiceProxy('/gazebo/delete_model', DeleteModel)
+        resp_delete = delete_model("cafe_table")
+        resp_delete = delete_model("block")
+    except rospy.ServiceException, e:
+        print "Delete Model service call failed: %s"%e
+
 def main():
     """RSDK Inverse Kinematics Pick and Place Example
 
@@ -182,6 +226,11 @@ def main():
     the loop.
     """
     rospy.init_node("ik_pick_and_place_demo")
+    #rospy.sleep(30)
+    # Load Gazebo Models via Spawning Services
+    load_gazebo_models()
+    # Remove models from the scene on shutdown
+    rospy.on_shutdown(delete_gazebo_models)
     limb = 'left'
     hover_distance = 0.15 # meters
     # Starting Joint angles for left arm
@@ -204,12 +253,12 @@ def main():
     # You may wish to replace these poses with estimates
     # from a perception node.
     block_poses.append(Pose(
-        position=Point(x=0.7, y=0.15, z=-0.125),
+        position=Point(x=0.7, y=0.15, z=-0.127),
         orientation=overhead_orientation))
     # Feel free to add additional desired poses for the object.
     # Each additional pose will get its own pick and place.
     block_poses.append(Pose(
-        position=Point(x=0.75, y=0.0, z=-0.125),
+        position=Point(x=0.75, y=0.0, z=-0.127),
         orientation=overhead_orientation))
     # Move to the desired starting angles
     pnp.move_to_start(starting_joint_angles)
