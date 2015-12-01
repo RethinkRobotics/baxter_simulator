@@ -106,7 +106,7 @@ class PickAndPlace(object):
                         ikreq.SEED_NS_MAP: 'Nullspace Setpoints',
                        }.get(resp_seeds[0], 'None')
             if self._verbose:
-                print("SUCCESS - Valid Joint Solution Found from Seed Type: {0}".format(
+                print("IK Solution SUCCESS - Valid Joint Solution Found from Seed Type: {0}".format(
                          (seed_str)))
             # Format solution into Limb API-compatible dictionary
             limb_joints = dict(zip(resp.joints[0].name, resp.joints[0].position))
@@ -177,8 +177,8 @@ class PickAndPlace(object):
 
 def load_gazebo_models(table_pose=Pose(position=Point(x=1.0, y=0.0, z=0.0)),
                        table_reference_frame="world",
-                       block_pose=Pose(position=Point(x=0.7, y=0.15, z=-0.127)),
-                       block_reference_frame="base"):
+                       block_pose=Pose(position=Point(x=0.6725, y=0.1265, z=0.7825)),
+                       block_reference_frame="world"):
     # Get Models' Path
     model_path = rospkg.RosPack().get_path('baxter_sim_examples')+"/models/"
     # Load Table SDF
@@ -234,8 +234,9 @@ def main():
     """
     rospy.init_node("ik_pick_and_place_demo")
     # Load Gazebo Models via Spawning Services
-    block_starting_point = Point(x=0.7, y=0.15, z=-0.129)
-    load_gazebo_models(block_pose=Pose(position=block_starting_point))
+    # Note that the models reference is the /world frame
+    # and the IK operates with respect to the /base frame
+    load_gazebo_models()
     # Remove models from the scene on shutdown
     rospy.on_shutdown(delete_gazebo_models)
 
@@ -264,7 +265,7 @@ def main():
     # You may wish to replace these poses with estimates
     # from a perception node.
     block_poses.append(Pose(
-        position=block_starting_point,
+        position=Point(x=0.7, y=0.15, z=-0.129),
         orientation=overhead_orientation))
     # Feel free to add additional desired poses for the object.
     # Each additional pose will get its own pick and place.
