@@ -8,7 +8,7 @@ robot:
     joints:
           l_gripper_l_finger_controller:
             joint: l_gripper_l_finger_joint
-            pid: {p: 30.0, i: 0.01, d: 5.0}
+            pid: {p: 1000,  i: 0.1, d: 0.01}
           l_gripper_r_finger_controller:
             joint: l_gripper_r_finger_joint
-            pid: {p: 30.0, i: 0.01, d: 5.0}
+            pid: {p: 1000,  i: 0.1, d: 0.01}
