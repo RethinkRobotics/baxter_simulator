@@ -81,7 +81,7 @@ class PickAndPlace(object):
         print("Moving the {0} arm to start pose...".format(self._limb_name))
         if not start_angles:
             start_angles = dict(zip(self._joint_names, [0]*7))
-        self._limb.move_to_joint_positions(start_angles)
+        self._guarded_move_to_joint_position(start_angles)
         self.gripper_open()
         rospy.sleep(1.0)
         print("Running. Ctrl-c to quit")
@@ -118,6 +118,12 @@ class PickAndPlace(object):
             return False
         return limb_joints
 
+    def _guarded_move_to_joint_position(self, joint_angles):
+        if joint_angles:
+            self._limb.move_to_joint_positions(joint_angles)
+        else:
+            rospy.logerr("No Joint Angles provided for move_to_joint_positions. Staying put.")
+
     def gripper_open(self):
         self._gripper.open()
         rospy.sleep(1.0)
@@ -131,7 +137,7 @@ class PickAndPlace(object):
         # approach with a pose the hover-distance above the requested pose
         approach.position.z = approach.position.z + self._hover_distance
         joint_angles = self.ik_request(approach)
-        self._limb.move_to_joint_positions(joint_angles)
+        self._guarded_move_to_joint_position(joint_angles)
 
     def _retract(self):
         # retrieve current pose from endpoint
@@ -146,12 +152,12 @@ class PickAndPlace(object):
         ik_pose.orientation.w = current_pose['orientation'].w
         joint_angles = self.ik_request(ik_pose)
         # servo up from current pose
-        self._limb.move_to_joint_positions(joint_angles)
+        self._guarded_move_to_joint_position(joint_angles)
 
     def _servo_to_pose(self, pose):
         # servo down to release
         joint_angles = self.ik_request(pose)
-        self._limb.move_to_joint_positions(joint_angles)
+        self._guarded_move_to_joint_position(joint_angles)
 
     def pick(self, pose):
         # open the gripper

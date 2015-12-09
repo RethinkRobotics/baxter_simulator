@@ -19,7 +19,7 @@
     </collision>
   </link>
   <gazebo reference="block">
-    <material>Gazebo/Blue</material>
+    <material>Gazebo/Red</material>
      <mu1>1000</mu1>
      <mu2>1000</mu2>
   </gazebo>
