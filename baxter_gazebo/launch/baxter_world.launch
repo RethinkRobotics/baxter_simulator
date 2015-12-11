@@ -13,9 +13,12 @@
   <arg name="right_electric_gripper" default="true"/>
 
   <!-- Load the URDF into the ROS Parameter Server -->
-  <!-- This xacro will pull in baxter.urdf, left_end_effector.urdf.xacro,
-                                           and right_end_effector.urdf.xacro -->
-  <param name="robot_description"
+  <!-- This xacro will pull in baxter_base.urdf.xacro, left_end_effector.urdf.xacro,
+                                           and right_end_effector.urdf.xacro
+       Note: if you set this to false, you MUST have set the robot_description prior
+             to launching baxter_world -->
+  <arg name="load_robot_description" default="true"/>
+  <param if="$(arg load_robot_description)" name="robot_description"
       command="$(find xacro)/xacro.py --inorder $(find baxter_description)/urdf/baxter.urdf.xacro gazebo:=true"/>
 
   <!-- We resume the logic in empty_world.launch, changing the name of the world to be launched -->
