@@ -142,7 +142,8 @@ class position_kinematics {
   ros::Publisher end_pointstate_pub;
   sensor_msgs::JointState joint;
   ros::NodeHandle handle;
-  std::string left_tip_name, right_tip_name;
+  std::string tip_name;
+  std::vector<std::string> joint_names;
   int no_jts;
 
 };
