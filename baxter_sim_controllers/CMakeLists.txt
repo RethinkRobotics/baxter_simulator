@@ -31,6 +31,7 @@ add_library(${PROJECT_NAME}
   src/baxter_velocity_controller.cpp
   src/baxter_effort_controller.cpp
   src/baxter_head_controller.cpp
+  src/baxter_gripper_controller.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -43,3 +44,12 @@ add_dependencies(${PROJECT_NAME}
   baxter_core_msgs_gencpp
 )
 
+install(
+  TARGETS ${PROJECT_NAME}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+)
+
+install(
+  DIRECTORY config include
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)

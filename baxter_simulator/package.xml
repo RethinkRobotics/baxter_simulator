@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>baxter_simulator</name>
-  <version>0.9.1</version>
+  <version>1.2.0</version>
   <description>
     Metapackage - Baxter Research Robot Gazebo Simulation
   </description>
@@ -20,6 +20,11 @@
   <author>Rethink Robotics Inc.</author>
 
   <buildtool_depend>catkin</buildtool_depend>
+  <run_depend>baxter_gazebo</run_depend>
+  <run_depend>baxter_sim_controllers</run_depend>
+  <run_depend>baxter_sim_hardware</run_depend>
+  <run_depend>baxter_sim_io</run_depend>
+  <run_depend>baxter_sim_kinematics</run_depend>
 
   <export>
     <metapackage/>

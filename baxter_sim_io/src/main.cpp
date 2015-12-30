@@ -34,24 +34,36 @@
 #include <QApplication>
 #include <baxter_sim_io/baxter_io.hpp>
 #include <baxter_sim_io/qnode.hpp>
+#include <signal.h>
+#include <sys/types.h>
 
-
+void signalhandler(int sig) {
+  if (sig == SIGINT) {
+    qApp->quit();
+  }
+  else if (sig == SIGTERM) {
+    qApp->quit();
+  }
+}
 
 int main(int argc, char **argv) {
 
     QApplication app(argc, argv);
     baxter_sim_io::BaxterIO w(argc,argv);
+    //Register Signal handler for ctrl+c
+    signal(SIGINT,signalhandler);
+    signal(SIGTERM,signalhandler);
     w.show();
     app.connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
-    int result = app.exec();
 
+    int result = app.exec();
 	return result;
 }
 
-    baxter_core_msgs::ITBState baxter_sim_io::QNode::left_arm_nav, baxter_sim_io::QNode::right_arm_nav,
+    baxter_core_msgs::NavigatorState baxter_sim_io::QNode::left_arm_nav, baxter_sim_io::QNode::right_arm_nav,
 	baxter_sim_io::QNode::left_shoulder_nav, baxter_sim_io::QNode::right_shoulder_nav;
 
-    baxter_core_msgs::DigitalIOState baxter_sim_io::QNode::left_cuff_squeeze, 
+    baxter_core_msgs::DigitalIOState baxter_sim_io::QNode::left_cuff_squeeze,
 	baxter_sim_io::QNode::right_cuff_squeeze, baxter_sim_io::QNode::left_cuff_ok,
 	baxter_sim_io::QNode::right_cuff_ok, baxter_sim_io::QNode::left_cuff_grasp,
 	baxter_sim_io::QNode::right_cuff_grasp, baxter_sim_io::QNode::left_shoulder,

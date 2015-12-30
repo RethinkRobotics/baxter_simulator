@@ -30,7 +30,7 @@ include_directories(include
   ${catkin_INCLUDE_DIRS}
   ${EIGEN_INCLUDE_DIRS}
 )
- 
+
 add_library(${PROJECT_NAME} src/arm_kinematics.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
@@ -42,3 +42,13 @@ add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
   ${catkin_EXPORTED_TARGETS}
   baxter_core_msgs_gencpp
  )
+
+ install(
+  TARGETS ${PROJECT_NAME}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+)
+
+install(
+  DIRECTORY include launch
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)

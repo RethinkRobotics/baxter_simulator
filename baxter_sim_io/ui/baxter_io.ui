@@ -167,7 +167,6 @@
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">der: none;</string>
     </property>
     <property name="text">
      <string/>
@@ -720,4 +719,3 @@ border: none;</string>
  <resources/>
  <connections/>
 </ui>
-

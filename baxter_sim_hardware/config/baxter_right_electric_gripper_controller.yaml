@@ -1,0 +1,14 @@
+robot:
+
+  # Baxter SDK Controllers: Gripper --------------------------
+  right_gripper_controller:
+    type: baxter_sim_controllers/BaxterGripperController
+    topic: /robot/end_effector/right_gripper/command
+    properties: /robot/end_effector/right_gripper/properties
+    joints:
+          r_gripper_l_finger_controller:
+            joint: r_gripper_l_finger_joint
+            pid: {p: 1000,  i: 0.1, d: 0.01}
+          r_gripper_r_finger_controller:
+            joint: r_gripper_r_finger_joint
+            pid: {p: 1000,  i: 0.1, d: 0.01}

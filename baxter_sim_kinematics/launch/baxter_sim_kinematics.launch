@@ -2,14 +2,29 @@
 <launch>
 
   <!-- Load the URDF into the ROS Parameter Server -->
-  <param name="urdf"
-	 command="cat '$(find baxter_description)/urdf/baxter.urdf'" />
+  <arg name="load_robot_description" default="false"/>
+  <arg name="right_electric_gripper" default="false"/>
+  <arg name="left_electric_gripper" default="false"/>
+
+  <!-- Load universal robotic description format (URDF) -->
+  <param if="$(arg load_robot_description)" name="robot_description"
+      command="$(find xacro)/xacro.py --inorder $(find baxter_description)/urdf/baxter.urdf.xacro
+          right_electric_gripper:=$(arg right_electric_gripper)
+          left_electric_gripper:=$(arg left_electric_gripper)"/>
+
   <param name="root_name" value="base" />
   <param name="grav_right_name" value="right_gripper" />
   <param name="grav_left_name" value="left_gripper" />
   <!-- load left and right tip name -->
   <param name="right_tip_name" value="right_gripper" />
   <param name="left_tip_name" value="left_gripper" />
+  <!-- load left and right joint names -->
+  <rosparam param="robot_config/right_config/joint_names">
+         [right_s0, right_s1, right_e0, right_e1, right_w0, right_w1, right_w2]
+  </rosparam>
+  <rosparam param="robot_config/left_config/joint_names">
+         [left_s0, left_s1, left_e0, left_e1, left_w0, left_w1, left_w2]
+  </rosparam>
   <node name="baxter_sim_kinematics_left" pkg="baxter_sim_kinematics" type="kinematics" respawn="false" output="screen" args="left">
 </node>
   <node name="baxter_sim_kinematics_right" pkg="baxter_sim_kinematics" type="kinematics" respawn="false" output="screen" args="right">

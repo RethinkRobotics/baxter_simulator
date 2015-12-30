@@ -8,6 +8,19 @@
   <arg name="headless" default="false"/>
   <arg name="debug" default="false"/>
 
+  <!-- These arguments load the electric grippers, for example left_electric_gripper:=true -->
+  <arg name="left_electric_gripper" default="true"/>
+  <arg name="right_electric_gripper" default="true"/>
+
+  <!-- Load the URDF into the ROS Parameter Server -->
+  <!-- This xacro will pull in baxter_base.urdf.xacro, left_end_effector.urdf.xacro,
+                                           and right_end_effector.urdf.xacro
+       Note: if you set this to false, you MUST have set the robot_description prior
+             to launching baxter_world -->
+  <arg name="load_robot_description" default="true"/>
+  <param if="$(arg load_robot_description)" name="robot_description"
+      command="$(find xacro)/xacro.py --inorder $(find baxter_description)/urdf/baxter.urdf.xacro gazebo:=true"/>
+
   <!-- We resume the logic in empty_world.launch, changing the name of the world to be launched -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(find baxter_gazebo)/worlds/baxter.world"/>
@@ -18,19 +31,15 @@
     <arg name="headless" value="$(arg headless)"/>
   </include>
 
-  <!-- Load the URDF into the ROS Parameter Server -->
-  <param name="robot_description"
-	 command="cat '$(find baxter_description)/urdf/baxter.urdf'" />
-
   <!-- Load the software version into the ROS Parameter Server -->
-  <param name="rethink/software_version" value="1.1.1" />
+  <param name="rethink/software_version" value="1.2.0" />
 
   <!-- Publish a static transform between the world and the base of the robot -->
-  <node pkg="tf2_ros" type="static_transform_publisher" name="base_to_world" args="0 0 0 0 0 0 0 world base" />
+  <node pkg="tf2_ros" type="static_transform_publisher" name="base_to_world" args="0 0 0 0 0 0 1 world base" />
 
   <!-- Run a python script to the send a service call to gazebo_ros to spawn a URDF robot -->
    <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
-	args="-file $(find baxter_description)/urdf/baxter.urdf -urdf -z 0.93 -model baxter
+	args="-param robot_description -urdf -z 0.93 -model baxter
 	      -J baxter::right_s0 -0.272659
 	      -J baxter::right_s1 1.04701
 	      -J baxter::right_e0 -0.00123203
@@ -47,6 +56,9 @@
 	      -J baxter::left_w2 -0.0124707" />
 
   <!-- ros_control baxter launch file -->
-  <include file="$(find baxter_sim_hardware)/launch/baxter_sdk_control.launch" />
+  <include file="$(find baxter_sim_hardware)/launch/baxter_sdk_control.launch">
+      <arg name="right_electric_gripper" value="$(arg right_electric_gripper)"/>
+      <arg name="left_electric_gripper" value="$(arg left_electric_gripper)"/>
+  </include>
 
 </launch>
