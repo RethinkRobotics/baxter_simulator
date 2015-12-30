@@ -75,22 +75,29 @@ bool position_kinematics::init(std::string side) {
   robot_state_sub = handle.subscribe < baxter_core_msgs::AssemblyState
       > (ROBOT_STATE, 100, &position_kinematics::stateCB, this);
 
-  no_jts=0;
   //Initialize the Parameter server with the root_name and tip_name of the Kinematic Chain based on the side
   if (side == "right") {
-    if (!handle.getParam("right_tip_name", right_tip_name)) {
+    if (!handle.getParam("right_tip_name", tip_name)) {
       ROS_FATAL("GenericIK: No tip name for Right arm found on parameter server");
       return false;
     }
-    m_kinematicsModel = arm_kinematics::Kinematics::create(right_tip_name, no_jts);
+    if (!handle.getParam("robot_config/right_config/joint_names", joint_names)) {
+      ROS_FATAL("GenericIK: No Joint Names for the Right Arm found on parameter server");
+      return false;
+    }
   }
   else {
-    if (!handle.getParam("left_tip_name", left_tip_name)) {
+    if (!handle.getParam("left_tip_name", tip_name)) {
       ROS_FATAL("GenericIK: No tip name for Right arm found on parameter server");
       return false;
     }
-    m_kinematicsModel = arm_kinematics::Kinematics::create(left_tip_name, no_jts);
+    if (!handle.getParam("robot_config/left_config/joint_names", joint_names)) {
+      ROS_FATAL("GenericIK: No Joint Names for the Left Arm found on parameter server");
+      return false;
+    }
   }
+  no_jts = joint_names.size();
+  m_kinematicsModel = arm_kinematics::Kinematics::create(tip_name, no_jts);
   return true;
 
 }
@@ -132,12 +139,12 @@ void position_kinematics::FKCallback(const sensor_msgs::JointState msg) {
 void position_kinematics::FilterJointState(
     const sensor_msgs::JointState *msg, sensor_msgs::JointState &res) {
   // Resize the result to hold the names and positions of the 7 joints
-  res.name.resize(no_jts);
-  res.position.resize(no_jts);
+  res.name.resize(joint_names.size());
+  res.position.resize(joint_names.size());
   int i = 0;
   for (size_t ind = 0; ind < msg->name.size(); ind++) {
     // Retain the names and positions of the joints of the initialized arm
-    if ((msg->name[ind]).std::string::find(m_limbName) != std::string::npos) {
+    if (std::find(joint_names.begin(), joint_names.end(), msg->name[ind]) != joint_names.end()) {
       res.name[i] = msg->name[ind];
       res.position[i] = msg->position[ind];
       i++;

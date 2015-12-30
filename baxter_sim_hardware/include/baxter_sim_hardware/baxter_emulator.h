@@ -109,6 +109,8 @@ class baxter_emulator {
   ros::Publisher assembly_state_pub, head_pub;
   // Gravity Publishers
   ros::Publisher left_grav_pub, right_grav_pub;
+  // Simulator has Started notification Publisher
+  ros::Publisher sim_started_pub;
 
   ros::NodeHandle n;
   ros::Timer head_nod_timer;
