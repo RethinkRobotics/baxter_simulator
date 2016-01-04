@@ -1,7 +1,7 @@
 - git:
     local-name: baxter_simulator
     uri: https://github.com/RethinkRobotics/baxter_simulator.git
-    version: release-1.2.0
+    version: release-1.2.1
 - git:
     local-name: baxter
     uri: https://github.com/RethinkRobotics/baxter.git
