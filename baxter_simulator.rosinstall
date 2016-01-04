@@ -1,24 +1,24 @@
 - git:
     local-name: baxter_simulator
     uri: https://github.com/RethinkRobotics/baxter_simulator.git
-    version: master
+    version: release-1.2.0
 - git:
     local-name: baxter
     uri: https://github.com/RethinkRobotics/baxter.git
-    version: master
+    version: release-1.2.0
 - git:
     local-name: baxter_interface
     uri: https://github.com/RethinkRobotics/baxter_interface.git
-    version: master
+    version: release-1.2.0
 - git:
     local-name: baxter_tools
     uri: https://github.com/RethinkRobotics/baxter_tools.git
-    version: master
+    version: release-1.2.0
 - git:
     local-name: baxter_common
     uri: https://github.com/RethinkRobotics/baxter_common.git
-    version: master
+    version: release-1.2.0
 - git:
     local-name: baxter_examples
     uri: https://github.com/RethinkRobotics/baxter_examples.git
-    version: master
+    version: release-1.2.0
