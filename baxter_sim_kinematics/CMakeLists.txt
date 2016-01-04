@@ -16,7 +16,6 @@ find_package(cmake_modules REQUIRED)
 find_package(Eigen REQUIRED)
 
 catkin_package(
-  INCLUDE_DIRS include
   CATKIN_DEPENDS
   std_msgs
   baxter_core_msgs
@@ -49,6 +48,10 @@ add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
 )
 
 install(
-  DIRECTORY include launch
+  DIRECTORY launch
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
+
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 )

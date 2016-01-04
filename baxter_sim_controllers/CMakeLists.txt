@@ -10,13 +10,21 @@ find_package(catkin
   baxter_core_msgs
 )
 find_package(Boost REQUIRED COMPONENTS system)
-
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(YAML_CPP REQUIRED yaml-cpp)
+find_path(YAML_CPP_INCLUDE_DIR
+          NAMES yaml_cpp.h
+          PATHS ${YAML_CPP_INCLUDE_DIRS})
+find_library(YAML_CPP_LIBRARY
+             NAMES YAML_CPP
+             PATHS ${YAML_CPP_LIBRARY_DIRS})
 catkin_package(
   CATKIN_DEPENDS
   controller_interface
   control_toolbox
   effort_controllers
   baxter_core_msgs
+  DEPENDS yaml-cpp
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
 )
@@ -37,6 +45,7 @@ add_library(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
   ${catkin_LIBRARIES}
   ${Boost_LIBRARIES}
+  ${YAML_CPP_LIBRARIES}
 )
 
 add_dependencies(${PROJECT_NAME}
