@@ -42,9 +42,14 @@ add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
   baxter_core_msgs_gencpp
  )
 
- install(
+install(
   TARGETS ${PROJECT_NAME}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+)
+
+install(
+  TARGETS kinematics
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 install(
