@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>baxter_gazebo</name>
-  <version>1.2.0</version>
+  <version>1.2.1</version>
   <description>
     Baxter Gazebo plugins and launch files
   </description>

@@ -1,3 +1,13 @@
+1.2.1 (2016-1-6)
+---------------------------------
+- This update is to fix the Isolated Install builds required by the ROS Buildfarm
+- Added yaml-cpp as a dependency for baxter_sim_controllers
+- Properly exported the include directory of baxter_sim_kinematics
+  so that baxter_sim_hardware could utilize its header files
+- Properly added install targets for executables in baxter_sim_kinematics
+  and baxter_sim_hardware
+- Updated headers to properly use / include OpenCV2 dependencies
+
 1.2.0 (2015-12-21)
 ---------------------------------
 - Added a timestamp to the endpoint state topic (thanks @jarvisshultz for contributing)
