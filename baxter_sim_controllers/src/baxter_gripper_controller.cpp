@@ -172,6 +172,7 @@ void BaxterGripperController::updateCommands() {
       return;
 
   double cmd_position  = gripper_controllers[main_idx_]->getPosition();
+  #ifdef VALID_YAMLCPP_VERSION
   YAML::Node args = YAML::Load(command.args);
   if ( args["position"] ) {
     cmd_position = args["position"].as<double>();
@@ -186,6 +187,7 @@ void BaxterGripperController::updateCommands() {
     cmd_position = (cmd_position/100.0) *
       (gripper_controllers[main_idx_]->joint_urdf_->limits->upper - gripper_controllers[main_idx_]->joint_urdf_->limits->lower);
   }
+  #endif
   // Update the individual joint controllers
   ROS_DEBUG_STREAM(gripper_controllers[main_idx_]->joint_urdf_->name << "->setCommand(" << cmd_position << ")");
   gripper_controllers[main_idx_]->setCommand(cmd_position);
