@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>baxter_sim_controllers</name>
-  <version>1.2.1</version>
+  <version>1.2.11</version>
   <description>
     Baxter specific controllers for Gazebo use
   </description>
