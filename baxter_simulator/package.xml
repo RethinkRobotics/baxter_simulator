@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>baxter_simulator</name>
-  <version>1.2.1</version>
+  <version>1.2.11</version>
   <description>
     Metapackage - Baxter Research Robot Gazebo Simulation
   </description>

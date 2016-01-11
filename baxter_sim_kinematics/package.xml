@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>baxter_sim_kinematics</name>
-  <version>1.2.1</version>
+  <version>1.2.11</version>
   <description>
     Baxter Kinematics for the FK, IK and the gravity compensation calculations
   </description>
