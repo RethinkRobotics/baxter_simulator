@@ -429,7 +429,7 @@ bool arm_kinematics::Kinematics::getPositionIK(
   }
 
   KDL::Frame F_dest;
-  tf::TransformTFToKDL(transform_root, F_dest);
+  tf::transformTFToKDL(transform_root, F_dest);
 
   int ik_valid = ik_solver_pos->CartToJnt(jnt_pos_in, F_dest, jnt_pos_out);
 
@@ -471,7 +471,7 @@ bool arm_kinematics::Kinematics::getPositionFK(
   if (fk_solver->JntToCart(jnt_pos_in, p_out, num_segments) >= 0) {
     tf_pose.frame_id_ = root_name;
     tf_pose.stamp_ = ros::Time();
-    tf::PoseKDLToTF(p_out, tf_pose);
+    tf::poseKDLToTF(p_out, tf_pose);
     try {
       tf_listener.transformPose(frame_id, tf_pose, tf_pose);
     } catch (...) {
