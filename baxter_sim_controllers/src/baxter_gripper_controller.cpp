@@ -172,7 +172,7 @@ void BaxterGripperController::updateCommands() {
       return;
 
   double cmd_position  = gripper_controllers[main_idx_]->getPosition();
-  #ifdef VALID_YAMLCPP_VERSION
+  #ifndef DEPRECATED_YAML_CPP_VERSION
   YAML::Node args = YAML::Load(command.args);
   if ( args["position"] ) {
     cmd_position = args["position"].as<double>();
