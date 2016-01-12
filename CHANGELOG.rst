@@ -1,3 +1,8 @@
+1.2.12 (2016-1-11)
+---------------------------------
+- This update fixes the conditional yaml-cpp preprocessor define
+- Fixed deprecation warning in baxter_sim_kinematics Transforms functions
+
 1.2.11 (2016-1-10)
 ---------------------------------
 - This update is to only compile yaml-cpp functions with preprocessor define
