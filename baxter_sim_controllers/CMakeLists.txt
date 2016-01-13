@@ -18,6 +18,10 @@ find_path(YAML_CPP_INCLUDE_DIR
 find_library(YAML_CPP_LIBRARY
              NAMES YAML_CPP
              PATHS ${YAML_CPP_LIBRARY_DIRS})
+if(${YAML_CPP_VERSION} VERSION_LESS 0.5)
+  add_definitions(-DDEPRECATED_YAML_CPP_VERSION)
+endif()
+
 catkin_package(
   CATKIN_DEPENDS
   controller_interface

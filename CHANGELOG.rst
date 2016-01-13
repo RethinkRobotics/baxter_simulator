@@ -1,3 +1,14 @@
+1.2.12 (2016-1-11)
+---------------------------------
+- This update fixes the conditional yaml-cpp preprocessor define
+- Fixed deprecation warning in baxter_sim_kinematics Transforms functions
+
+1.2.11 (2016-1-10)
+---------------------------------
+- This update is to only compile yaml-cpp functions with preprocessor define
+  if the detected system version is yaml-cpp 0.5 or greater. This prevents grippers
+  from working in EOL Ubuntu Saucy, but allows the ros_buildfarm to compile.
+
 1.2.1 (2016-1-6)
 ---------------------------------
 - This update is to fix the Isolated Install builds required by the ROS Buildfarm
