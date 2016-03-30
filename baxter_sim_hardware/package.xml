@@ -39,6 +39,7 @@
   <run_depend>baxter_core_msgs</run_depend>
   <run_depend>cv_bridge</run_depend>
   <run_depend>image_transport</run_depend>
+  <run_depend>baxter_sim_io</run_depend>
   <run_depend>baxter_sim_kinematics</run_depend>
   <run_depend>controller_manager</run_depend>
   <run_depend>libopencv-dev</run_depend>
