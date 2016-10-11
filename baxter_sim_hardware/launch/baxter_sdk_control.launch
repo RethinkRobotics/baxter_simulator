@@ -5,10 +5,14 @@
   <arg name="left_electric_gripper" default="true"/>
   <arg name="right_electric_gripper" default="true"/>
   <arg name="gui" default="true"/>
-  <arg name="grav_right_name" default="right_gripper" />
-  <arg name="grav_left_name" default="left_gripper" />
-  <arg name="right_tip_name" default="right_gripper" />
-  <arg name="left_tip_name" default="left_gripper" />
+  <arg name="grav_right_name" default="right_gripper" if="$(arg right_electric_gripper)" />
+  <arg name="grav_left_name" default="left_gripper" if="$(arg left_electric_gripper)" />
+  <arg name="right_tip_name" default="right_gripper" if="$(arg right_electric_gripper)" />
+  <arg name="left_tip_name" default="left_gripper" if="$(arg left_electric_gripper)" />
+  <arg name="grav_right_name" default="right_wrist" unless="$(arg right_electric_gripper)" />
+  <arg name="grav_left_name" default="left_wrist" unless="$(arg left_electric_gripper)" />
+  <arg name="right_tip_name" default="right_wrist" unless="$(arg right_electric_gripper)" />
+  <arg name="left_tip_name" default="left_wrist" unless="$(arg left_electric_gripper)" />
 
   <!-- baxter_sim_kinematics launch file to do the Forward/Inverse Kinematics -->
   <include file="$(find baxter_sim_kinematics)/launch/baxter_sim_kinematics.launch">
