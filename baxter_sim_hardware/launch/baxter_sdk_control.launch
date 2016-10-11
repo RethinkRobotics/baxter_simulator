@@ -5,9 +5,18 @@
   <arg name="left_electric_gripper" default="true"/>
   <arg name="right_electric_gripper" default="true"/>
   <arg name="gui" default="true"/>
+  <arg name="grav_right_name" default="right_gripper" />
+  <arg name="grav_left_name" default="left_gripper" />
+  <arg name="right_tip_name" default="right_gripper" />
+  <arg name="left_tip_name" default="left_gripper" />
 
   <!-- baxter_sim_kinematics launch file to do the Forward/Inverse Kinematics -->
-  <include file="$(find baxter_sim_kinematics)/launch/baxter_sim_kinematics.launch" />
+  <include file="$(find baxter_sim_kinematics)/launch/baxter_sim_kinematics.launch">
+    <arg name="grav_right_name" value="$(arg grav_right_name)" />
+    <arg name="grav_left_name" value="$(arg grav_left_name)" />
+    <arg name="right_tip_name" value="$(arg right_tip_name)" />
+    <arg name="left_tip_name" value="$(arg left_tip_name)" />
+  </include>
 
   <!-- Load joint controller configurations from YAML file to parameter server -->
   <rosparam file="$(find baxter_sim_hardware)/config/baxter_sim_controllers.yaml" command="load"/>
