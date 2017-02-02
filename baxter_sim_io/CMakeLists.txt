@@ -70,8 +70,6 @@ file(GLOB_RECURSE QT_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINK
 add_executable(baxter_sim_io ${QT_SOURCES} ${QT_RESOURCES_CPP} ${QT_FORMS_HPP} ${QT_MOC_HPP})
 target_link_libraries(baxter_sim_io Qt5::Widgets ${ROS_LIBRARIES} ${catkin_LIBRARIES})
 
-add_dependencies(baxter_sim_io baxter_core_msgs_gencpp)
-
 install(TARGETS baxter_sim_io
 ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

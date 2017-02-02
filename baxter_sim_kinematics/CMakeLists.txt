@@ -12,9 +12,6 @@ find_package(catkin
   gazebo_msgs
 )
 
-find_package(cmake_modules REQUIRED)
-find_package(Eigen REQUIRED)
-
 catkin_package(
   INCLUDE_DIRS include
   CATKIN_DEPENDS
@@ -28,7 +25,6 @@ catkin_package(
 
 include_directories(include
   ${catkin_INCLUDE_DIRS}
-  ${EIGEN_INCLUDE_DIRS}
 )
 
 add_library(${PROJECT_NAME} src/arm_kinematics.cpp)
@@ -38,10 +34,7 @@ add_executable(kinematics src/position_kinematics.cpp)
 target_link_libraries(kinematics ${catkin_LIBRARIES} ${PROJECT_NAME})
 
 add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
- add_dependencies(kinematics
-  ${catkin_EXPORTED_TARGETS}
-  baxter_core_msgs_gencpp
- )
+add_dependencies(kinematics ${catkin_EXPORTED_TARGETS})
 
 install(
   TARGETS ${PROJECT_NAME}
