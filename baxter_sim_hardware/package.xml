@@ -42,5 +42,6 @@
   <run_depend>baxter_sim_kinematics</run_depend>
   <run_depend>controller_manager</run_depend>
   <run_depend>libopencv-dev</run_depend>
+  <run_depend>joint_state_controller</run_depend>
 
 </package>

@@ -8,7 +8,7 @@
 
   <!-- Load universal robotic description format (URDF) -->
   <param if="$(arg load_robot_description)" name="robot_description"
-      command="$(find xacro)/xacro.py --inorder $(find baxter_description)/urdf/baxter.urdf.xacro
+      command="$(find xacro)/xacro --inorder $(find baxter_description)/urdf/baxter.urdf.xacro
           right_electric_gripper:=$(arg right_electric_gripper)
           left_electric_gripper:=$(arg left_electric_gripper)"/>
 
