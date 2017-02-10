@@ -348,8 +348,8 @@ bool arm_kinematics::Kinematics::getGravityTorques(
     if (code_l >= 0 && code_r >= 0) {
 
 	for (unsigned int i = 0; i < num_joints; i++) {
-            left_gravity.gravity_model_effort[i] = torques_l(i); 
-            right_gravity.gravity_model_effort[i] = torques_r(i); 
+            left_gravity.gravity_model_effort[i] = torques_l(i);
+            right_gravity.gravity_model_effort[i] = torques_r(i);
       }
       return true;
     } else {
@@ -467,7 +467,7 @@ bool arm_kinematics::Kinematics::getPositionFK(
   }
 
   int num_segments = chain.getNrOfSegments();
-  ROS_DEBUG("Number of Segments in the KDL chain: %d", num_segments);
+  ROS_DEBUG_ONCE("Number of Segments in the KDL chain: %d", num_segments);
   if (fk_solver->JntToCart(jnt_pos_in, p_out, num_segments) >= 0) {
     tf_pose.frame_id_ = root_name;
     tf_pose.stamp_ = ros::Time();
@@ -487,4 +487,3 @@ bool arm_kinematics::Kinematics::getPositionFK(
 }
 
 }  //namespace
-
