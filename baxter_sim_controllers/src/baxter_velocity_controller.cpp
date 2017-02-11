@@ -81,7 +81,7 @@ bool BaxterVelocityController::init(
   velocity_controllers_.resize(n_joints_);
 
   int i = 0; // track the joint id
-  for(XmlRpc::XmlRpcValue::iterator joint_it = xml_struct.begin(); 
+  for(XmlRpc::XmlRpcValue::iterator joint_it = xml_struct.begin();
       joint_it != xml_struct.end(); ++joint_it)
   {
     // Get joint controller
@@ -97,7 +97,7 @@ bool BaxterVelocityController::init(
     // Get the joint-namespace nodehandle
     {
       ros::NodeHandle joint_nh(nh_, "joints/"+joint_controller_name);
-      ROS_INFO_STREAM_NAMED("init","Loading sub-controller '" << joint_controller_name 
+      ROS_INFO_STREAM_NAMED("init","Loading sub-controller '" << joint_controller_name
         << "', Namespace: " << joint_nh.getNamespace());
 
       velocity_controllers_[i].reset(new effort_controllers::JointVelocityController());
@@ -122,13 +122,13 @@ bool BaxterVelocityController::init(
     // Get a node handle that is relative to the base path
     ros::NodeHandle nh_base("~");
 
-    // Create command subscriber custom to baxter  
+    // Create command subscriber custom to baxter
     velocity_command_sub_ = nh_base.subscribe<baxter_core_msgs::JointCommand>
       (topic_name, 1, &BaxterVelocityController::commandCB, this);
   }
   else // default "command" topic
   {
-    // Create command subscriber custom to baxter  
+    // Create command subscriber custom to baxter
     velocity_command_sub_ = nh_.subscribe<baxter_core_msgs::JointCommand>
       ("command", 1, &BaxterVelocityController::commandCB, this);
   }

@@ -8,7 +8,7 @@
     <include>
       <uri>model://sun</uri>
     </include>
-    
+
     <include>
 	<uri>model://gas_station</uri>
 	<name>gas_station</name>
