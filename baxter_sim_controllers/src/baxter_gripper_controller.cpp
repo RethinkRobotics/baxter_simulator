@@ -84,7 +84,7 @@ bool BaxterGripperController::init(hardware_interface::EffortJointInterface* rob
     // Get the joint-namespace nodehandle
     {
       ros::NodeHandle joint_nh(nh_, "joints/" + joint_controller_name);
-      ROS_INFO_STREAM_NAMED("init", "Loading sub-controller '" << joint_controller_name
+      ROS_DEBUG_STREAM_NAMED("init", "Loading sub-controller '" << joint_controller_name
                                                                << "', Namespace: " << joint_nh.getNamespace());
 
       gripper_controllers[i].reset(new effort_controllers::JointPositionController());

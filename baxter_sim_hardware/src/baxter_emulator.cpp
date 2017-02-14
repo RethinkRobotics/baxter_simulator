@@ -296,7 +296,7 @@ void baxter_emulator::startPublishLoop(const std::string& img_path)
   {
     ROS_WARN_NAMED("emulator", "Unable to load the Startup picture on Baxter's display screen %s", e.what());
   }
-  ROS_INFO_NAMED("emulator", "***************** Simulator is loaded and started successfully *****************\n\n");
+  ROS_INFO_NAMED("emulator", "Simulator is loaded and started successfully");
 
   std_msgs::Empty started_msg;
   sim_started_pub.publish(started_msg);

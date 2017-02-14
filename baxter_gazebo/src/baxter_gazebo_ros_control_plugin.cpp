@@ -35,7 +35,7 @@
 
 /* Author: Hariharasudan Malaichamee
  * Author: Dave Coleman
- Desc:   Customized the default gazebo_ros_control_plugin.cpp
+ * Desc:   Customized the default gazebo_ros_control_plugin.cpp
  */
 
 // Overload the default plugin
