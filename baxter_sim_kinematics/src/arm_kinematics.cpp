@@ -46,24 +46,24 @@ bool Kinematics::init_grav() {
   std::string urdf_xml, full_urdf_xml;
   nh.param("urdf_xml", urdf_xml, std::string("robot_description"));
   nh.searchParam(urdf_xml, full_urdf_xml);
-  ROS_DEBUG("Reading xml file from parameter server");
+  ROS_DEBUG_NAMED("arm_kinematics", "Reading xml file from parameter server");
   std::string result;
   if (!nh.getParam(full_urdf_xml, result)) {
-    ROS_FATAL("Could not load the xml from parameter server: %s",
+    ROS_FATAL_NAMED("arm_kinematics", "Could not load the xml from parameter server: %s",
               urdf_xml.c_str());
     return false;
   }
 
   if (!nh.getParam("root_name", root_name)) {
-    ROS_FATAL("GenericIK: No tip name for gravity found on parameter server");
+    ROS_FATAL_NAMED("arm_kinematics", "GenericIK: No tip name for gravity found on parameter server");
     return false;
   }
   if (!nh.getParam("grav_right_name", grav_right_name)) {
-    ROS_FATAL("GenericIK: No tip name for gravity found on parameter server");
+    ROS_FATAL_NAMED("arm_kinematics", "GenericIK: No tip name for gravity found on parameter server");
     return false;
   }
   if (!nh.getParam("grav_left_name", grav_left_name)) {
-    ROS_FATAL("GenericIK: No tip name for gravity found on parameter server");
+    ROS_FATAL_NAMED("arm_kinematics", "GenericIK: No tip name for gravity found on parameter server");
     return false;
   }
 
@@ -86,7 +86,7 @@ bool Kinematics::init_grav() {
   //Load the right chain and copy them to Right specific variables
   tip_name = grav_right_name;
   if (!loadModel(result)) {
-    ROS_FATAL("Could not load models!");
+    ROS_FATAL_NAMED("arm_kinematics", "Could not load models!");
     return false;
   }
 
@@ -127,7 +127,7 @@ bool Kinematics::init_grav() {
   //Load the left chain and copy them to Right specific variable
   tip_name = grav_left_name;
   if (!loadModel(result)) {
-    ROS_FATAL("Could not load models!");
+    ROS_FATAL_NAMED("arm_kinematics", "Could not load models!");
     return false;
   }
 
@@ -176,23 +176,23 @@ bool Kinematics::init(std::string tip, int &no_jts) {
   tip_name = tip;
   nh.param("urdf_xml", urdf_xml, std::string("robot_description"));
   nh.searchParam(urdf_xml, full_urdf_xml);
-  ROS_DEBUG("Reading xml file from parameter server");
+  ROS_DEBUG_NAMED("arm_kinematics", "Reading xml file from parameter server");
   std::string result;
   if (!nh.getParam(full_urdf_xml, result)) {
-    ROS_FATAL("Could not load the xml from parameter server: %s",
+    ROS_FATAL_NAMED("arm_kinematics", "Could not load the xml from parameter server: %s",
               urdf_xml.c_str());
     return false;
   }
 
   // Get Root and Tip From Parameter Service
   if (!nh.getParam("root_name", root_name)) {
-    ROS_FATAL("GenericIK: No root name found on parameter server");
+    ROS_FATAL_NAMED("arm_kinematics", "GenericIK: No root name found on parameter server");
     return false;
   }
 
   // Load and Read Models
   if (!loadModel(result)) {
-    ROS_FATAL("Could not load models!");
+    ROS_FATAL_NAMED("arm_kinematics", "Could not load models!");
     return false;
   }
 
@@ -221,19 +221,19 @@ bool Kinematics::loadModel(const std::string xml) {
   urdf::Model robot_model;
   KDL::Tree tree;
   if (!robot_model.initString(xml)) {
-    ROS_FATAL("Could not initialize robot model");
+    ROS_FATAL_NAMED("arm_kinematics", "Could not initialize robot model");
     return -1;
   }
   if (!kdl_parser::treeFromString(xml, tree)) {
-    ROS_ERROR("Could not initialize tree object");
+    ROS_ERROR_NAMED("arm_kinematics", "Could not initialize tree object");
     return false;
   }
   if (!tree.getChain(root_name, tip_name, chain)) {
-    ROS_ERROR("Could not initialize chain object for root_name %s and tip_name %s",root_name.c_str(), tip_name.c_str());
+    ROS_ERROR_NAMED("arm_kinematics", "Could not initialize chain object for root_name %s and tip_name %s",root_name.c_str(), tip_name.c_str());
     return false;
   }
   if (!readJoints(robot_model)) {
-    ROS_FATAL("Could not read information about the joints");
+    ROS_FATAL_NAMED("arm_kinematics", "Could not read information about the joints");
     return false;
   }
 
@@ -254,12 +254,12 @@ bool Kinematics::readJoints(urdf::Model &robot_model) {
       }
       joint = robot_model.getJoint(link->parent_joint->name);
       if (!joint) {
-        ROS_ERROR("Could not find joint: %s", link->parent_joint->name.c_str());
+        ROS_ERROR_NAMED("arm_kinematics", "Could not find joint: %s", link->parent_joint->name.c_str());
         return false;
       }
       if (joint->type != urdf::Joint::UNKNOWN
           && joint->type != urdf::Joint::FIXED) {
-        ROS_INFO("adding joint: [%s]", joint->name.c_str());
+        ROS_DEBUG_NAMED("arm_kinematics", "adding joint: [%s]", joint->name.c_str());
         num_joints++;
       }
       link = robot_model.getLink(link->getParent()->name);
@@ -275,7 +275,7 @@ bool Kinematics::readJoints(urdf::Model &robot_model) {
     joint = robot_model.getJoint(link->parent_joint->name);
     if (joint->type != urdf::Joint::UNKNOWN
         && joint->type != urdf::Joint::FIXED) {
-      ROS_INFO("getting bounds for joint: [%s]", joint->name.c_str());
+      ROS_DEBUG_NAMED("arm_kinematics", "getting bounds for joint: [%s]", joint->name.c_str());
 
       float lower, upper;
       int hasLimits;
@@ -353,8 +353,8 @@ bool arm_kinematics::Kinematics::getGravityTorques(
       }
       return true;
     } else {
-      ROS_ERROR_THROTTLE(
-          1.0,
+      ROS_ERROR_THROTTLE_NAMED(
+          1.0, "arm_kinematics",
           "KT: Failed to compute gravity torques from KDL return code for left and right arms %d %d",
           code_l, code_r);
       return false;
@@ -416,7 +416,7 @@ bool arm_kinematics::Kinematics::getPositionIK(
     if (tmp_index >= 0) {
       jnt_pos_in(tmp_index) = seed.position[i];
     } else {
-      ROS_ERROR("i: %d, No joint index for %s", i, seed.name[i].c_str());
+      ROS_ERROR_NAMED("arm_kinematics", "i: %d, No joint index for %s", i, seed.name[i].c_str());
     }
   }
 
@@ -424,7 +424,7 @@ bool arm_kinematics::Kinematics::getPositionIK(
   try {
     tf_listener.transformPose(root_name, transform, transform_root);
   } catch (...) {
-    ROS_ERROR("Could not transform IK pose to frame: %s", root_name.c_str());
+    ROS_ERROR_NAMED("arm_kinematics", "Could not transform IK pose to frame: %s", root_name.c_str());
     return false;
   }
 
@@ -438,12 +438,12 @@ bool arm_kinematics::Kinematics::getPositionIK(
     result->position.resize(num_joints);
     for (unsigned int i = 0; i < num_joints; i++) {
       result->position[i] = jnt_pos_out(i);
-      ROS_DEBUG("IK Solution: %s %d: %f", result->name[i].c_str(), i,
+      ROS_DEBUG_NAMED("arm_kinematics", "IK Solution: %s %d: %f", result->name[i].c_str(), i,
                 jnt_pos_out(i));
     }
     return true;
   } else {
-    ROS_DEBUG("An IK solution could not be found");
+    ROS_DEBUG_NAMED("arm_kinematics", "An IK solution could not be found");
     return false;
   }
 }
@@ -467,7 +467,7 @@ bool arm_kinematics::Kinematics::getPositionFK(
   }
 
   int num_segments = chain.getNrOfSegments();
-  ROS_DEBUG_ONCE("Number of Segments in the KDL chain: %d", num_segments);
+  ROS_DEBUG_ONCE_NAMED("arm_kinematics", "Number of Segments in the KDL chain: %d", num_segments);
   if (fk_solver->JntToCart(jnt_pos_in, p_out, num_segments) >= 0) {
     tf_pose.frame_id_ = root_name;
     tf_pose.stamp_ = ros::Time();
@@ -475,12 +475,12 @@ bool arm_kinematics::Kinematics::getPositionFK(
     try {
       tf_listener.transformPose(frame_id, tf_pose, tf_pose);
     } catch (...) {
-      ROS_ERROR("Could not transform FK pose to frame: %s", frame_id.c_str());
+      ROS_ERROR_NAMED("arm_kinematics", "Could not transform FK pose to frame: %s", frame_id.c_str());
       return false;
     }
     tf::poseStampedTFToMsg(tf_pose, result);
   } else {
-    ROS_ERROR("Could not compute FK for endpoint.");
+    ROS_ERROR_NAMED("arm_kinematics", "Could not compute FK for endpoint.");
     return false;
   }
   return true;
