@@ -143,12 +143,12 @@ class PickAndPlace(object):
         # retrieve current pose from endpoint
         current_pose = self._limb.endpoint_pose()
         ik_pose = Pose()
-        ik_pose.position.x = current_pose['position'].x 
-        ik_pose.position.y = current_pose['position'].y 
+        ik_pose.position.x = current_pose['position'].x
+        ik_pose.position.y = current_pose['position'].y
         ik_pose.position.z = current_pose['position'].z + self._hover_distance
-        ik_pose.orientation.x = current_pose['orientation'].x 
-        ik_pose.orientation.y = current_pose['orientation'].y 
-        ik_pose.orientation.z = current_pose['orientation'].z 
+        ik_pose.orientation.x = current_pose['orientation'].x
+        ik_pose.orientation.y = current_pose['orientation'].y
+        ik_pose.orientation.z = current_pose['orientation'].z
         ik_pose.orientation.w = current_pose['orientation'].w
         joint_angles = self.ik_request(ik_pose)
         # servo up from current pose

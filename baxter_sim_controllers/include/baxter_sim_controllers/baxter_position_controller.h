@@ -76,7 +76,7 @@ namespace baxter_sim_controllers
     ros::NodeHandle nh_;
 
     /**< Last commanded position. */
-    realtime_tools::RealtimeBuffer<baxter_core_msgs::JointCommand> position_command_buffer_; 
+    realtime_tools::RealtimeBuffer<baxter_core_msgs::JointCommand> position_command_buffer_;
 
     size_t n_joints_;
     std::string topic_name;
@@ -89,7 +89,7 @@ namespace baxter_sim_controllers
 
     // Command subscriber
     ros::Subscriber position_command_sub_;
-    
+
     /**
      * @brief Callback from a recieved goal from the published topic message
      * @param msg trajectory goal
@@ -97,9 +97,9 @@ namespace baxter_sim_controllers
     void commandCB(const baxter_core_msgs::JointCommandConstPtr& msg);
 
     // Create an effort-based joint position controller for every joint
-    std::vector< 
+    std::vector<
       boost::shared_ptr<
-        effort_controllers::JointPositionController> > position_controllers_;    
+        effort_controllers::JointPositionController> > position_controllers_;
 
   };
 

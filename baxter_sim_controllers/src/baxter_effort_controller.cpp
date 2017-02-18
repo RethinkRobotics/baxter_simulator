@@ -76,7 +76,7 @@ bool BaxterEffortController::init(
   effort_controllers_.resize(n_joints_);
 
   int i = 0; // track the joint id
-  for(XmlRpc::XmlRpcValue::iterator joint_it = xml_struct.begin(); 
+  for(XmlRpc::XmlRpcValue::iterator joint_it = xml_struct.begin();
       joint_it != xml_struct.end(); ++joint_it)
   {
     // Get joint controller
@@ -90,16 +90,16 @@ bool BaxterEffortController::init(
      std::string joint_name[n_joints_];
     // Get joint controller name
     std::string joint_controller_name = joint_it->first;
-   
+
     // Get the joint-namespace nodehandle
     {
       ros::NodeHandle joint_nh(nh_, "joints/"+joint_controller_name);
-      ROS_INFO_STREAM_NAMED("init","Loading sub-controller '" << joint_controller_name 
+      ROS_INFO_STREAM_NAMED("init","Loading sub-controller '" << joint_controller_name
         << "', Namespace: " << joint_nh.getNamespace());
 
       effort_controllers_[i].reset(new effort_controllers::JointEffortController());
       effort_controllers_[i]->init(robot, joint_nh);
-      
+
       if( !joint_nh.getParam("joint",joint_name[i]))
       {
     	ROS_ERROR("No 'joints' parameter in controller (namespace '%s')", joint_nh.getNamespace().c_str());
@@ -107,7 +107,7 @@ bool BaxterEffortController::init(
       }
 	// Create a publisher for every joint controller that publishes to the command topic under that controller
 	effort_command_pub_[i]=joint_nh.advertise<std_msgs::Float64>("command",1);
-                                                                    
+
     } // end of joint-namespaces
 
     // Add joint name to map (allows unordered list to quickly be mapped to the ordered index)
@@ -123,13 +123,13 @@ bool BaxterEffortController::init(
     // Get a node handle that is relative to the base path
     ros::NodeHandle nh_base("~");
 
-    // Create command subscriber custom to baxter  
+    // Create command subscriber custom to baxter
     effort_command_sub_ = nh_base.subscribe<baxter_core_msgs::JointCommand>
       (topic_name, 1, &BaxterEffortController::commandCB, this);
   }
   else // default "command" topic
   {
-    // Create command subscriber custom to baxter  
+    // Create command subscriber custom to baxter
     effort_command_sub_ = nh_.subscribe<baxter_core_msgs::JointCommand>
       ("command", 1, &BaxterEffortController::commandCB, this);
   }
@@ -155,7 +155,7 @@ void BaxterEffortController::update(const ros::Time& time, const ros::Duration& 
   // Check if there are commands to be updated
  if(!new_command_)
 	return;
- new_command_=false; 
+ new_command_=false;
   for(size_t i=0; i<n_joints_; i++)
   {
     // Update the individual joint controllers
