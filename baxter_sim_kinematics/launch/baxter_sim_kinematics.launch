@@ -3,8 +3,8 @@
 
   <!-- Load the URDF into the ROS Parameter Server -->
   <arg name="load_robot_description" default="false"/>
-  <arg name="right_electric_gripper" default="false"/>
-  <arg name="left_electric_gripper" default="false"/>
+  <arg name="right_electric_gripper" default="true"/>
+  <arg name="left_electric_gripper" default="true"/>
 
   <!-- Load universal robotic description format (URDF) -->
   <param if="$(arg load_robot_description)" name="robot_description"
