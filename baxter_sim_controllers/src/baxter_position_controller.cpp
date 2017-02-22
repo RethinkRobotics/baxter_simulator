@@ -84,7 +84,8 @@ bool BaxterPositionController::init(hardware_interface::EffortJointInterface* ro
     // Get joint controller
     if (joint_it->second.getType() != XmlRpc::XmlRpcValue::TypeStruct)
     {
-      ROS_ERROR_NAMED("position", "The 'joints/joint_controller' parameter is not a struct (namespace '%s')", nh_.getNamespace().c_str());
+      ROS_ERROR_NAMED("position", "The 'joints/joint_controller' parameter is not a struct (namespace '%s')",
+                      nh_.getNamespace().c_str());
       return false;
     }
 

@@ -86,7 +86,14 @@ public:
    * @param Nodehandle to initialize the image transport
    * @param img_path that refers the path of the image that loads on start up
    */
-  void publish(const std::string& img_path);
+  void startPublishLoop(const std::string& img_path);
+
+  // Remove ROS-L
+  void publish(const std::string& img_path)
+  {
+    ROS_WARN_STREAM_NAMED("emulator", "publish() is deprecated in favor of startPublishLoop()");
+    startPublishLoop(img_path);
+  }
 
 private:
   bool enable;
@@ -165,6 +172,16 @@ private:
   void update_jnt_st(const sensor_msgs::JointState& msg);
 
   void reset_head_nod(const ros::TimerEvent& t);
+
+  /**
+   * \brief Helper to wait until a ROS topic is available
+   * \param publisher to wait for
+   * \param amount of time to wait. if 0.0, will not block
+   * \param number of subscribers to wait for
+   * \return true on connection
+   */
+  bool waitForSubscriber(const image_transport::Publisher& pub, const double wait_time,
+                         const std::size_t num_req_sub = 1);
 };
 }  // namespace
 

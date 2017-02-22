@@ -79,7 +79,8 @@ bool BaxterEffortController::init(hardware_interface::EffortJointInterface* robo
     // Get joint controller
     if (joint_it->second.getType() != XmlRpc::XmlRpcValue::TypeStruct)
     {
-      ROS_ERROR_NAMED("effort", "The 'joints/joint_controller' parameter is not a struct (namespace '%s')", nh_.getNamespace().c_str());
+      ROS_ERROR_NAMED("effort", "The 'joints/joint_controller' parameter is not a struct (namespace '%s')",
+                      nh_.getNamespace().c_str());
       return false;
     }
 
@@ -99,7 +100,8 @@ bool BaxterEffortController::init(hardware_interface::EffortJointInterface* robo
 
       if (!joint_nh.getParam("joint", joint_name[i]))
       {
-        ROS_ERROR_NAMED("effort", "No 'joints' parameter in controller (namespace '%s')", joint_nh.getNamespace().c_str());
+        ROS_ERROR_NAMED("effort", "No 'joints' parameter in controller (namespace '%s')",
+                        joint_nh.getNamespace().c_str());
         return false;
       }
       // Create a publisher for every joint controller that publishes to the command topic under that controller
