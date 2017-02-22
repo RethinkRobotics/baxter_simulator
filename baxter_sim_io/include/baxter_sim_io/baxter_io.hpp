@@ -41,19 +41,20 @@
 #include "ui_baxter_io.h"
 #include "qnode.hpp"
 
-namespace baxter_sim_io {
+namespace baxter_sim_io
+{
+class BaxterIO : public QMainWindow
+{
+  Q_OBJECT
 
-class BaxterIO : public QMainWindow {
-Q_OBJECT
-
- public:
-  BaxterIO(int argc, char** argv, QWidget *parent = 0);
+public:
+  BaxterIO(int argc, char** argv, QWidget* parent = 0);
   ~BaxterIO();
 
 private:
-    void setstyle(std::string ,std::string , QPushButton&);
+  void setstyle(std::string, std::string, QPushButton&);
 
- private Q_SLOTS:
+private Q_SLOTS:
   void on_left_arm_ok_pressed();
   void on_left_arm_ok_released();
   void on_left_arm_cancel_pressed();
@@ -95,11 +96,11 @@ private:
   void on_right_cuff_grasp_pressed();
   void on_right_cuff_grasp_released();
 
- private:
-  Ui::BaxterIO *ui;
+private:
+  Ui::BaxterIO* ui;
   QNode qnode;
 };
 
 }  // namespace baxter_sim_io
 
-#endif // BAXTER_SIM_IO_BAXTER_IO_H
+#endif  // BAXTER_SIM_IO_BAXTER_IO_H

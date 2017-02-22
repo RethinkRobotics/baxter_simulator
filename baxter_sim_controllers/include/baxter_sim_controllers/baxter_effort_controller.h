@@ -45,27 +45,25 @@
 #include <controller_interface/controller.h>
 #include <realtime_tools/realtime_buffer.h>
 
-#include <baxter_core_msgs/JointCommand.h> // the input command
+#include <baxter_core_msgs/JointCommand.h>  // the input command
 
-#include <effort_controllers/joint_effort_controller.h> // used for controlling individual joints
+#include <effort_controllers/joint_effort_controller.h>  // used for controlling individual joints
 
-namespace baxter_sim_controllers {
-
-class BaxterEffortController : public controller_interface::Controller<
-    hardware_interface::EffortJointInterface> {
-
- public:
+namespace baxter_sim_controllers
+{
+class BaxterEffortController : public controller_interface::Controller<hardware_interface::EffortJointInterface>
+{
+public:
   BaxterEffortController();
   ~BaxterEffortController();
 
-  bool init(hardware_interface::EffortJointInterface *robot,
-            ros::NodeHandle &n);
+  bool init(hardware_interface::EffortJointInterface* robot, ros::NodeHandle& n);
   void starting(const ros::Time& time);
   void stopping(const ros::Time& time);
   void update(const ros::Time& time, const ros::Duration& period);
   void updateCommands();
 
- private:
+private:
   ros::NodeHandle nh_;
   size_t n_joints_;
   std::string topic_name;
@@ -87,7 +85,6 @@ class BaxterEffortController : public controller_interface::Controller<
 
   // Create an effort-based joint effort controller for every joint
   std::vector<boost::shared_ptr<effort_controllers::JointEffortController> > effort_controllers_;
-
 };
 
 }  // namespace

@@ -27,7 +27,6 @@
  # POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-
 #ifndef BAXTER_HEAD_CONTROLLER_H_
 #define BAXTER_HEAD_CONTROLLER_H_
 #include <ros/node_handle.h>
@@ -42,55 +41,49 @@
 
 //#include <baxter_core_msgs/JointCommand.h> // the input command
 #include <baxter_core_msgs/HeadPanCommand.h>
-#include <effort_controllers/joint_position_controller.h> // used for controlling individual joints
-
+#include <effort_controllers/joint_position_controller.h>  // used for controlling individual joints
 
 namespace baxter_sim_controllers
 {
+class BaxterHeadController : public controller_interface::Controller<hardware_interface::EffortJointInterface>
+{
+public:
+  BaxterHeadController();
+  ~BaxterHeadController();
 
-  class BaxterHeadController: public controller_interface::Controller<hardware_interface::EffortJointInterface>
-  {
+  bool init(hardware_interface::EffortJointInterface* robot, ros::NodeHandle& n);
+  void starting(const ros::Time& time);
+  void stopping(const ros::Time& time);
+  void update(const ros::Time& time, const ros::Duration& period);
+  void updateCommands();
 
-  public:
-    BaxterHeadController();
-    ~BaxterHeadController();
+private:
+  ros::NodeHandle nh_;
 
-    bool init(hardware_interface::EffortJointInterface *robot, ros::NodeHandle &n);
-    void starting(const ros::Time& time);
-    void stopping(const ros::Time& time);
-    void update(const ros::Time& time, const ros::Duration& period);
-    void updateCommands();
+  /**< Last commanded position. */
+  realtime_tools::RealtimeBuffer<baxter_core_msgs::HeadPanCommand> head_command_buffer;
 
-  private:
-    ros::NodeHandle nh_;
+  size_t n_joints;
+  std::string topic_name;
 
-    /**< Last commanded position. */
-    realtime_tools::RealtimeBuffer<baxter_core_msgs::HeadPanCommand> head_command_buffer;
+  std::map<std::string, std::size_t> joint_to_index_map;  // allows incoming messages to be quickly ordered
 
-    size_t n_joints;
-    std::string topic_name;
+  bool new_command;  // true when an unproccessed new command is in the realtime buffer
+  size_t update_counter;
 
-    std::map<std::string,std::size_t> joint_to_index_map; // allows incoming messages to be quickly ordered
+  // Command subscriber
+  ros::Subscriber head_command_sub;
 
-    bool new_command; // true when an unproccessed new command is in the realtime buffer
-    size_t update_counter;
+  /**
+   * @brief Callback from a recieved goal from the published topic message
+   * @param msg trajectory goal
+   */
+  void commandCB(const baxter_core_msgs::HeadPanCommandConstPtr& msg);
 
-    // Command subscriber
-    ros::Subscriber head_command_sub;
+  // Create an effort-based joint position controller for every joint
+  std::vector<boost::shared_ptr<effort_controllers::JointPositionController> > head_controllers;
+};
 
-    /**
-     * @brief Callback from a recieved goal from the published topic message
-     * @param msg trajectory goal
-     */
-    void commandCB(const baxter_core_msgs::HeadPanCommandConstPtr& msg);
-
-    // Create an effort-based joint position controller for every joint
-    std::vector<
-      boost::shared_ptr<
-        effort_controllers::JointPositionController> > head_controllers;
-
-  };
-
-} // namespace
+}  // namespace
 
 #endif /* BAXTER_HEAD_CONTROLLER_H_ */

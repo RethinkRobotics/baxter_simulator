@@ -41,7 +41,7 @@
 #include <std_msgs/Empty.h>
 #include <std_msgs/UInt32.h>
 
-//Baxter Specific Messages
+// Baxter Specific Messages
 #include <baxter_core_msgs/AssemblyState.h>
 #include <baxter_core_msgs/EndEffectorState.h>
 #include <baxter_core_msgs/EndEffectorProperties.h>
@@ -54,7 +54,7 @@
 
 #include <sensor_msgs/JointState.h>
 
-//ROS-Opencv Headers
+// ROS-Opencv Headers
 #include <image_transport/image_transport.h>
 #include <opencv2/highgui/highgui.hpp>
 #include <cv_bridge/cv_bridge.h>
@@ -67,16 +67,17 @@
 #include <cmath>
 #include <map>
 
-namespace baxter_en {
-
-class baxter_emulator {
-
- public:
+namespace baxter_en
+{
+class baxter_emulator
+{
+public:
   /**
    * Method to initialize the default values for all the variables, instantiate the publishers and 	* subscribers
    * @param img_path that refers the path of the image that loads on start up
    */
-  baxter_emulator() {
+  baxter_emulator()
+  {
   }
   bool init();
 
@@ -85,25 +86,20 @@ class baxter_emulator {
    * @param Nodehandle to initialize the image transport
    * @param img_path that refers the path of the image that loads on start up
    */
-  void publish(const std::string &img_path);
+  void publish(const std::string& img_path);
 
- private:
+private:
   bool enable;
-  //Subscribers
-  ros::Subscriber enable_sub, stop_sub, reset_sub, left_laser_sub,
-      right_laser_sub, nav_light_sub, head_nod_sub, jnt_st;
+  // Subscribers
+  ros::Subscriber enable_sub, stop_sub, reset_sub, left_laser_sub, right_laser_sub, nav_light_sub, head_nod_sub, jnt_st;
 
   // Gripper Publishers
-  ros::Publisher left_grip_st_pub, right_grip_st_pub, left_grip_prop_pub,
-      right_grip_prop_pub;
+  ros::Publisher left_grip_st_pub, right_grip_st_pub, left_grip_prop_pub, right_grip_prop_pub;
   // Infrared publishers
-  ros::Publisher left_ir_pub, right_ir_pub, left_ir_int_pub, right_ir_int_pub,
-      left_ir_state_pub, right_ir_state_pub;
+  ros::Publisher left_ir_pub, right_ir_pub, left_ir_int_pub, right_ir_int_pub, left_ir_state_pub, right_ir_state_pub;
   // Navigator publishers
-  ros::Publisher left_inner_light_pub, right_inner_light_pub,
-                 left_outer_light_pub, right_outer_light_pub,
-                 torso_left_inner_light_pub, torso_right_inner_light_pub,
-                 torso_left_outer_light_pub, torso_right_outer_light_pub;
+  ros::Publisher left_inner_light_pub, right_inner_light_pub, left_outer_light_pub, right_outer_light_pub,
+      torso_left_inner_light_pub, torso_right_inner_light_pub, torso_left_outer_light_pub, torso_right_outer_light_pub;
   // General state publishers
   ros::Publisher assembly_state_pub, head_pub;
   // Gravity Publishers
@@ -119,9 +115,8 @@ class baxter_emulator {
   baxter_core_msgs::EndEffectorState left_grip_st, right_grip_st;
   baxter_core_msgs::EndEffectorProperties left_grip_prop, right_grip_prop;
   baxter_core_msgs::AnalogIOState left_ir_state, right_ir_state;
-  baxter_core_msgs::DigitalIOState leftIL_nav_light, leftOL_nav_light,
-      torso_leftIL_nav_light, torso_leftOL_nav_light, rightIL_nav_light,
-      rightOL_nav_light, torso_rightIL_nav_light, torso_rightOL_nav_light;
+  baxter_core_msgs::DigitalIOState leftIL_nav_light, leftOL_nav_light, torso_leftIL_nav_light, torso_leftOL_nav_light,
+      rightIL_nav_light, rightOL_nav_light, torso_rightIL_nav_light, torso_rightOL_nav_light;
   baxter_core_msgs::SEAJointState left_gravity, right_gravity;
   sensor_msgs::JointState jstate_msg;
   sensor_msgs::Range left_ir, right_ir;
@@ -132,45 +127,44 @@ class baxter_emulator {
   /**
    * Callback function to enable the robot
    */
-  void enable_cb(const std_msgs::Bool &msg);
+  void enable_cb(const std_msgs::Bool& msg);
 
   /**
    * Callback function to stop the robot and capture the source of the stop
    */
-  void stop_cb(const std_msgs::Empty &msg);
+  void stop_cb(const std_msgs::Empty& msg);
 
   /**
    * Callback function to reset all the state values to False and 0s
    */
-  void reset_cb(const std_msgs::Empty &msg);
+  void reset_cb(const std_msgs::Empty& msg);
 
   /**
    * Callback function to update the left laser values
    */
-  void left_laser_cb(const sensor_msgs::LaserScan &msg);
+  void left_laser_cb(const sensor_msgs::LaserScan& msg);
 
   /**
    * Callback function to update the right laser values
    */
-  void right_laser_cb(const sensor_msgs::LaserScan &msg);
+  void right_laser_cb(const sensor_msgs::LaserScan& msg);
 
   /**
    * Callback function to update the navigators' light values
    */
-  void nav_light_cb(const baxter_core_msgs::DigitalOutputCommand &msg);
+  void nav_light_cb(const baxter_core_msgs::DigitalOutputCommand& msg);
 
   /**
    * Callback function to capture if the head is nodding
    */
-  void head_nod_cb(const std_msgs::Bool &msg);
+  void head_nod_cb(const std_msgs::Bool& msg);
 
   /**
    * Method that updates the gravity variable
    */
-  void update_jnt_st(const sensor_msgs::JointState &msg);
+  void update_jnt_st(const sensor_msgs::JointState& msg);
 
-  void reset_head_nod(const ros::TimerEvent &t);
-
+  void reset_head_nod(const ros::TimerEvent& t);
 };
 }  // namespace
 
