@@ -56,20 +56,20 @@ bool BaxterEffortController::init(hardware_interface::EffortJointInterface* robo
   XmlRpc::XmlRpcValue xml_struct;
   if (!nh_.getParam("joints", xml_struct))
   {
-    ROS_ERROR("No 'joints' parameter in controller (namespace '%s')", nh_.getNamespace().c_str());
+    ROS_ERROR_NAMED("effort", "No 'joints' parameter in controller (namespace '%s')", nh_.getNamespace().c_str());
     return false;
   }
 
   // Make sure it's a struct
   if (xml_struct.getType() != XmlRpc::XmlRpcValue::TypeStruct)
   {
-    ROS_ERROR("The 'joints' parameter is not a struct (namespace '%s')", nh_.getNamespace().c_str());
+    ROS_ERROR_NAMED("effort", "The 'joints' parameter is not a struct (namespace '%s')", nh_.getNamespace().c_str());
     return false;
   }
 
   // Get number of joints
   n_joints_ = xml_struct.size();
-  ROS_INFO_STREAM("Initializing BaxterEffortController with " << n_joints_ << " joints.");
+  ROS_INFO_STREAM_NAMED("effort", "Initializing BaxterEffortController with " << n_joints_ << " joints.");
 
   effort_controllers_.resize(n_joints_);
 
@@ -79,7 +79,7 @@ bool BaxterEffortController::init(hardware_interface::EffortJointInterface* robo
     // Get joint controller
     if (joint_it->second.getType() != XmlRpc::XmlRpcValue::TypeStruct)
     {
-      ROS_ERROR("The 'joints/joint_controller' parameter is not a struct (namespace '%s')", nh_.getNamespace().c_str());
+      ROS_ERROR_NAMED("effort", "The 'joints/joint_controller' parameter is not a struct (namespace '%s')", nh_.getNamespace().c_str());
       return false;
     }
 
@@ -99,7 +99,7 @@ bool BaxterEffortController::init(hardware_interface::EffortJointInterface* robo
 
       if (!joint_nh.getParam("joint", joint_name[i]))
       {
-        ROS_ERROR("No 'joints' parameter in controller (namespace '%s')", joint_nh.getNamespace().c_str());
+        ROS_ERROR_NAMED("effort", "No 'joints' parameter in controller (namespace '%s')", joint_nh.getNamespace().c_str());
         return false;
       }
       // Create a publisher for every joint controller that publishes to the command topic under that controller

@@ -83,7 +83,7 @@ public:
     GazeboRosControlPlugin::Load(parent, sdf);
 
     // Baxter customizations:
-    ROS_INFO_STREAM_NAMED("baxter_gazebo_ros_control_plugin", "Loading Baxter specific simulation components");
+    ROS_INFO_STREAM_NAMED("ros_control_plugin", "Loading Baxter specific simulation components");
 
     // Subscribe to a topic that switches' Baxter's msgs
     left_command_mode_sub_ = model_nh_.subscribe<baxter_core_msgs::JointCommand>(
@@ -134,13 +134,13 @@ public:
       if (!controller_manager_->switchController(start_controllers, stop_controllers,
                                                  controller_manager_msgs::SwitchController::Request::BEST_EFFORT))
       {
-        ROS_ERROR_STREAM_NAMED("baxter_gazebo_ros_control_plugin", "Failed to switch controllers");
+        ROS_ERROR_STREAM_NAMED("ros_control_plugin", "Failed to switch controllers");
       }
       else
       {
         // Resetting the command modes to the initial configuration
-        ROS_INFO("Robot is disabled");
-        ROS_INFO("Gravity compensation was turned off");
+        ROS_INFO_NAMED("ros_control_plugin", "Robot is disabled");
+        ROS_INFO_NAMED("ros_control_plugin", "Gravity compensation was turned off");
         right_command_mode_.mode = -1;
         left_command_mode_.mode = -1;
         head_is_started = false;
@@ -162,13 +162,13 @@ public:
       if (!controller_manager_->switchController(start_controllers, stop_controllers,
                                                  controller_manager_msgs::SwitchController::Request::STRICT))
       {
-        ROS_ERROR_STREAM_NAMED("baxter_gazebo_ros_control_plugin", "Failed to switch controllers");
+        ROS_ERROR_STREAM_NAMED("ros_control_plugin", "Failed to switch controllers");
       }
       else
       {
-        ROS_INFO("Robot is enabled");
-        ROS_INFO("Left Grippercontroller was successfully started");
-        ROS_INFO("Gravity compensation was turned on");
+        ROS_INFO_NAMED("ros_control_plugin", "Robot is enabled");
+        ROS_INFO_NAMED("ros_control_plugin", "Left Grippercontroller was successfully started");
+        ROS_INFO_NAMED("ros_control_plugin", "Gravity compensation was turned on");
         left_gripper_is_started = true;
         is_disabled = false;
       }
@@ -187,13 +187,13 @@ public:
       if (!controller_manager_->switchController(start_controllers, stop_controllers,
                                                  controller_manager_msgs::SwitchController::Request::STRICT))
       {
-        ROS_ERROR_STREAM_NAMED("baxter_gazebo_ros_control_plugin", "Failed to switch controllers");
+        ROS_ERROR_STREAM_NAMED("ros_control_plugin", "Failed to switch controllers");
       }
       else
       {
-        ROS_INFO("Robot is enabled");
-        ROS_INFO("Right Grippercontroller was successfully started");
-        ROS_INFO("Gravity compensation was turned on");
+        ROS_INFO_NAMED("ros_control_plugin", "Robot is enabled");
+        ROS_INFO_NAMED("ros_control_plugin", "Right Grippercontroller was successfully started");
+        ROS_INFO_NAMED("ros_control_plugin", "Gravity compensation was turned on");
         right_gripper_is_started = true;
         is_disabled = false;
       }
@@ -212,13 +212,13 @@ public:
       if (!controller_manager_->switchController(start_controllers, stop_controllers,
                                                  controller_manager_msgs::SwitchController::Request::STRICT))
       {
-        ROS_ERROR_STREAM_NAMED("baxter_gazebo_ros_control_plugin", "Failed to switch controllers");
+        ROS_ERROR_STREAM_NAMED("ros_control_plugin", "Failed to switch controllers");
       }
       else
       {
-        ROS_INFO("Robot is enabled");
-        ROS_INFO("Head controller was successfully started");
-        ROS_INFO("Gravity compensation was turned on");
+        ROS_INFO_NAMED("ros_control_plugin", "Robot is enabled");
+        ROS_INFO_NAMED("ros_control_plugin", "Head controller was successfully started");
+        ROS_INFO_NAMED("ros_control_plugin", "Gravity compensation was turned on");
         head_is_started = true;
         is_disabled = false;
       }
@@ -240,7 +240,7 @@ public:
     }
     else
     {
-      ROS_WARN_STREAM_NAMED("baxter_gazebo_ros_control_plugin", "Enable the robot");
+      ROS_WARN_STREAM_NAMED("ros_control_plugin", "Enable the robot");
       return;
     }
   }
@@ -259,14 +259,14 @@ public:
     }
     else
     {
-      ROS_WARN_STREAM_NAMED("baxter_gazebo_ros_control_plugin", "Enable the robot");
+      ROS_WARN_STREAM_NAMED("ros_control_plugin", "Enable the robot");
       return;
     }
   }
 
   void modeCommandCallback(const baxter_core_msgs::JointCommandConstPtr& msg, const std::string& side)
   {
-    ROS_DEBUG_STREAM_NAMED("baxter_gazebo_ros_control_plugin", "Switching command mode for side " << side);
+    ROS_DEBUG_STREAM_NAMED("ros_control_plugin", "Switching command mode for side " << side);
 
     // lock out other thread(s) which are getting called back via ros.
     boost::lock_guard<boost::mutex> guard(mtx_);
@@ -300,7 +300,7 @@ public:
         stop = side + "_joint_velocity_controller and " + side + "_joint_velocity_controller";
         break;
       default:
-        ROS_ERROR_STREAM_NAMED("baxter_gazebo_ros_control_plugin", "Unknown command mode " << msg->mode);
+        ROS_ERROR_STREAM_NAMED("ros_control_plugin", "Unknown command mode " << msg->mode);
         return;
     }
     // Checks if we have already disabled the controllers
@@ -317,14 +317,14 @@ public:
     if (!controller_manager_->switchController(start_controllers, stop_controllers,
                                                controller_manager_msgs::SwitchController::Request::BEST_EFFORT))
     {
-      ROS_ERROR_STREAM_NAMED("baxter_gazebo_ros_control_plugin", "Failed to switch controllers");
+      ROS_ERROR_STREAM_NAMED("ros_control_plugin", "Failed to switch controllers");
     }
     else
     {
       is_disabled = false;
-      ROS_INFO("Robot is enabled");
+      ROS_INFO_NAMED("ros_control_plugin", "Robot is enabled");
       ROS_INFO_STREAM(start << " was started and " << stop << " were stopped succesfully");
-      ROS_INFO("Gravity compensation was turned on");
+      ROS_INFO_NAMED("ros_control_plugin", "Gravity compensation was turned on");
     }
   }
 };
