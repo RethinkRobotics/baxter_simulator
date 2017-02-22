@@ -59,6 +59,7 @@
   <include file="$(find baxter_sim_hardware)/launch/baxter_sdk_control.launch">
       <arg name="right_electric_gripper" value="$(arg right_electric_gripper)"/>
       <arg name="left_electric_gripper" value="$(arg left_electric_gripper)"/>
+      <arg name="gui" value="$(arg gui)" />
   </include>
 
 </launch>

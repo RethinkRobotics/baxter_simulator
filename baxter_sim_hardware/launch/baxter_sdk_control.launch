@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <launch>
 
+  <!-- these are the arguments you can pass this launch file, for example paused:=true -->
   <arg name="left_electric_gripper" default="true"/>
   <arg name="right_electric_gripper" default="true"/>
+  <arg name="gui" default="true"/>
 
   <!-- baxter_sim_kinematics launch file to do the Forward/Inverse Kinematics -->
   <include file="$(find baxter_sim_kinematics)/launch/baxter_sim_kinematics.launch" />
@@ -45,7 +47,9 @@
     <remap from="/joint_states" to="/robot/joint_states" />
   </node>
 
-  <node name="baxter_sim_io" pkg="baxter_sim_io" type="baxter_sim_io"
-	respawn="false" output="screen">
-  </node>
+  <group if="$(arg gui)">
+    <node name="baxter_sim_io" pkg="baxter_sim_io" type="baxter_sim_io"
+	  respawn="false" output="screen"/>
+  </group>
+
 </launch>
