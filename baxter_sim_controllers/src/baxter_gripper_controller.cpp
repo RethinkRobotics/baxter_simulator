@@ -191,7 +191,7 @@ void BaxterGripperController::updateCommands()
   }
 #endif
   // Update the individual joint controllers
-  ROS_DEBUG_STREAM(gripper_controllers[main_idx_]->joint_urdf_->name << "->setCommand(" << cmd_position << ")");
+  ROS_DEBUG_STREAM_NAMED("gripper", gripper_controllers[main_idx_]->joint_urdf_->name << "->setCommand(" << cmd_position << ")");
   gripper_controllers[main_idx_]->setCommand(cmd_position);
   gripper_controllers[mimic_idx_]->setCommand(gripper_controllers[mimic_idx_]->joint_urdf_->mimic->multiplier *
                                                   cmd_position +

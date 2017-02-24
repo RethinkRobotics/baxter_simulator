@@ -323,8 +323,8 @@ public:
     {
       is_disabled = false;
       ROS_INFO_NAMED("ros_control_plugin", "Robot is enabled");
-      ROS_INFO_STREAM(start << " was started and " << stop << " were stopped succesfully");
-      ROS_INFO_NAMED("ros_control_plugin", "Gravity compensation was turned on");
+      ROS_DEBUG_STREAM_NAMED("ros_control_plugin", "Controller " << start << " started and " << stop << " stopped.");
+      ROS_INFO_NAMED("ros_control_plugin", "Gravity compensation was turned on by mode command callback");
     }
   }
 };
