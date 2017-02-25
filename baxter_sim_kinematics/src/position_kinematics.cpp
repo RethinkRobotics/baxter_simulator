@@ -230,12 +230,13 @@ kinematics::position_kinematics::poskin_ptr g_pNode;
 //! Helper function for
 void quitRequested(int)
 {
-  ROS_INFO_NAMED("position_kin", "position_kinematics: Terminating program...");
   if (g_pNode)
   {
     g_pNode->exit();
     g_pNode.reset();
   }
+
+  ros::shutdown();
 }
 
 /**
@@ -250,12 +251,10 @@ int main(int argc, char* argv[])
     fprintf(stderr, "Usage: %s <left | right>\n", argv[0]);
     return 1;
   }
-  ros::init(argc, argv, "baxter_sim_kinematics_" + side);
+  ros::init(argc, argv, "baxter_sim_kinematics_" + side, ros::init_options::NoSigintHandler);
 
   // capture signals and attempt to cleanup Node
-  signal(SIGTERM, quitRequested);
   signal(SIGINT, quitRequested);
-  signal(SIGHUP, quitRequested);
 
   g_pNode = kinematics::position_kinematics::create(side);
 
