@@ -272,7 +272,7 @@ void baxter_emulator::startPublishLoop(const std::string& img_path)
   ros::Rate loop_rate(100);
 
   arm_kinematics::Kinematics kin;
-  kin.init_grav();
+  kin.init_grav(); // Disable gravity on Baxter's arms
 
   image_transport::ImageTransport it(n);
   image_transport::Publisher display_pub = it.advertise(BAXTER_DISPLAY_TOPIC, 1);
@@ -296,7 +296,8 @@ void baxter_emulator::startPublishLoop(const std::string& img_path)
   {
     ROS_WARN_NAMED("emulator", "Unable to load the Startup picture on Baxter's display screen %s", e.what());
   }
-  ROS_INFO_NAMED("emulator", "Simulator is loaded and started successfully");
+  ROS_INFO_NAMED("emulator", "***************** Simulator is loaded and started successfully *****************\n\n");
+
   std_msgs::Empty started_msg;
   sim_started_pub.publish(started_msg);
   while (ros::ok())

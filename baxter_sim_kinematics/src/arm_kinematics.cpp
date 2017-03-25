@@ -79,13 +79,12 @@ bool Kinematics::init_grav()
   // Service client to set the gravity false for the limbs
   ros::ServiceClient set_lp_client = nh.serviceClient<gazebo_msgs::SetLinkProperties>("/gazebo/set_link_properties");
 
-  // Wait for service to become availablestd::find(vector.begin(), vector.end(), item)!=vector.end()
+  // Wait for service to become available
   set_lp_client.waitForExistence();
 
   gazebo_msgs::SetLinkProperties setlinkproperties;
   gazebo_msgs::GetLinkProperties getlinkproperties;
 
-  setlinkproperties.request.gravity_mode = 0;
   // Load the right chain and copy them to Right specific variables
   tip_name = grav_right_name;
   if (!loadModel(result))

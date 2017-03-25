@@ -67,6 +67,8 @@ class Kinematics
 {
 public:
   Kinematics();
+
+  // Disable gravity on Baxter's arms
   bool init_grav();
 
   /* Initializes the solvers and the other variables required
