@@ -237,7 +237,7 @@ void QNode::run()
     ros::spinOnce();
     loop_rate.sleep();
   }
-  ROS_INFO("Ros shutdown, proceeding to close the gui.");
+  ROS_INFO_NAMED("qnode", "Ros shutdown, proceeding to close the gui.");
 }
 
 }  // namespace baxter_sim_io

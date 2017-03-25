@@ -290,9 +290,9 @@ void baxter_emulator::publish(const std::string& img_path)
   }
   catch (std::exception e)
   {
-    ROS_WARN("Unable to load the Startup picture on Baxter's display screen %s", e.what());
+    ROS_WARN_NAMED("emulator", "Unable to load the Startup picture on Baxter's display screen %s", e.what());
   }
-  ROS_INFO("Simulator is loaded and started successfully");
+  ROS_INFO_NAMED("emulator", "Simulator is loaded and started successfully");
   std_msgs::Empty started_msg;
   sim_started_pub.publish(started_msg);
   while (ros::ok())
@@ -447,7 +447,7 @@ void baxter_emulator::nav_light_cb(const baxter_core_msgs::DigitalOutputCommand&
       torso_rightOL_nav_light.state = res;
       break;
     default:
-      ROS_ERROR("Not a valid component id");
+      ROS_ERROR_NAMED("emulator", "Not a valid component id");
       break;
   }
 }

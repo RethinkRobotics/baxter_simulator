@@ -51,20 +51,20 @@ bool BaxterGripperController::init(hardware_interface::EffortJointInterface* rob
   XmlRpc::XmlRpcValue xml_struct;
   if (!nh_.getParam("joints", xml_struct))
   {
-    ROS_ERROR("No 'joints' parameter in controller (namespace '%s')", nh_.getNamespace().c_str());
+    ROS_ERROR_NAMED("gripper", "No 'joints' parameter in controller (namespace '%s')", nh_.getNamespace().c_str());
     return false;
   }
 
   // Make sure it's a struct
   if (xml_struct.getType() != XmlRpc::XmlRpcValue::TypeStruct)
   {
-    ROS_ERROR("The 'joints' parameter is not a struct (namespace '%s')", nh_.getNamespace().c_str());
+    ROS_ERROR_NAMED("gripper", "The 'joints' parameter is not a struct (namespace '%s')", nh_.getNamespace().c_str());
     return false;
   }
 
   // Get number of joints
   n_joints = xml_struct.size();
-  ROS_INFO_STREAM("Initializing BaxterGripperController with " << n_joints << " joints.");
+  ROS_INFO_STREAM_NAMED("gripper", "Initializing BaxterGripperController with " << n_joints << " joints.");
 
   gripper_controllers.resize(n_joints);
   int i = 0;  // track the joint id
@@ -73,7 +73,7 @@ bool BaxterGripperController::init(hardware_interface::EffortJointInterface* rob
     // Get joint controller
     if (joint_it->second.getType() != XmlRpc::XmlRpcValue::TypeStruct)
     {
-      ROS_ERROR("The 'joints/joint_controller' parameter is not a struct (namespace '%s')", nh_.getNamespace().c_str());
+      ROS_ERROR_NAMED("gripper", "The 'joints/joint_controller' parameter is not a struct (namespace '%s')", nh_.getNamespace().c_str());
       return false;
     }
 
@@ -166,7 +166,7 @@ void BaxterGripperController::updateCommands()
   // Get latest command
   const baxter_core_msgs::EndEffectorCommand& command = *(gripper_command_buffer.readFromRT());
 
-  ROS_DEBUG_STREAM("Gripper update commands " << command.command << " " << command.args);
+  ROS_DEBUG_STREAM_NAMED("gripper", "Gripper update commands " << command.command << " " << command.args);
   if (command.command != baxter_core_msgs::EndEffectorCommand::CMD_GO)
     return;
 
@@ -191,7 +191,7 @@ void BaxterGripperController::updateCommands()
   }
 #endif
   // Update the individual joint controllers
-  ROS_DEBUG_STREAM(gripper_controllers[main_idx_]->joint_urdf_->name << "->setCommand(" << cmd_position << ")");
+  ROS_DEBUG_STREAM_NAMED("gripper", gripper_controllers[main_idx_]->joint_urdf_->name << "->setCommand(" << cmd_position << ")");
   gripper_controllers[main_idx_]->setCommand(cmd_position);
   gripper_controllers[mimic_idx_]->setCommand(gripper_controllers[mimic_idx_]->joint_urdf_->mimic->multiplier *
                                                   cmd_position +

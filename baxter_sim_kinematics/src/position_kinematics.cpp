@@ -77,12 +77,12 @@ bool position_kinematics::init(std::string side)
   {
     if (!handle.getParam("right_tip_name", tip_name))
     {
-      ROS_FATAL("GenericIK: No tip name for Right arm found on parameter server");
+      ROS_FATAL_NAMED("position_kin", "GenericIK: No tip name for Right arm found on parameter server");
       return false;
     }
     if (!handle.getParam("robot_config/right_config/joint_names", joint_names))
     {
-      ROS_FATAL("GenericIK: No Joint Names for the Right Arm found on parameter server");
+      ROS_FATAL_NAMED("position_kin", "GenericIK: No Joint Names for the Right Arm found on parameter server");
       return false;
     }
   }
@@ -90,12 +90,12 @@ bool position_kinematics::init(std::string side)
   {
     if (!handle.getParam("left_tip_name", tip_name))
     {
-      ROS_FATAL("GenericIK: No tip name for Right arm found on parameter server");
+      ROS_FATAL_NAMED("position_kin", "GenericIK: No tip name for Right arm found on parameter server");
       return false;
     }
     if (!handle.getParam("robot_config/left_config/joint_names", joint_names))
     {
-      ROS_FATAL("GenericIK: No Joint Names for the Left Arm found on parameter server");
+      ROS_FATAL_NAMED("position_kin", "GenericIK: No Joint Names for the Left Arm found on parameter server");
       return false;
     }
   }
@@ -205,7 +205,7 @@ bool position_kinematics::IKCallback(baxter_core_msgs::SolvePositionIK::Request&
 
     if (!valid_inp)
     {
-      ROS_ERROR("Not a valid request message to the IK service");
+      ROS_ERROR_NAMED("position_kin", "Not a valid request message to the IK service");
       return false;
     }
 
@@ -230,7 +230,7 @@ kinematics::position_kinematics::poskin_ptr g_pNode;
 //! Helper function for
 void quitRequested(int)
 {
-  ROS_INFO("position_kinematics: Terminating program...");
+  ROS_INFO_NAMED("position_kin", "position_kinematics: Terminating program...");
   if (g_pNode)
   {
     g_pNode->exit();

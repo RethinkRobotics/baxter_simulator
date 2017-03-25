@@ -61,20 +61,20 @@ bool BaxterPositionController::init(hardware_interface::EffortJointInterface* ro
   XmlRpc::XmlRpcValue xml_struct;
   if (!nh_.getParam("joints", xml_struct))
   {
-    ROS_ERROR("No 'joints' parameter in controller (namespace '%s')", nh_.getNamespace().c_str());
+    ROS_ERROR_NAMED("position", "No 'joints' parameter in controller (namespace '%s')", nh_.getNamespace().c_str());
     return false;
   }
 
   // Make sure it's a struct
   if (xml_struct.getType() != XmlRpc::XmlRpcValue::TypeStruct)
   {
-    ROS_ERROR("The 'joints' parameter is not a struct (namespace '%s')", nh_.getNamespace().c_str());
+    ROS_ERROR_NAMED("position", "The 'joints' parameter is not a struct (namespace '%s')", nh_.getNamespace().c_str());
     return false;
   }
 
   // Get number of joints
   n_joints_ = xml_struct.size();
-  ROS_INFO_STREAM("Initializing BaxterPositionController with " << n_joints_ << " joints.");
+  ROS_INFO_STREAM_NAMED("position", "Initializing BaxterPositionController with " << n_joints_ << " joints.");
 
   position_controllers_.resize(n_joints_);
 
@@ -84,7 +84,7 @@ bool BaxterPositionController::init(hardware_interface::EffortJointInterface* ro
     // Get joint controller
     if (joint_it->second.getType() != XmlRpc::XmlRpcValue::TypeStruct)
     {
-      ROS_ERROR("The 'joints/joint_controller' parameter is not a struct (namespace '%s')", nh_.getNamespace().c_str());
+      ROS_ERROR_NAMED("position", "The 'joints/joint_controller' parameter is not a struct (namespace '%s')", nh_.getNamespace().c_str());
       return false;
     }
 
