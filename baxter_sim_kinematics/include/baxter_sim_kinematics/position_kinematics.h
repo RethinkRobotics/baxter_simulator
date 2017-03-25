@@ -89,9 +89,6 @@ public:
 
     // we have left the ros spin loop, clean up (if needed) then shutdown
     exit();
-
-    // attempt proper shutdown
-    ros::shutdown();
   }
 
   /**
@@ -105,6 +102,9 @@ public:
     // Note: Run loop will call shutdown before exiting
 
     m_ikService.shutdown();
+    joint_states_sub.shutdown();
+    robot_state_sub.shutdown();
+    end_pointstate_pub.shutdown();
   }
 
 private:
