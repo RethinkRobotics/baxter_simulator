@@ -27,7 +27,6 @@
  # POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-
 #ifndef BAXTER_GRIPPER_CONTROLLER_H_
 #define BAXTER_GRIPPER_CONTROLLER_H_
 
@@ -42,56 +41,52 @@
 #include <realtime_tools/realtime_buffer.h>
 
 #include <baxter_core_msgs/EndEffectorCommand.h>
-#include <effort_controllers/joint_position_controller.h> // used for controlling individual joints
-
+#include <effort_controllers/joint_position_controller.h>  // used for controlling individual joints
 
 namespace baxter_sim_controllers
 {
-  class BaxterGripperController: public controller_interface::Controller<hardware_interface::EffortJointInterface>
-  {
+class BaxterGripperController : public controller_interface::Controller<hardware_interface::EffortJointInterface>
+{
+public:
+  BaxterGripperController();
+  ~BaxterGripperController();
 
-  public:
-    BaxterGripperController();
-    ~BaxterGripperController();
+  bool init(hardware_interface::EffortJointInterface* robot, ros::NodeHandle& n);
+  void starting(const ros::Time& time);
+  void stopping(const ros::Time& time);
+  void update(const ros::Time& time, const ros::Duration& period);
+  void updateCommands();
 
-    bool init(hardware_interface::EffortJointInterface *robot, ros::NodeHandle &n) ;
-    void starting(const ros::Time& time) ;
-    void stopping(const ros::Time& time) ;
-    void update(const ros::Time& time, const ros::Duration& period) ;
-    void updateCommands() ;
+private:
+  ros::NodeHandle nh_;
 
-  private:
-    ros::NodeHandle nh_;
+  /**< Last commanded position. */
+  realtime_tools::RealtimeBuffer<baxter_core_msgs::EndEffectorCommand> gripper_command_buffer;
 
-    /**< Last commanded position. */
-    realtime_tools::RealtimeBuffer<baxter_core_msgs::EndEffectorCommand> gripper_command_buffer;
+  size_t n_joints;
+  std::string topic_name;
+  // Indices for mimic and orignal joints
+  int mimic_idx_;
+  int main_idx_;
 
-    size_t n_joints;
-    std::string topic_name;
-    // Indices for mimic and orignal joints
-    int mimic_idx_;
-    int main_idx_;
+  std::map<std::string, std::size_t> joint_to_index_map;  // allows incoming messages to be quickly ordered
 
-    std::map<std::string,std::size_t> joint_to_index_map; // allows incoming messages to be quickly ordered
+  bool new_command;  // true when an unproccessed new command is in the realtime buffer
+  size_t update_counter;
 
-    bool new_command; // true when an unproccessed new command is in the realtime buffer
-    size_t update_counter;
+  // Command subscriber
+  ros::Subscriber gripper_command_sub;
 
-    // Command subscriber
-    ros::Subscriber gripper_command_sub;
+  /**
+   * @brief Callback from a recieved goal from the published topic message
+   * @param msg trajectory goal
+   */
+  void commandCB(const baxter_core_msgs::EndEffectorCommandConstPtr& msg);
 
-    /**
-     * @brief Callback from a recieved goal from the published topic message
-     * @param msg trajectory goal
-     */
-    void commandCB(const baxter_core_msgs::EndEffectorCommandConstPtr& msg);
+  // Create an effort-based joint position controller for every joint
+  std::vector<boost::shared_ptr<effort_controllers::JointPositionController> > gripper_controllers;
+};
 
-    // Create an effort-based joint position controller for every joint
-    std::vector<
-      boost::shared_ptr<
-        effort_controllers::JointPositionController> > gripper_controllers;
-  };
-
-} // namespace
+}  // namespace
 
 #endif /* BAXTER_GRIPPER_CONTROLLER_H_ */

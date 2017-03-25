@@ -54,27 +54,31 @@
 #include <gazebo_msgs/GetLinkProperties.h>
 #include <algorithm>
 
-namespace arm_kinematics {
-
-//Structures to pass the messages
-typedef struct INFO {
+namespace arm_kinematics
+{
+// Structures to pass the messages
+typedef struct INFO
+{
   std::vector<std::string> link_names;
   std::vector<std::string> joint_names;
 } KinematicSolverInfo;
 
-class Kinematics {
- public:
+class Kinematics
+{
+public:
   Kinematics();
   bool init_grav();
 
   /* Initializes the solvers and the other variables required
    *  @returns true is successful
    */
-  bool init(std::string tip_name, int &no_jts);
+  bool init(std::string tip_name, int& no_jts);
   typedef boost::shared_ptr<Kinematics> Ptr;
-  static Ptr create(std::string tip_name, int &no_jts) {
+  static Ptr create(std::string tip_name, int& no_jts)
+  {
     Ptr parm_kinematics = Ptr(new Kinematics());
-    if (parm_kinematics->init(tip_name, no_jts)) {
+    if (parm_kinematics->init(tip_name, no_jts))
+    {
       return parm_kinematics;
     }
     return Ptr();
@@ -83,25 +87,25 @@ class Kinematics {
   /* Method to calculate the IK for the required end pose
    *  @returns true if successful
    */
-  bool getPositionIK(const geometry_msgs::PoseStamped &pose_stamp,
-                     const sensor_msgs::JointState &seed,
-                     sensor_msgs::JointState *result);
+  bool getPositionIK(const geometry_msgs::PoseStamped& pose_stamp, const sensor_msgs::JointState& seed,
+                     sensor_msgs::JointState* result);
 
   /* Method to calculate the FK for the required joint configuration
    *  @returns true if successful
    */
-  bool getPositionFK(std::string frame_id,
-                     const sensor_msgs::JointState &joint_configuration,
-                     geometry_msgs::PoseStamped &res);
+  bool getPositionFK(std::string frame_id, const sensor_msgs::JointState& joint_configuration,
+                     geometry_msgs::PoseStamped& res);
 
   /* Method to calculate the torques required to apply at each of the joints for gravity compensation
    *  @returns true is successful
    */
-  //bool getGravityTorques(const sensor_msgs::JointState &joint_configuration,
-  //std::vector<double> &torquesOut);
-  bool getGravityTorques(const sensor_msgs::JointState joint_configuration, baxter_core_msgs::SEAJointState &left_gravity, baxter_core_msgs::SEAJointState &right_gravity, bool isEnabled);
+  // bool getGravityTorques(const sensor_msgs::JointState &joint_configuration,
+  // std::vector<double> &torquesOut);
+  bool getGravityTorques(const sensor_msgs::JointState joint_configuration,
+                         baxter_core_msgs::SEAJointState& left_gravity, baxter_core_msgs::SEAJointState& right_gravity,
+                         bool isEnabled);
 
- private:
+private:
   ros::NodeHandle nh, nh_private;
   std::string root_name, tip_name, grav_left_name, grav_right_name;
   KDL::JntArray joint_min, joint_max;
@@ -109,7 +113,7 @@ class Kinematics {
   unsigned int num_joints;
 
   KDL::ChainFkSolverPos_recursive* fk_solver;
-  KDL::ChainIkSolverPos_NR_JL *ik_solver_pos;
+  KDL::ChainIkSolverPos_NR_JL* ik_solver_pos;
   KDL::ChainIkSolverVel_pinv* ik_solver_vel;
   KDL::ChainIdSolver_RNE *gravity_solver_l, *gravity_solver_r;
 
@@ -129,18 +133,17 @@ class Kinematics {
   /* Method to read the URDF model and extract the joints
    *  @returns true is successful
    */
-  bool readJoints(urdf::Model &robot_model);
+  bool readJoints(urdf::Model& robot_model);
 
   /* Method to calculate the Joint index of a particular joint from the KDL chain
    *  @returns the index of the joint
    */
-  int getJointIndex(const std::string &name);
+  int getJointIndex(const std::string& name);
 
   /* Method to calculate the KDL segment index of a particular segment from the KDL chain
    *  @returns the index of the segment
    */
-  int getKDLSegmentIndex(const std::string &name);
+  int getKDLSegmentIndex(const std::string& name);
 };
-
 }
 #endif
