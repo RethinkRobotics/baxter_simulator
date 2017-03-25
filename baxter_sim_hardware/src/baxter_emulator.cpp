@@ -76,7 +76,7 @@ const std::string BAXTER_RIGHT_GRAVITY_TOPIC = "robot/limb/right/gravity_compens
 
 const std::string BAXTER_SIM_STARTED = "robot/sim/started";
 
-const int IMG_LOAD_ON_STARTUP_DELAY = 35;  // Timeout for publishing a single RSDK image on start up
+const int IMG_LOAD_ON_STARTUP_DELAY = 10;  // Timeout for publishing a single RSDK image on start up
 
 enum nav_light_enum
 {
@@ -267,7 +267,7 @@ bool baxter_emulator::init()
  * Method that publishes the emulated interfaces' states and data at 100 Hz
  * @param img_path that refers the path of the image that loads on start up
  */
-void baxter_emulator::publish(const std::string& img_path)
+void baxter_emulator::startPublishLoop(const std::string& img_path)
 {
   ros::Rate loop_rate(100);
 
@@ -284,7 +284,11 @@ void baxter_emulator::publish(const std::string& img_path)
     if (cv_ptr->image.data)
     {
       cv_ptr->encoding = sensor_msgs::image_encodings::BGR8;
-      sleep(IMG_LOAD_ON_STARTUP_DELAY);  // Wait for the model to load
+
+      // Wait for the VideoPlugin screen to load, or timeout after delay
+      const std::size_t num_required_subscribers = 2;
+      waitForSubscriber(display_pub, IMG_LOAD_ON_STARTUP_DELAY, num_required_subscribers);
+
       display_pub.publish(cv_ptr->toImageMsg());
     }
   }
@@ -521,6 +525,52 @@ void baxter_emulator::update_jnt_st(const sensor_msgs::JointState& msg)
   }
 }
 
+bool baxter_emulator::waitForSubscriber(const image_transport::Publisher& pub, const double wait_time,
+                                        const std::size_t num_req_sub)
+{
+  // Will wait at most this amount of time
+  ros::Time max_time(ros::Time::now() + ros::Duration(wait_time));
+
+  // This is wrong. It returns only the number of subscribers that have already
+  // established their direct connections to this publisher
+  int num_existing_subscribers = pub.getNumSubscribers();
+
+  // How often to check for subscribers
+  ros::Rate poll_rate(200);
+
+  if (wait_time > std::numeric_limits<double>::epsilon() && num_existing_subscribers == 0)
+    ROS_INFO_STREAM_NAMED("emulator", "Topic '" << pub.getTopic() << "' waiting for subscriber...");
+
+  // Wait for subscriber
+  while (num_existing_subscribers < num_req_sub)
+  {
+    ROS_DEBUG_STREAM_THROTTLE_NAMED(2.0, "emulator", "Waiting " << max_time - ros::Time::now()
+                                    << " num_existing_sub "<< num_existing_subscribers
+                                    << " of required " << num_req_sub);
+
+
+    if (wait_time < std::numeric_limits<double>::epsilon() || ros::Time::now() > max_time)  // Check if timed out
+    {
+      ROS_WARN_STREAM_NAMED("emulator", "Topic '" << pub.getTopic() << "' unable to connect to " << num_req_sub << " subscribers within "
+                            << wait_time << " sec. It is possible initially published visual messages will be lost.");
+
+      return false;
+    }
+    ros::spinOnce();
+
+    // Sleep
+    poll_rate.sleep();
+
+    // Check again
+    num_existing_subscribers = pub.getNumSubscribers();
+
+    if (!ros::ok())
+      return false;
+  }
+
+  return true;
+}
+
 }  // namespace
 
 int main(int argc, char* argv[])
@@ -528,9 +578,10 @@ int main(int argc, char* argv[])
   ros::init(argc, argv, "baxter_emulator");
 
   std::string img_path = argc > 1 ? argv[1] : "";
+
   baxter_en::baxter_emulator emulate;
   bool result = emulate.init();
-  emulate.publish(img_path);
+  emulate.startPublishLoop(img_path);
 
   return 0;
 }
