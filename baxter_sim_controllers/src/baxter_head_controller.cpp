@@ -30,52 +30,51 @@
 #include <baxter_sim_controllers/baxter_head_controller.h>
 #include <pluginlib/class_list_macros.h>
 
-namespace baxter_sim_controllers {
-
-BaxterHeadController::BaxterHeadController()
-    : new_command(true),
-      update_counter(0) {
+namespace baxter_sim_controllers
+{
+BaxterHeadController::BaxterHeadController() : new_command(true), update_counter(0)
+{
 }
 
-BaxterHeadController::~BaxterHeadController() {
+BaxterHeadController::~BaxterHeadController()
+{
   head_command_sub.shutdown();
 }
 
-bool BaxterHeadController::init(hardware_interface::EffortJointInterface *robot,
-                                ros::NodeHandle &nh) {
+bool BaxterHeadController::init(hardware_interface::EffortJointInterface* robot, ros::NodeHandle& nh)
+{
   // Store nodehandle
   nh_ = nh;
 
   // Get joint sub-controllers
   XmlRpc::XmlRpcValue xml_struct;
-  if (!nh_.getParam("joints", xml_struct)) {
-    ROS_ERROR("No 'joints' parameter in controller (namespace '%s')",
-              nh_.getNamespace().c_str());
+  if (!nh_.getParam("joints", xml_struct))
+  {
+    ROS_ERROR_NAMED("head", "No 'joints' parameter in controller (namespace '%s')", nh_.getNamespace().c_str());
     return false;
   }
 
   // Make sure it's a struct
-  if (xml_struct.getType() != XmlRpc::XmlRpcValue::TypeStruct) {
-    ROS_ERROR("The 'joints' parameter is not a struct (namespace '%s')",
-              nh_.getNamespace().c_str());
+  if (xml_struct.getType() != XmlRpc::XmlRpcValue::TypeStruct)
+  {
+    ROS_ERROR_NAMED("head", "The 'joints' parameter is not a struct (namespace '%s')", nh_.getNamespace().c_str());
     return false;
   }
 
   // Get number of joints
   n_joints = xml_struct.size();
-  ROS_INFO_STREAM(
-      "Initializing BaxterHeadController with "<<n_joints<<" joints.");
+  ROS_INFO_STREAM_NAMED("head", "Initializing BaxterHeadController with " << n_joints << " joints.");
 
   head_controllers.resize(n_joints);
 
   int i = 0;  // track the joint id
-  for (XmlRpc::XmlRpcValue::iterator joint_it = xml_struct.begin();
-      joint_it != xml_struct.end(); ++joint_it) {
+  for (XmlRpc::XmlRpcValue::iterator joint_it = xml_struct.begin(); joint_it != xml_struct.end(); ++joint_it)
+  {
     // Get joint controller
-    if (joint_it->second.getType() != XmlRpc::XmlRpcValue::TypeStruct) {
-      ROS_ERROR(
-          "The 'joints/joint_controller' parameter is not a struct (namespace '%s')",
-          nh_.getNamespace().c_str());
+    if (joint_it->second.getType() != XmlRpc::XmlRpcValue::TypeStruct)
+    {
+      ROS_ERROR_NAMED("head", "The 'joints/joint_controller' parameter is not a struct (namespace '%s')",
+                      nh_.getNamespace().c_str());
       return false;
     }
 
@@ -85,75 +84,77 @@ bool BaxterHeadController::init(hardware_interface::EffortJointInterface *robot,
     // Get the joint-namespace nodehandle
     {
       ros::NodeHandle joint_nh(nh_, "joints/" + joint_controller_name);
-      ROS_INFO_STREAM_NAMED(
-          "init",
-          "Loading sub-controller '" << joint_controller_name << "', Namespace: " << joint_nh.getNamespace());
+      ROS_INFO_STREAM_NAMED("init", "Loading sub-controller '" << joint_controller_name
+                                                               << "', Namespace: " << joint_nh.getNamespace());
 
-      head_controllers[i].reset(
-          new effort_controllers::JointPositionController());
+      head_controllers[i].reset(new effort_controllers::JointPositionController());
       head_controllers[i]->init(robot, joint_nh);
 
     }  // end of joint-namespaces
 
     // Add joint name to map (allows unordered list to quickly be mapped to the ordered index)
-    joint_to_index_map.insert(
-        std::pair<std::string, std::size_t>(head_controllers[i]->getJointName(),
-                                            i));
+    joint_to_index_map.insert(std::pair<std::string, std::size_t>(head_controllers[i]->getJointName(), i));
 
     // increment joint i
     ++i;
   }
 
   // Get controller topic name that it will subscribe to
-  if (nh_.getParam("topic", topic_name)) { // They provided a custom topic to subscribe to
+  if (nh_.getParam("topic", topic_name))
+  {  // They provided a custom topic to subscribe to
 
     // Get a node handle that is relative to the base path
     ros::NodeHandle nh_base("~");
 
     // Create command subscriber custom to baxter
-    head_command_sub = nh_base.subscribe<baxter_core_msgs::HeadPanCommand>(
-        topic_name, 1, &BaxterHeadController::commandCB, this);
-  } else  // default "command" topic
+    head_command_sub =
+        nh_base.subscribe<baxter_core_msgs::HeadPanCommand>(topic_name, 1, &BaxterHeadController::commandCB, this);
+  }
+  else  // default "command" topic
   {
     // Create command subscriber custom to baxter
-    head_command_sub = nh_.subscribe<baxter_core_msgs::HeadPanCommand>(
-        "command", 1, &BaxterHeadController::commandCB, this);
+    head_command_sub =
+        nh_.subscribe<baxter_core_msgs::HeadPanCommand>("command", 1, &BaxterHeadController::commandCB, this);
   }
 
   return true;
 }
 
-void BaxterHeadController::starting(const ros::Time& time) {
+void BaxterHeadController::starting(const ros::Time& time)
+{
   baxter_core_msgs::HeadPanCommand initial_command;
 
   // Fill in the initial command
-  for (int i = 0; i < n_joints; i++) {
+  for (int i = 0; i < n_joints; i++)
+  {
     initial_command.target = head_controllers[i]->getPosition();
   }
   head_command_buffer.initRT(initial_command);
   new_command = true;
 }
 
-void BaxterHeadController::stopping(const ros::Time& time) {
-
+void BaxterHeadController::stopping(const ros::Time& time)
+{
 }
 
-void BaxterHeadController::update(const ros::Time& time,
-                                  const ros::Duration& period) {
+void BaxterHeadController::update(const ros::Time& time, const ros::Duration& period)
+{
   // Debug info
   update_counter++;
   if (update_counter % 100 == 0)
 
-  updateCommands();
+    updateCommands();
 
   // Apply joint commands
-  for (size_t i = 0; i < n_joints; i++) {
+  for (size_t i = 0; i < n_joints; i++)
+  {
     // Update the individual joint controllers
     head_controllers[i]->update(time, period);
   }
 }
 
-void BaxterHeadController::updateCommands() {
+void BaxterHeadController::updateCommands()
+{
   // Check if we have a new command to publish
   if (!new_command)
     return;
@@ -162,14 +163,13 @@ void BaxterHeadController::updateCommands() {
   new_command = false;
 
   // Get latest command
-  const baxter_core_msgs::HeadPanCommand &command = *(head_command_buffer
-      .readFromRT());
+  const baxter_core_msgs::HeadPanCommand& command = *(head_command_buffer.readFromRT());
 
   head_controllers[0]->setCommand(command.target);
 }
 
-void BaxterHeadController::commandCB(
-    const baxter_core_msgs::HeadPanCommandConstPtr& msg) {
+void BaxterHeadController::commandCB(const baxter_core_msgs::HeadPanCommandConstPtr& msg)
+{
   // the writeFromNonRT can be used in RT, if you have the guarantee that
   //  * no non-rt thread is calling the same function (we're not subscribing to ros callbacks)
   //  * there is only one single rt thread
@@ -180,6 +180,4 @@ void BaxterHeadController::commandCB(
 
 }  // namespace
 
-PLUGINLIB_EXPORT_CLASS(baxter_sim_controllers::BaxterHeadController,
-                       controller_interface::ControllerBase)
-
+PLUGINLIB_EXPORT_CLASS(baxter_sim_controllers::BaxterHeadController, controller_interface::ControllerBase)

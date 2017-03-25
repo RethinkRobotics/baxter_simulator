@@ -46,17 +46,16 @@
 #include <baxter_sim_kinematics/arm_kinematics.h>
 #include <sensor_msgs/JointState.h>
 
-namespace kinematics {
-class position_kinematics {
- protected:
-  position_kinematics() {
-  }
-  ;
+namespace kinematics
+{
+class position_kinematics
+{
+protected:
+  position_kinematics(){};
 
   bool init(std::string side);
 
- public:
-
+public:
   //! return types of create() and createOnStack()
   typedef boost::shared_ptr<position_kinematics> poskin_ptr;
 
@@ -69,9 +68,11 @@ class position_kinematics {
    *
    * @return boost::shared_ptr
    */
-  static poskin_ptr create(std::string side) {
+  static poskin_ptr create(std::string side)
+  {
     poskin_ptr pk_ptr = poskin_ptr(new position_kinematics());
-    if (pk_ptr->init(side)) {
+    if (pk_ptr->init(side))
+    {
       return pk_ptr;
     }
     return poskin_ptr();
@@ -81,15 +82,13 @@ class position_kinematics {
    * Method that serves as the main execution loop of the Node.  This is called in the main() function to 'run'
    * and only returns after exit or ros::shutdown is called.
    */
-  void run() {
-    //just do spin here (blocks until shutdown), remove while loop
+  void run()
+  {
+    // just do spin here (blocks until shutdown), remove while loop
     ros::spin();
 
-    //we have left the ros spin loop, clean up (if needed) then shutdown
+    // we have left the ros spin loop, clean up (if needed) then shutdown
     exit();
-
-    //attempt proper shutdown
-    ros::shutdown();
   }
 
   /**
@@ -97,14 +96,18 @@ class position_kinematics {
    * cleanup and manually exit the node's run loop.
    * This is usually triggered by capturing a SIGTERM, etc.
    */
-  void exit() {
-    //Do anything to shut down cleanly
-    //Note: Run loop will call shutdown before exiting
+  void exit()
+  {
+    // Do anything to shut down cleanly
+    // Note: Run loop will call shutdown before exiting
 
     m_ikService.shutdown();
+    joint_states_sub.shutdown();
+    robot_state_sub.shutdown();
+    end_pointstate_pub.shutdown();
   }
 
- private:
+private:
   /**
    * Callback function that checks and sets the robot enabled flag
    */
@@ -117,13 +120,14 @@ class position_kinematics {
   geometry_msgs::PoseStamped FKCalc(const sensor_msgs::JointState req);
 
   /**
-   * Callback function for the IK service that responds with the appropriate joint configuration or error message if not found
+   * Callback function for the IK service that responds with the appropriate joint configuration or error message if not
+   * found
    */
-  bool IKCallback(baxter_core_msgs::SolvePositionIK::Request &req,
-                  baxter_core_msgs::SolvePositionIK::Response &res);
+  bool IKCallback(baxter_core_msgs::SolvePositionIK::Request& req, baxter_core_msgs::SolvePositionIK::Response& res);
 
   /**
-   * Callback function for the FK subscriber that retrievs the appropriate FK from the Joint states and publishes it to the endpoint
+   * Callback function for the FK subscriber that retrievs the appropriate FK from the Joint states and publishes it to
+   * the endpoint
    * topic
    */
   void FKCallback(const sensor_msgs::JointState msg);
@@ -131,8 +135,7 @@ class position_kinematics {
   /**
    * Method to Filter the names and positions of the initialized side from the remaining
    */
-  void FilterJointState(const sensor_msgs::JointState *msg,
-                        sensor_msgs::JointState &res);
+  void FilterJointState(const sensor_msgs::JointState* msg, sensor_msgs::JointState& res);
 
   bool is_enabled;
   std::string m_limbName;
@@ -145,9 +148,7 @@ class position_kinematics {
   std::string tip_name;
   std::vector<std::string> joint_names;
   int no_jts;
-
 };
-
 }
 
 #endif /* POSITION_KINEMATICS_H_ */

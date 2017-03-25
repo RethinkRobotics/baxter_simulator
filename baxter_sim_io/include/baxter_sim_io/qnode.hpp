@@ -41,43 +41,38 @@
 #include <baxter_core_msgs/NavigatorState.h>
 #include <baxter_core_msgs/DigitalIOState.h>
 
-namespace baxter_sim_io {
-
-class QNode : public QThread {
-Q_OBJECT
- public:
+namespace baxter_sim_io
+{
+class QNode : public QThread
+{
+  Q_OBJECT
+public:
   QNode(int argc, char** argv);
   virtual ~QNode();
   bool init();
   void run();
-  static baxter_core_msgs::NavigatorState left_arm_nav, right_arm_nav,
-      left_shoulder_nav, right_shoulder_nav;
-  static baxter_core_msgs::DigitalIOState left_cuff_squeeze, right_cuff_squeeze,
-      left_cuff_ok, right_cuff_ok, left_cuff_grasp, right_cuff_grasp,
-      left_shoulder, right_shoulder;
+  static baxter_core_msgs::NavigatorState left_arm_nav, right_arm_nav, left_shoulder_nav, right_shoulder_nav;
+  static baxter_core_msgs::DigitalIOState left_cuff_squeeze, right_cuff_squeeze, left_cuff_ok, right_cuff_ok,
+      left_cuff_grasp, right_cuff_grasp, left_shoulder, right_shoulder;
 
   void rosShutdown();
 
- private:
+private:
   int init_argc;
   char** init_argv;
-  ros::Publisher left_navigator, right_navigator, torso_left_navigator, torso_right_navigator,
-      left_lower_cuff, right_lower_cuff, left_lower_button, right_lower_button,
-      left_upper_button, right_upper_button, left_shoulder_button,
-      right_shoulder_button;
-  ros::Subscriber left_inner_light_sub, left_outer_light_sub,
-                  right_inner_light_sub, right_outer_light_sub,
-                  torso_left_inner_light_sub, torso_left_outer_light_sub,
-                  torso_right_inner_light_sub, torso_right_outer_light_sub;
-  void left_inner_light_sub_cb(const baxter_core_msgs::DigitalIOState &msg);
-  void left_outer_light_sub_cb(const baxter_core_msgs::DigitalIOState &msg);
-  void right_inner_light_sub_cb(const baxter_core_msgs::DigitalIOState &msg);
-  void right_outer_light_sub_cb(const baxter_core_msgs::DigitalIOState &msg);
-  void torso_left_inner_light_sub_cb(const baxter_core_msgs::DigitalIOState &msg);
-  void torso_left_outer_light_sub_cb(const baxter_core_msgs::DigitalIOState &msg);
-  void torso_right_inner_light_sub_cb(const baxter_core_msgs::DigitalIOState &msg);
-  void torso_right_outer_light_sub_cb(const baxter_core_msgs::DigitalIOState &msg);
-
+  ros::Publisher left_navigator, right_navigator, torso_left_navigator, torso_right_navigator, left_lower_cuff,
+      right_lower_cuff, left_lower_button, right_lower_button, left_upper_button, right_upper_button,
+      left_shoulder_button, right_shoulder_button;
+  ros::Subscriber left_inner_light_sub, left_outer_light_sub, right_inner_light_sub, right_outer_light_sub,
+      torso_left_inner_light_sub, torso_left_outer_light_sub, torso_right_inner_light_sub, torso_right_outer_light_sub;
+  void left_inner_light_sub_cb(const baxter_core_msgs::DigitalIOState& msg);
+  void left_outer_light_sub_cb(const baxter_core_msgs::DigitalIOState& msg);
+  void right_inner_light_sub_cb(const baxter_core_msgs::DigitalIOState& msg);
+  void right_outer_light_sub_cb(const baxter_core_msgs::DigitalIOState& msg);
+  void torso_left_inner_light_sub_cb(const baxter_core_msgs::DigitalIOState& msg);
+  void torso_left_outer_light_sub_cb(const baxter_core_msgs::DigitalIOState& msg);
+  void torso_right_inner_light_sub_cb(const baxter_core_msgs::DigitalIOState& msg);
+  void torso_right_outer_light_sub_cb(const baxter_core_msgs::DigitalIOState& msg);
 };
 
 }  // namespace baxter_sim_io
