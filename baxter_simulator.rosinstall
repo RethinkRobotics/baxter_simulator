@@ -1,7 +1,7 @@
 - git:
     local-name: baxter_simulator
     uri: https://github.com/RethinkRobotics/baxter_simulator.git
-    version: development
+    version: kinetic-devel
 - git:
     local-name: baxter
     uri: https://github.com/RethinkRobotics/baxter.git
@@ -17,7 +17,7 @@
 - git:
     local-name: baxter_common
     uri: https://github.com/RethinkRobotics/baxter_common.git
-    version: development
+    version: kinetic-devel
 - git:
     local-name: baxter_examples
     uri: https://github.com/RethinkRobotics/baxter_examples.git
