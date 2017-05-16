@@ -40,6 +40,7 @@
   <run_depend>cv_bridge</run_depend>
   <run_depend>image_transport</run_depend>
   <run_depend>joint_state_controller</run_depend>
+  <run_depend>baxter_sim_controllers</run_depend>
   <run_depend>baxter_sim_io</run_depend>
   <run_depend>baxter_sim_kinematics</run_depend>
   <run_depend>controller_manager</run_depend>
