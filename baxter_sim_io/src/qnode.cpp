@@ -31,12 +31,15 @@
  *  \author Hariharasudan Malaichamee
  *  \desc   ROS node that publishes the states captured from the QT events
  */
+#ifndef Q_MOC_RUN
 #include <ros/ros.h>
-#include <ros/network.h>
-#include <string>
-#include <std_msgs/String.h>
-#include <sstream>
 #include <baxter_sim_io/qnode.hpp>
+#include <ros/network.h>
+#endif
+
+#include <string>
+#include <sstream>
+#include <std_msgs/String.h>
 #include <signal.h>
 
 namespace baxter_sim_io {

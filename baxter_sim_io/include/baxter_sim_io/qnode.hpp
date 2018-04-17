@@ -34,12 +34,15 @@
 #ifndef baxter_sim_io_QNODE_HPP_
 #define baxter_sim_io_QNODE_HPP_
 
+#ifndef Q_MOC_RUN
 #include <ros/ros.h>
-#include <string>
+#endif
+
 #include <QThread>
 #include <QStringListModel>
 #include <baxter_core_msgs/NavigatorState.h>
 #include <baxter_core_msgs/DigitalIOState.h>
+#include <string>
 
 namespace baxter_sim_io {
 
