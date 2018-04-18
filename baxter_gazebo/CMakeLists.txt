@@ -35,6 +35,8 @@ include_directories(include
   ${GAZEBO_INCLUDE_DIRS}
 )
 
+list(APPEND CMAKE_CXX_FLAGS "${GAZEBO_CXX_FLAGS}")
+
 add_library(baxter_gazebo_ros_control
   src/baxter_gazebo_ros_control_plugin.cpp
 )
