@@ -37,34 +37,35 @@
 #include <signal.h>
 #include <sys/types.h>
 
-void signalhandler(int sig) {
-  if (sig == SIGINT) {
+void signalhandler(int sig)
+{
+  if (sig == SIGINT)
+  {
     qApp->quit();
   }
-  else if (sig == SIGTERM) {
+  else if (sig == SIGTERM)
+  {
     qApp->quit();
   }
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv)
+{
+  QApplication app(argc, argv);
+  baxter_sim_io::BaxterIO w(argc, argv);
+  // Register Signal handler for ctrl+c
+  signal(SIGINT, signalhandler);
+  signal(SIGTERM, signalhandler);
+  w.show();
+  app.connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
 
-    QApplication app(argc, argv);
-    baxter_sim_io::BaxterIO w(argc,argv);
-    //Register Signal handler for ctrl+c
-    signal(SIGINT,signalhandler);
-    signal(SIGTERM,signalhandler);
-    w.show();
-    app.connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
-
-    int result = app.exec();
-	return result;
+  int result = app.exec();
+  return result;
 }
 
-    baxter_core_msgs::NavigatorState baxter_sim_io::QNode::left_arm_nav, baxter_sim_io::QNode::right_arm_nav,
-	baxter_sim_io::QNode::left_shoulder_nav, baxter_sim_io::QNode::right_shoulder_nav;
+baxter_core_msgs::NavigatorState baxter_sim_io::QNode::left_arm_nav, baxter_sim_io::QNode::right_arm_nav,
+    baxter_sim_io::QNode::left_shoulder_nav, baxter_sim_io::QNode::right_shoulder_nav;
 
-    baxter_core_msgs::DigitalIOState baxter_sim_io::QNode::left_cuff_squeeze,
-	baxter_sim_io::QNode::right_cuff_squeeze, baxter_sim_io::QNode::left_cuff_ok,
-	baxter_sim_io::QNode::right_cuff_ok, baxter_sim_io::QNode::left_cuff_grasp,
-	baxter_sim_io::QNode::right_cuff_grasp, baxter_sim_io::QNode::left_shoulder,
-	baxter_sim_io::QNode::right_shoulder;
+baxter_core_msgs::DigitalIOState baxter_sim_io::QNode::left_cuff_squeeze, baxter_sim_io::QNode::right_cuff_squeeze,
+    baxter_sim_io::QNode::left_cuff_ok, baxter_sim_io::QNode::right_cuff_ok, baxter_sim_io::QNode::left_cuff_grasp,
+    baxter_sim_io::QNode::right_cuff_grasp, baxter_sim_io::QNode::left_shoulder, baxter_sim_io::QNode::right_shoulder;

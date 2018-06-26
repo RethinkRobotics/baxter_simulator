@@ -3,16 +3,18 @@ project(baxter_gazebo)
 
 find_package(catkin
   REQUIRED COMPONENTS
-  roscpp
-  gazebo_ros
-  gazebo_ros_control
-  controller_manager
-  baxter_core_msgs
+    roscpp
+    gazebo_ros
+    gazebo_ros_control
+    controller_manager
+    baxter_core_msgs
 )
 
-find_package(Boost REQUIRED COMPONENTS system)
+# Depend on system install of Gazebo
+find_package(GAZEBO REQUIRED)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
 
-find_package(gazebo REQUIRED)
+find_package(Boost REQUIRED COMPONENTS system)
 
 catkin_package(
   CATKIN_DEPENDS
@@ -20,8 +22,6 @@ catkin_package(
   gazebo_ros_control
   roscpp
   controller_manager_msgs
-  DEPENDS
-  gazebo
 )
 
 link_directories(

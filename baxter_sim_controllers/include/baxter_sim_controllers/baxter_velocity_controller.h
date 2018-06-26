@@ -51,58 +51,52 @@
 #include <controller_interface/controller.h>
 #include <realtime_tools/realtime_buffer.h>
 
-#include <baxter_core_msgs/JointCommand.h> // the input command
+#include <baxter_core_msgs/JointCommand.h>  // the input command
 
-#include <effort_controllers/joint_velocity_controller.h> // used for controlling individual joints
-
+#include <effort_controllers/joint_velocity_controller.h>  // used for controlling individual joints
 
 namespace baxter_sim_controllers
 {
+class BaxterVelocityController : public controller_interface::Controller<hardware_interface::EffortJointInterface>
+{
+public:
+  BaxterVelocityController();
+  ~BaxterVelocityController();
 
-  class BaxterVelocityController: public controller_interface::Controller<hardware_interface::EffortJointInterface>
-  {
+  bool init(hardware_interface::EffortJointInterface* robot, ros::NodeHandle& n);
+  void starting(const ros::Time& time);
+  void stopping(const ros::Time& time);
+  void update(const ros::Time& time, const ros::Duration& period);
+  void updateCommands();
 
-  public:
-    BaxterVelocityController();
-    ~BaxterVelocityController();
+private:
+  ros::NodeHandle nh_;
 
-    bool init(hardware_interface::EffortJointInterface *robot, ros::NodeHandle &n);
-    void starting(const ros::Time& time);
-    void stopping(const ros::Time& time);
-    void update(const ros::Time& time, const ros::Duration& period);
-    void updateCommands();
+  // Last commanded velocity
+  realtime_tools::RealtimeBuffer<baxter_core_msgs::JointCommand> velocity_command_buffer_;
 
-  private:
-    ros::NodeHandle nh_;
+  size_t n_joints_;
+  std::string topic_name;
 
-    // Last commanded velocity
-    realtime_tools::RealtimeBuffer<baxter_core_msgs::JointCommand> velocity_command_buffer_; 
+  std::map<std::string, std::size_t> joint_to_index_map_;  // allows incoming messages to be quickly ordered
 
-    size_t n_joints_;
-    std::string topic_name;
+  bool verbose_;
+  bool new_command_;  // true when an unproccessed new command is in the realtime buffer
+  size_t update_counter_;
 
-    std::map<std::string,std::size_t> joint_to_index_map_; // allows incoming messages to be quickly ordered
+  // Command subscriber
+  ros::Subscriber velocity_command_sub_;
 
-    bool verbose_;
-    bool new_command_; // true when an unproccessed new command is in the realtime buffer
-    size_t update_counter_;
+  /**
+   * @brief Callback from a recieved goal from the published topic message
+   * @param msg trajectory goal
+   */
+  void commandCB(const baxter_core_msgs::JointCommandConstPtr& msg);
 
-    // Command subscriber
-    ros::Subscriber velocity_command_sub_;
-    
-    /**
-     * @brief Callback from a recieved goal from the published topic message
-     * @param msg trajectory goal
-     */
-    void commandCB(const baxter_core_msgs::JointCommandConstPtr& msg);
+  // Create an effort-based joint velocity controller for every joint
+  std::vector<boost::shared_ptr<effort_controllers::JointVelocityController> > velocity_controllers_;
+};
 
-    // Create an effort-based joint velocity controller for every joint
-    std::vector< 
-      boost::shared_ptr<
-        effort_controllers::JointVelocityController> > velocity_controllers_;    
-
-  };
-
-} // namespace
+}  // namespace
 
 #endif

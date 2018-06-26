@@ -5,19 +5,23 @@
   <arg name="load_robot_description" default="false"/>
   <arg name="right_electric_gripper" default="false"/>
   <arg name="left_electric_gripper" default="false"/>
+  <arg name="grav_right_name" default="right_gripper" />
+  <arg name="grav_left_name" default="left_gripper" />
+  <arg name="right_tip_name" default="right_gripper" />
+  <arg name="left_tip_name" default="left_gripper" />
 
   <!-- Load universal robotic description format (URDF) -->
   <param if="$(arg load_robot_description)" name="robot_description"
-      command="$(find xacro)/xacro.py --inorder $(find baxter_description)/urdf/baxter.urdf.xacro
+      command="$(find xacro)/xacro --inorder $(find baxter_description)/urdf/baxter.urdf.xacro
           right_electric_gripper:=$(arg right_electric_gripper)
           left_electric_gripper:=$(arg left_electric_gripper)"/>
 
   <param name="root_name" value="base" />
-  <param name="grav_right_name" value="right_gripper" />
-  <param name="grav_left_name" value="left_gripper" />
+  <param name="grav_right_name" value="$(arg grav_right_name)" />
+  <param name="grav_left_name" value="$(arg grav_left_name)" />
   <!-- load left and right tip name -->
-  <param name="right_tip_name" value="right_gripper" />
-  <param name="left_tip_name" value="left_gripper" />
+  <param name="right_tip_name" value="$(arg right_tip_name)" />
+  <param name="left_tip_name" value="$(arg left_tip_name)" />
   <!-- load left and right joint names -->
   <rosparam param="robot_config/right_config/joint_names">
          [right_s0, right_s1, right_e0, right_e1, right_w0, right_w1, right_w2]
