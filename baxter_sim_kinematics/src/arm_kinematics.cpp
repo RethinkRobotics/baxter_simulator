@@ -245,14 +245,13 @@ bool Kinematics::loadModel(const std::string xml) {
  */
 bool Kinematics::readJoints(urdf::Model &robot_model) {
   num_joints = 0;
-  boost::shared_ptr<const urdf::Link> link = robot_model.getLink(tip_name);
-  boost::shared_ptr<const urdf::Joint> joint;
+  auto link = robot_model.getLink(tip_name);
   for (int i = 0; i < chain.getNrOfSegments(); i++)
     while (link && link->name != root_name) {
       if (!(link->parent_joint)) {
         break;
       }
-      joint = robot_model.getJoint(link->parent_joint->name);
+      auto joint = robot_model.getJoint(link->parent_joint->name);
       if (!joint) {
         ROS_ERROR("Could not find joint: %s", link->parent_joint->name.c_str());
         return false;
@@ -272,7 +271,7 @@ bool Kinematics::readJoints(urdf::Model &robot_model) {
   link = robot_model.getLink(tip_name);
   unsigned int i = 0;
   while (link && i < num_joints) {
-    joint = robot_model.getJoint(link->parent_joint->name);
+    auto joint = robot_model.getJoint(link->parent_joint->name);
     if (joint->type != urdf::Joint::UNKNOWN
         && joint->type != urdf::Joint::FIXED) {
       ROS_INFO("getting bounds for joint: [%s]", joint->name.c_str());
