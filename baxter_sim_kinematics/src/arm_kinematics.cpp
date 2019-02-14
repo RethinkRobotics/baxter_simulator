@@ -34,6 +34,7 @@
 #include <cstring>
 #include <ros/ros.h>
 #include <baxter_sim_kinematics/arm_kinematics.h>
+#include <memory>
 
 namespace arm_kinematics {
 
@@ -245,8 +246,8 @@ bool Kinematics::loadModel(const std::string xml) {
  */
 bool Kinematics::readJoints(urdf::Model &robot_model) {
   num_joints = 0;
-  boost::shared_ptr<const urdf::Link> link = robot_model.getLink(tip_name);
-  boost::shared_ptr<const urdf::Joint> joint;
+  std::shared_ptr<const urdf::Link> link = robot_model.getLink(tip_name);
+  std::shared_ptr<const urdf::Joint> joint;
   for (int i = 0; i < chain.getNrOfSegments(); i++)
     while (link && link->name != root_name) {
       if (!(link->parent_joint)) {
