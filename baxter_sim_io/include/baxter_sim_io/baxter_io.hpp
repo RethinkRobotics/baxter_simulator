@@ -35,7 +35,8 @@
 #ifndef BAXTER_SIM_IO_BAXTER_IO_H
 #define BAXTER_SIM_IO_BAXTER_IO_H
 
-#include <QtGui/QMainWindow>
+// #include <QtGui/QMainWindow>
+#include <QtWidgets/QMainWindow>
 #include <QBitmap>
 #include <QPushButton>
 #include "ui_baxter_io.h"
