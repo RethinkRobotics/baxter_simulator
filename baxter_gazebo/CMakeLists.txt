@@ -17,11 +17,11 @@ find_package(gazebo REQUIRED)
 catkin_package(
   CATKIN_DEPENDS
   baxter_core_msgs
+  gazebo_ros
   gazebo_ros_control
   roscpp
   controller_manager_msgs
   DEPENDS
-  gazebo
 )
 
 link_directories(

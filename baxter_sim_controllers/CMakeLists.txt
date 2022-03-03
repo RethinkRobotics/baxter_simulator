@@ -28,7 +28,7 @@ catkin_package(
   control_toolbox
   effort_controllers
   baxter_core_msgs
-  DEPENDS yaml-cpp
+  DEPENDS
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
 )
