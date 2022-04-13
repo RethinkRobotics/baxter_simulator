@@ -13,7 +13,7 @@ find_package(catkin
 )
 
 find_package(cmake_modules REQUIRED)
-find_package(Eigen REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 catkin_package(
   INCLUDE_DIRS include
